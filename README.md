@@ -2,7 +2,7 @@
 
 A community wildlife incident reporting application built with MongoDB, Express, React, and Node.js for the SE3070 group project at SLIIT.
 
-Phase 2A adds the Community Member authentication API with server-side sessions. Reporting and SMS are future work.
+Phase 2B adds the Community Member authentication experience: registration, login, protected member landing, session restoration, and logout. Reporting and SMS are future work.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ Copy these only on initial setup; preserve existing settings. Both `.env` files 
 | Server `CLIENT_ORIGIN` | `http://127.0.0.1:5173` |
 | Server `SESSION_SECRET` | A locally generated secret of at least 32 characters |
 | Server `SESSION_TTL_HOURS` | `24` |
-| Client `VITE_API_BASE_URL` | `http://127.0.0.1:5000/api` |
+| Client `VITE_API_BASE_URL` | `/api` |
 
 Generate a unique local `SESSION_SECRET`, for example with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`, then replace the example value in `server/.env`. The server validates configuration and connects MongoDB before listening. Restart the relevant process after editing environment files.
 
@@ -86,7 +86,7 @@ npm run dev:client
 - Frontend: <http://127.0.0.1:5173>
 - API health: <http://127.0.0.1:5000/api/health>
 
-These are loopback (localhost) URLs. Open the frontend with the hostname configured in `CLIENT_ORIGIN`; `localhost` and `127.0.0.1` are distinct browser origins. Vite uses a strict port to keep CORS predictable. The frontend checks API/database health on page load; refresh after recovering the server.
+These are loopback (localhost) URLs. Open the frontend with the hostname configured in `CLIENT_ORIGIN`; `localhost` and `127.0.0.1` are distinct browser origins. Vite uses a strict port to keep CORS predictable. During development, Vite proxies `/api` to the backend so browser requests include the session cookie consistently. The frontend restores the session with `/api/auth/me` before deciding which page to show.
 
 Check the API in PowerShell:
 

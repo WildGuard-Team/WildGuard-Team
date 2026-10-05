@@ -2,15 +2,17 @@
 
 ## Current foundation
 
-The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Phase 2A implements backend Community Member authentication; reports and SMS are not implemented.
+The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Phase 2B implements Community Member authentication end to end; reports and SMS are not implemented.
 
 ### Frontend
 
 - `src/main.jsx` mounts React and global CSS; `App.jsx` composes the app.
 - `src/components/layout/` owns the shared shell.
-- `src/components/common/` owns generic shared UI, currently the API health indicator.
-- `src/pages/` composes page-level UI. The setup page delegates network status to a focused component.
-- `src/services/api.js` owns the HTTP boundary and API base URL.
+- `src/components/common/` remains available for generic shared UI.
+- `src/context/AuthContext.jsx` owns the authenticated member/session state, while `context/useAuth.js` exposes the focused consumer hook.
+- `src/features/auth/` owns auth-only layouts, fields, form feedback, pages, client validation, and API calls.
+- `src/pages/MemberLandingPage.jsx` composes the protected Auth milestone landing page.
+- The Vite proxy keeps `/api` requests same-origin in local development. Shared client services should be added only when more than one feature uses them.
 - `src/index.css` owns foundation styling. Add colocated styles or CSS modules as features grow.
 
 Create these planned folders only when real code needs them; no empty files or placeholder pages:
@@ -76,6 +78,6 @@ Keep queries out of controllers. Split services when responsibilities diverge; a
 8. Each local database is independent. Agree on seed fixtures later if needed; Git does not synchronize MongoDB data. A hosted URI can replace the local URI without application code changes.
 9. Keep comments focused on non-obvious reasons. Prefer single-purpose functions and meaningful boundaries over giant pages, controllers, services, or premature abstractions.
 
-## Next milestone: Community Member authentication frontend
+## Next milestone: Community Report
 
-Build focused registration and login components under `client/src/features/auth/`, using the documented API contract and `credentials: 'include'`. Keep forms, client validation, and auth API calls separate from route/page composition. Do not store session identifiers or auth tokens in local storage. Submit Community Report follows frontend authentication.
+Community Member registration, login, protected routing, session restoration, and logout are complete. Build report pages and components under `client/src/features/reports/`, protect their server routes with `requireAuthentication`, and keep report validation, use cases, and persistence in `server/src/modules/reports/`.
