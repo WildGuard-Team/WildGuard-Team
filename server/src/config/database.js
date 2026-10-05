@@ -16,3 +16,7 @@ export function isDatabaseConnected() {
 export async function disconnectDatabase() {
   await mongoose.disconnect();
 }
+
+export function getDatabaseClient() {
+  return mongoose.connection.getClient();
+}

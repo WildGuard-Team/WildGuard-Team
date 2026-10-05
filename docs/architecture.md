@@ -2,7 +2,7 @@
 
 ## Current foundation
 
-The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Auth, reports, and SMS are not implemented.
+The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Phase 2A implements backend Community Member authentication; reports and SMS are not implemented.
 
 ### Frontend
 
@@ -43,8 +43,8 @@ Pages coordinate behavior and compose small components. Extract forms, validatio
 
 ### Backend
 
-- `src/app.js` configures Express and routes, then 404/error middleware. It does not connect to MongoDB or start a listener.
-- `src/server.js` loads and validates configuration, connects MongoDB, starts listening, and handles shutdown.
+- `src/app.js` configures Express, CORS, origin checks, session middleware, routes, then 404/error middleware. It does not connect to MongoDB or start a listener.
+- `src/server.js` loads and validates configuration, connects MongoDB, creates the persistent MongoDB session store, starts listening, and handles shutdown.
 - `src/config/env.js` validates settings; `config/database.js` owns database connection lifecycle and readiness.
 - `src/middleware/errors.js` provides JSON 404 and centralized errors without exposing stack traces.
 - `test/` checks configuration and HTTP contracts; real database connectivity is a separate smoke check.
@@ -61,7 +61,7 @@ Future modules belong in `src/modules/auth/`, `src/modules/reports/`, and `src/m
 
 Keep queries out of controllers. Split services when responsibilities diverge; avoid one service owning every workflow. Prefer functions over artificial one-method classes. The small health endpoint does not need a service/repository chain.
 
-Auth owns Community Member identity and registration/login. Reports owns incident submission and persistence after auth. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
+`modules/auth/` now owns the User model, validation, password operations, repository, use cases, controllers, route registration, and reusable authentication/origin middleware. Public registration assigns `COMMUNITY_MEMBER` in the service; a caller cannot choose a role. Session setup remains in `app.js`/`server.js` because it applies to the whole HTTP application. Reports should use `requireAuthentication` for endpoints requiring a signed-in member. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
 
 ## Integration rules for four contributors
 
@@ -75,6 +75,6 @@ Auth owns Community Member identity and registration/login. Reports owns inciden
 8. Each local database is independent. Agree on seed fixtures later if needed; Git does not synchronize MongoDB data. A hosted URI can replace the local URI without application code changes.
 9. Keep comments focused on non-obvious reasons. Prefer single-purpose functions and meaningful boundaries over giant pages, controllers, services, or premature abstractions.
 
-## Next milestone: Community Member registration/login
+## Next milestone: Community Member authentication frontend
 
-Agree on the member data contract and session/token approach. Implement server validation, secure password handling, persistence, registration/login use cases, and tests. Add focused frontend form components, validation, auth services, and route/state handling as required. Agree on errors and session expiry. Submit Community Report follows authentication; Phase 1 includes neither auth nor report screens.
+Build focused registration and login components under `client/src/features/auth/`, using the documented API contract and `credentials: 'include'`. Keep forms, client validation, and auth API calls separate from route/page composition. Do not store session identifiers or auth tokens in local storage. Submit Community Report follows frontend authentication.

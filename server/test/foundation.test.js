@@ -6,7 +6,7 @@ import { readConfig } from '../src/config/env.js';
 
 const validEnv = {
   PORT: '5000', MONGODB_URI: 'mongodb://127.0.0.1:27017/wildguard',
-  CLIENT_ORIGIN: 'http://127.0.0.1:5173',
+  CLIENT_ORIGIN: 'http://127.0.0.1:5173', SESSION_SECRET: 'a-test-secret-that-is-longer-than-thirty-two-characters',
 };
 
 test('startup validates missing and malformed configuration', () => {
@@ -19,6 +19,8 @@ test('startup validates missing and malformed configuration', () => {
   }
   assert.throws(() => readConfig({ ...validEnv, MONGODB_URI: 'mongodb://localhost:27017/' }), /MONGODB_URI/);
   assert.throws(() => readConfig({ ...validEnv, CLIENT_ORIGIN: 'http://localhost:5173/path' }), /CLIENT_ORIGIN/);
+  assert.throws(() => readConfig({ ...validEnv, SESSION_SECRET: 'too-short' }), /SESSION_SECRET/);
+  assert.throws(() => readConfig({ ...validEnv, SESSION_TTL_HOURS: '0' }), /SESSION_TTL_HOURS/);
 });
 
 test('HTTP health, CORS, missing routes, and malformed JSON contracts', async (t) => {

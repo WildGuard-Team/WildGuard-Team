@@ -2,7 +2,7 @@
 
 A community wildlife incident reporting application built with MongoDB, Express, React, and Node.js for the SE3070 group project at SLIIT.
 
-Phase 1 provides a runnable frontend shell, backend health endpoint, validated configuration, and team conventions. Authentication, reporting, and SMS are future work.
+Phase 2A adds the Community Member authentication API with server-side sessions. Reporting and SMS are future work.
 
 ## Prerequisites
 
@@ -39,9 +39,11 @@ Copy these only on initial setup; preserve existing settings. Both `.env` files 
 | Server `PORT` | `5000` |
 | Server `MONGODB_URI` | `mongodb://127.0.0.1:27017/wildguard` |
 | Server `CLIENT_ORIGIN` | `http://127.0.0.1:5173` |
+| Server `SESSION_SECRET` | A locally generated secret of at least 32 characters |
+| Server `SESSION_TTL_HOURS` | `24` |
 | Client `VITE_API_BASE_URL` | `http://127.0.0.1:5000/api` |
 
-The server validates configuration and connects MongoDB before listening. Restart the relevant process after editing environment files. The database may not appear in Compass until a future module writes its first document.
+Generate a unique local `SESSION_SECRET`, for example with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`, then replace the example value in `server/.env`. The server validates configuration and connects MongoDB before listening. Restart the relevant process after editing environment files.
 
 ## Start MongoDB locally
 
@@ -99,6 +101,21 @@ curl http://127.0.0.1:5000/api/health
 ```
 
 A ready response contains `status: "ok"`, `service: "wildguard-api"`, `database: "connected"`, and an ISO timestamp. A database disconnect after startup returns HTTP 503. Unknown routes return JSON HTTP 404; errors use `{ "error": { "message": "..." } }`.
+
+## Authentication API
+
+All endpoints are below `/api/auth`. Send JSON and, when calling from the Vite client, use `fetch` with `credentials: 'include'`. The API accepts the configured `CLIENT_ORIGIN` through CORS. The session is stored in MongoDB; the browser receives an HttpOnly `wildguard.sid` cookie with `SameSite=Lax` and a configured expiry. It is marked `Secure` when `NODE_ENV=production`, so production must use HTTPS. The cookie contains no account data; only a user identifier is stored server-side.
+
+| Method and path | Request body | Result |
+| --- | --- | --- |
+| `POST /register` | `{ "fullName", "email", "password" }` | `201 { user }`; always creates `COMMUNITY_MEMBER`, but does not log in |
+| `POST /login` | `{ "email", "password" }` | `200 { user }` and sets the session cookie |
+| `GET /me` | none | `200 { user }` when authenticated; `401` otherwise |
+| `POST /logout` | none | `200 { "message": "Logged out." }`, invalidates the session and clears the cookie |
+
+`user` contains `id`, `fullName`, `email`, `role`, and `createdAt`; it never includes a password hash. Registration requires a 2–100 character full name, a valid email address, and a 12–128 character password. Email is trimmed and lowercased. Public callers cannot set `role`; attempts return `400`. Duplicate email returns `409`; login deliberately uses the same `401 Invalid email or password` response for an unknown email and a wrong password.
+
+For state-changing requests, browsers that send an `Origin` header must match `CLIENT_ORIGIN`; requests from another origin receive `403`. This works with `SameSite=Lax` to reduce cross-site submission risk, but HttpOnly alone does not prevent CSRF. Automated API clients and same-origin/non-browser requests may omit `Origin`. For production, deploy the frontend and API on the same HTTPS site where possible and keep `CLIENT_ORIGIN` precise; if a later cross-site design is required, add a dedicated CSRF-token strategy.
 
 ## Checks and build
 
