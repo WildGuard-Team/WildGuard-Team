@@ -1,7 +1,8 @@
 import {
-  MANUAL_LOCATION_SOURCE, WEB_REPORT_SOURCE, REFERENCE_MAX_ATTEMPTS,
-} from '../config/report.constants.js';
-import { createReferenceNumber } from '../utils/reference-number.js';
+  COMMUNITY_REPORT_MANUAL_LOCATION_SOURCE, COMMUNITY_REPORT_WEB_SOURCE,
+  COMMUNITY_REPORT_REFERENCE_MAX_ATTEMPTS,
+} from '../config/community-report.constants.js';
+import { createCommunityReportReferenceNumber } from '../utils/reference-number.js';
 
 function isReferenceCollision(error) {
   return error?.code === 11000 && (
@@ -10,7 +11,7 @@ function isReferenceCollision(error) {
   );
 }
 
-function toPublicReport(report) {
+function toPublicCommunityReport(report) {
   return {
     id: report.id,
     referenceNumber: report.referenceNumber,
@@ -25,21 +26,21 @@ function toPublicReport(report) {
   };
 }
 
-export async function createReport(input, reporterId, reports) {
-  for (let attempt = 0; attempt < REFERENCE_MAX_ATTEMPTS; attempt += 1) {
+export async function createCommunityReport(input, reporterId, communityReports) {
+  for (let attempt = 0; attempt < COMMUNITY_REPORT_REFERENCE_MAX_ATTEMPTS; attempt += 1) {
     try {
-      const report = await reports.create({
-        referenceNumber: createReferenceNumber(),
+      const report = await communityReports.create({
+        referenceNumber: createCommunityReportReferenceNumber(),
         reporterId,
         reportType: input.reportType,
         description: input.description,
         location: {
-          locationSource: MANUAL_LOCATION_SOURCE,
+          locationSource: COMMUNITY_REPORT_MANUAL_LOCATION_SOURCE,
           manualLocation: input.manualLocation,
         },
-        source: WEB_REPORT_SOURCE,
+        source: COMMUNITY_REPORT_WEB_SOURCE,
       });
-      return toPublicReport(report);
+      return toPublicCommunityReport(report);
     } catch (error) {
       if (!isReferenceCollision(error)) throw error;
     }

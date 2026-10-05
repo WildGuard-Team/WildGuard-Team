@@ -2,7 +2,7 @@
 
 ## Current foundation
 
-The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Phase 2B implements Community Member authentication end to end; reports and SMS are not implemented.
+The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` (Express + Mongoose, JavaScript), and `docs/`. One root lockfile keeps dependencies consistent. Phase 2B implements Community Member authentication and basic Community Reporting; SMS is not implemented.
 
 ### Frontend
 
@@ -52,7 +52,7 @@ Pages coordinate behavior and compose small components. Extract forms, validatio
 - `src/routes/` owns API route definitions and associates middleware/controllers with endpoint paths. `auth.routes.js` registers the authentication endpoints.
 - `test/` checks configuration and HTTP contracts; real database connectivity is a separate smoke check.
 
-Future modules belong in `src/modules/auth/`, `src/modules/reports/`, and `src/modules/sms/`. Add `src/shared/` only for code actually shared by modules. Create only layers each module needs:
+Current and planned domain modules are `src/modules/auth/`, `src/modules/community-reports/`, `src/modules/monitoring/`, `src/modules/field-incidents/`, and `src/modules/conservation-reports/`. Add `src/shared/` only for code actually shared by modules. Create only layers each module needs:
 
 | Layer | Responsibility |
 | --- | --- |
@@ -64,7 +64,7 @@ Future modules belong in `src/modules/auth/`, `src/modules/reports/`, and `src/m
 
 Keep queries out of controllers. Split services when responsibilities diverge; avoid one service owning every workflow. Prefer functions over artificial one-method classes. The small health endpoint does not need a service/repository chain.
 
-`modules/auth/` owns the User model, validation, password operations, repository, use cases, controllers, and reusable authentication/origin middleware. Public registration assigns `COMMUNITY_MEMBER` in the service; a caller cannot choose a role. Session setup remains in `app.js`/`server.js` because it applies to the whole HTTP application. Reports should use `requireAuthentication` for endpoints requiring a signed-in member. When Reports is implemented, its endpoint definitions belong in `src/routes/reports.routes.js`; keep report validation, controllers, services, and persistence in `src/modules/reports/`. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
+`modules/auth/` owns the User model, validation, password operations, repository, use cases, controllers, and reusable authentication/origin middleware. Public registration assigns `COMMUNITY_MEMBER` in the service; a caller cannot choose a role. Session setup remains in `app.js`/`server.js` because it applies to the whole HTTP application. Community report endpoints use `requireAuthentication`; their validation, controllers, services, and persistence belong in `src/modules/community-reports/`. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
 
 ## Integration rules for four contributors
 
@@ -78,6 +78,10 @@ Keep queries out of controllers. Split services when responsibilities diverge; a
 8. Each local database is independent. Agree on seed fixtures later if needed; Git does not synchronize MongoDB data. A hosted URI can replace the local URI without application code changes.
 9. Keep comments focused on non-obvious reasons. Prefer single-purpose functions and meaningful boundaries over giant pages, controllers, services, or premature abstractions.
 
-## Next milestone: Community Report
+## Community Reporting
 
-Community Member registration, login, protected routing, session restoration, and logout are complete. Build report pages and components under `client/src/features/reports/`, protect their server routes with `requireAuthentication`, and keep report validation, use cases, and persistence in `server/src/modules/reports/`.
+`modules/community-reports/` owns Community Member report submission. Its `routes` layer maps `POST /api/reports`; `middleware` applies JWT authentication and the Community Member restriction; `controllers` translate HTTP input/output; `validation` normalizes and validates the request; `services` generate a reference and coordinate submission; `repositories` own Report collection writes; `models` define persistence; and `config`/`utils` hold report rules and reference generation.
+
+The implemented endpoint requires the existing HttpOnly JWT cookie and accepts `{ "reportType", "description", "manualLocation" }`. It returns `201 { "report": { "id", "referenceNumber", "reportType", "description", "location", "source", "createdAt" } }`. The request is a Community Member report only; it is distinct from a Ranger field incident and a Park Manager-generated conservation report. The `CommunityReport` Mongoose model explicitly keeps the existing `reports` collection.
+
+Implemented functionality is authenticated manual-location submission, report-type and text validation, safe response shaping, collision-safe reference generation, and client review/confirmation screens with API error messaging. Pending original use-case scenarios are GPS with manual fallback, optional evidence, SMS submission, durable network-failure recovery, and submission retry. These are not implemented here and do not change the current authentication policy.

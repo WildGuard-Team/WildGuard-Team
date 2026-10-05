@@ -1,7 +1,8 @@
 import { HttpError } from '../../../shared/http-error.js';
 import {
-  REPORT_TYPES, DESCRIPTION_LIMITS, MANUAL_LOCATION_LIMITS,
-} from '../config/report.constants.js';
+  COMMUNITY_REPORT_TYPES, COMMUNITY_REPORT_DESCRIPTION_LIMITS,
+  COMMUNITY_REPORT_MANUAL_LOCATION_LIMITS,
+} from '../config/community-report.constants.js';
 
 const allowedFields = new Set(['reportType', 'description', 'manualLocation']);
 
@@ -13,19 +14,19 @@ function requiredText(value, label, limits) {
   return text;
 }
 
-export function validateCreateReport(body) {
+export function validateCreateCommunityReport(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw new HttpError(400, 'A JSON object is required.');
   }
   if (Object.keys(body).some((field) => !allowedFields.has(field))) {
     throw new HttpError(400, 'Only reportType, description, and manualLocation are allowed.');
   }
-  if (!REPORT_TYPES.includes(body.reportType)) {
-    throw new HttpError(400, `Report type must be one of: ${REPORT_TYPES.join(', ')}.`);
+  if (!COMMUNITY_REPORT_TYPES.includes(body.reportType)) {
+    throw new HttpError(400, `Report type must be one of: ${COMMUNITY_REPORT_TYPES.join(', ')}.`);
   }
   return {
     reportType: body.reportType,
-    description: requiredText(body.description, 'Description', DESCRIPTION_LIMITS),
-    manualLocation: requiredText(body.manualLocation, 'Manual location', MANUAL_LOCATION_LIMITS),
+    description: requiredText(body.description, 'Description', COMMUNITY_REPORT_DESCRIPTION_LIMITS),
+    manualLocation: requiredText(body.manualLocation, 'Manual location', COMMUNITY_REPORT_MANUAL_LOCATION_LIMITS),
   };
 }
