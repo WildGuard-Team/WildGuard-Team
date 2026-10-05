@@ -4,11 +4,11 @@ import { useAuth } from './context/useAuth.js';
 import LoginPage from './features/auth/pages/LoginPage.jsx';
 import RegisterPage from './features/auth/pages/RegisterPage.jsx';
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
-import { ReportDraftProvider } from './features/reports/context/ReportDraftContext.jsx';
-import ReportTypePage from './features/reports/pages/ReportTypePage.jsx';
-import ReportDetailsPage from './features/reports/pages/ReportDetailsPage.jsx';
-import ReviewReportPage from './features/reports/pages/ReviewReportPage.jsx';
-import ReportConfirmationPage from './features/reports/pages/ReportConfirmationPage.jsx';
+import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
+import ReportTypePage from './features/community-reports/pages/ReportTypePage.jsx';
+import ReportDetailsPage from './features/community-reports/pages/ReportDetailsPage.jsx';
+import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
+import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 
 export default function App() {
   return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;

@@ -13,7 +13,7 @@ export default function ReportDetailsPage({ navigate }) {
     const nextErrors = validateDetails(draft); setErrors(nextErrors);
     if (!Object.keys(nextErrors).length) navigate('/reports/review');
   }
-  return <ReportLayout title="Tell us what happened" step={2}>
+  return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Provide the information currently supported by WildGuard." step={2}>
     <ReportProgress currentStep={2} />
     <form className="report-form" noValidate onSubmit={continueToReview}>
       <label className="form-field" htmlFor="description">Incident description <textarea id="description" name="description" value={draft.description} onChange={update} aria-invalid={Boolean(errors.description)} aria-describedby="description-hint" placeholder="Describe what you saw or what happened." /></label>

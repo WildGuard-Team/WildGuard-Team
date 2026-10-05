@@ -11,7 +11,7 @@ The root npm workspace contains `client/` (React + Vite, JavaScript), `server/` 
 - `src/components/common/` remains available for generic shared UI.
 - `src/context/AuthContext.jsx` owns the authenticated member/session state, while `context/useAuth.js` exposes the focused consumer hook.
 - `src/features/auth/` owns auth-only layouts, fields, form feedback, pages, client validation, and API calls.
-- `src/pages/MemberLandingPage.jsx` composes the protected Auth milestone landing page.
+- `src/pages/MemberLandingPage.jsx` composes the protected Community Member dashboard.
 - The Vite proxy keeps `/api` requests same-origin in local development. Shared client services should be added only when more than one feature uses them.
 - `src/index.css` owns foundation styling. Add colocated styles or CSS modules as features grow.
 
@@ -29,10 +29,11 @@ client/src/
       components/                 auth-specific UI
       pages/                      registration/login composition
       services/                   auth API calls
-    reports/
-      components/                 report-specific UI
-      pages/                      report page composition
-      services/                   report API calls
+    community-reports/
+      components/                 report-specific UI and Community layout
+      context/                    report draft state
+      pages/                      report step composition
+      services/                   credentialed report API calls
   pages/                          application-level pages
   services/                       shared HTTP infrastructure
   routes/                         route definitions when introduced
@@ -42,6 +43,8 @@ client/src/
 ```
 
 Pages coordinate behavior and compose small components. Extract forms, validation, API calls, and substantial loading behavior into focused components, functions, services, or hooks. Generic UI belongs in `components/common`; feature UI belongs in its feature. Avoid global context for state used by one form.
+
+The implemented Community Reporting UI provides the Community Member dashboard, report-type selection, incident details/manual location, review with accuracy confirmation, submission progress, and a reference-number confirmation screen. It sends credentialed `POST /api/reports` requests and keeps draft data when moving between steps. GPS/manual fallback, optional evidence, SMS reporting, offline persistence, and durable retry remain pending because the current API does not persist them.
 
 ### Backend
 
