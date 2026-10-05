@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-
-export const COMMUNITY_MEMBER = 'COMMUNITY_MEMBER';
+import { COMMUNITY_MEMBER } from '../config/auth.constants.js';
 
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true, trim: true, maxlength: 100 },

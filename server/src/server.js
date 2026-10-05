@@ -3,17 +3,14 @@ import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
 import { readConfig } from './config/env.js';
 import { connectDatabase, disconnectDatabase, getDatabaseClient, isDatabaseConnected } from './config/database.js';
-import MongoStore from 'connect-mongo';
+import { createSessionStore } from './config/session.js';
 
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 
 async function start() {
   const config = readConfig(process.env);
   await connectDatabase(config.mongodbUri);
-  const sessionStore = MongoStore.create({
-    clientPromise: Promise.resolve(getDatabaseClient()), collectionName: 'sessions',
-    ttl: config.sessionTtlHours * 60 * 60,
-  });
+  const sessionStore = createSessionStore(getDatabaseClient(), config.sessionTtlHours);
   const app = createApp({ ...config, isDatabaseConnected, sessionStore });
   const server = app.listen(config.port, '127.0.0.1');
   await new Promise((resolve, reject) => {

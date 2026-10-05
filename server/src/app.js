@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
+import { createSessionMiddleware } from './config/session.js';
 import { errorHandler, notFound } from './middleware/errors.js';
-import { requireTrustedOrigin } from './modules/auth/middleware.js';
-import { createAuthRouter } from './routes/auth.routes.js';
-import { createUserRepository } from './modules/auth/repository.js';
+import { requireTrustedOrigin } from './modules/auth/middleware/validate-origin.middleware.js';
+import { createUserRepository } from './modules/auth/repositories/user.repository.js';
+import { createAuthRouter } from './modules/auth/routes/auth.routes.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, sessionSecret = 'test-session-secret-that-is-at-least-32-characters',
@@ -16,14 +16,7 @@ export function createApp({
   app.use(cors({ origin: clientOrigin }));
   app.use(express.json({ limit: '100kb' }));
   app.use(requireTrustedOrigin(clientOrigin));
-  app.use(session({
-    name: 'wildguard.sid', secret: sessionSecret, resave: false, saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      httpOnly: true, sameSite: 'lax', secure: nodeEnv === 'production',
-      maxAge: sessionTtlHours * 60 * 60 * 1000,
-    },
-  }));
+  app.use(createSessionMiddleware({ sessionSecret, sessionTtlHours, nodeEnv, sessionStore }));
 
   app.get('/api/health', (req, res) => {
     const connected = isDatabaseConnected();

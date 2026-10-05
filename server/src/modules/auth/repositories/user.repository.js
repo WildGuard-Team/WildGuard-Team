@@ -1,4 +1,4 @@
-import { User } from './model.js';
+import { User } from '../models/user.model.js';
 
 export function createUserRepository(model = User) {
   return {

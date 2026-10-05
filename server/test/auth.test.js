@@ -4,7 +4,7 @@ import test from 'node:test';
 import session from 'express-session';
 import mongoose from 'mongoose';
 import { createApp } from '../src/app.js';
-import { User } from '../src/modules/auth/model.js';
+import { User } from '../src/modules/auth/models/user.model.js';
 
 const clientOrigin = 'http://127.0.0.1:5173';
 const testUri = 'mongodb://127.0.0.1:27017/wildguard_auth_test';
