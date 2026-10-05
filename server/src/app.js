@@ -4,9 +4,12 @@ import { errorHandler, notFound } from './middleware/errors.js';
 import { requireTrustedOrigin } from './modules/auth/middleware/validate-origin.middleware.js';
 import { createUserRepository } from './modules/auth/repositories/user.repository.js';
 import { createAuthRouter } from './modules/auth/routes/auth.routes.js';
+import { createReportRepository } from './modules/reports/repositories/report.repository.js';
+import { createReportRouter } from './modules/reports/routes/report.routes.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
+  reports = createReportRepository(),
 }) {
   const app = express();
   app.disable('x-powered-by');
@@ -26,6 +29,7 @@ export function createApp({
   });
 
   app.use('/api/auth', createAuthRouter(users, { jwtSecret, jwtExpiresIn, nodeEnv }));
+  app.use('/api/reports', createReportRouter(reports, users, { jwtSecret }));
 
   app.use(notFound);
   app.use(errorHandler);
