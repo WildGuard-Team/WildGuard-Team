@@ -3,7 +3,7 @@ import cors from 'cors';
 import session from 'express-session';
 import { errorHandler, notFound } from './middleware/errors.js';
 import { requireTrustedOrigin } from './modules/auth/middleware.js';
-import { createAuthRouter } from './modules/auth/routes.js';
+import { createAuthRouter } from './routes/auth.routes.js';
 import { createUserRepository } from './modules/auth/repository.js';
 
 export function createApp({

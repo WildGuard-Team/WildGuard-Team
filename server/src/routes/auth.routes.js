@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { createAuthController } from './controller.js';
-import { requireAuthentication } from './middleware.js';
+import { createAuthController } from '../modules/auth/controller.js';
+import { requireAuthentication } from '../modules/auth/middleware.js';
 
 function handle(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res)).catch(next);

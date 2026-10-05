@@ -47,6 +47,7 @@ Pages coordinate behavior and compose small components. Extract forms, validatio
 - `src/server.js` loads and validates configuration, connects MongoDB, creates the persistent MongoDB session store, starts listening, and handles shutdown.
 - `src/config/env.js` validates settings; `config/database.js` owns database connection lifecycle and readiness.
 - `src/middleware/errors.js` provides JSON 404 and centralized errors without exposing stack traces.
+- `src/routes/` owns API route definitions and associates middleware/controllers with endpoint paths. `auth.routes.js` registers the authentication endpoints.
 - `test/` checks configuration and HTTP contracts; real database connectivity is a separate smoke check.
 
 Future modules belong in `src/modules/auth/`, `src/modules/reports/`, and `src/modules/sms/`. Add `src/shared/` only for code actually shared by modules. Create only layers each module needs:
@@ -61,7 +62,7 @@ Future modules belong in `src/modules/auth/`, `src/modules/reports/`, and `src/m
 
 Keep queries out of controllers. Split services when responsibilities diverge; avoid one service owning every workflow. Prefer functions over artificial one-method classes. The small health endpoint does not need a service/repository chain.
 
-`modules/auth/` now owns the User model, validation, password operations, repository, use cases, controllers, route registration, and reusable authentication/origin middleware. Public registration assigns `COMMUNITY_MEMBER` in the service; a caller cannot choose a role. Session setup remains in `app.js`/`server.js` because it applies to the whole HTTP application. Reports should use `requireAuthentication` for endpoints requiring a signed-in member. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
+`modules/auth/` owns the User model, validation, password operations, repository, use cases, controllers, and reusable authentication/origin middleware. Public registration assigns `COMMUNITY_MEMBER` in the service; a caller cannot choose a role. Session setup remains in `app.js`/`server.js` because it applies to the whole HTTP application. Reports should use `requireAuthentication` for endpoints requiring a signed-in member. When Reports is implemented, its endpoint definitions belong in `src/routes/reports.routes.js`; keep report validation, controllers, services, and persistence in `src/modules/reports/`. SMS will own provider integration and delivery once requirements are agreed; other modules should use its service interface. No admin roles or approval workflow are defined.
 
 ## Integration rules for four contributors
 
