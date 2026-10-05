@@ -2,16 +2,14 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
 import { readConfig } from './config/env.js';
-import { connectDatabase, disconnectDatabase, getDatabaseClient, isDatabaseConnected } from './config/database.js';
-import { createSessionStore } from './config/session.js';
+import { connectDatabase, disconnectDatabase, isDatabaseConnected } from './config/database.js';
 
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 
 async function start() {
   const config = readConfig(process.env);
   await connectDatabase(config.mongodbUri);
-  const sessionStore = createSessionStore(getDatabaseClient(), config.sessionTtlHours);
-  const app = createApp({ ...config, isDatabaseConnected, sessionStore });
+  const app = createApp({ ...config, isDatabaseConnected });
   const server = app.listen(config.port, '127.0.0.1');
   await new Promise((resolve, reject) => {
     server.once('listening', resolve);

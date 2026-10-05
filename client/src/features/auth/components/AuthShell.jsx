@@ -14,7 +14,7 @@ export default function AuthShell({ children, variant = 'login' }) {
             <p>Report sightings, share concerns, and help safeguard nature.</p>
           </div>
         </aside>
-        <section className="auth-form-panel"><div className="auth-form-content">{children}</div></section>
+        <section className="auth-form-panel"><div className={`auth-form-content auth-form-content--${variant}`}>{children}</div></section>
       </section>
     </main>
   );

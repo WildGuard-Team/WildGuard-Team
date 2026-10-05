@@ -1,5 +1,5 @@
 export function readConfig(env) {
-  const required = ['PORT', 'MONGODB_URI', 'CLIENT_ORIGIN', 'SESSION_SECRET'];
+  const required = ['PORT', 'MONGODB_URI', 'CLIENT_ORIGIN', 'JWT_SECRET', 'JWT_EXPIRES_IN'];
   for (const key of required) {
     if (!env[key]?.trim()) throw new Error(`Missing ${key}. Copy server/.env.example to server/.env and configure it.`);
   }
@@ -18,19 +18,19 @@ export function readConfig(env) {
   if (!origin || !['http:', 'https:'].includes(origin.protocol) || origin.origin !== clientOrigin) {
     throw new Error('CLIENT_ORIGIN must be an HTTP(S) origin without a path or trailing slash.');
   }
-  const sessionSecret = env.SESSION_SECRET.trim();
-  if (sessionSecret.length < 32) {
-    throw new Error('SESSION_SECRET must contain at least 32 characters.');
+  const jwtSecret = env.JWT_SECRET.trim();
+  if (jwtSecret.length < 32) {
+    throw new Error('JWT_SECRET must contain at least 32 characters.');
   }
-  const sessionTtlHours = Number(env.SESSION_TTL_HOURS ?? 24);
-  if (!Number.isInteger(sessionTtlHours) || sessionTtlHours < 1 || sessionTtlHours > 24 * 30) {
-    throw new Error('SESSION_TTL_HOURS must be an integer between 1 and 720.');
+  const jwtExpiresIn = env.JWT_EXPIRES_IN.trim();
+  if (!/^[1-9]\d*[smhd]$/.test(jwtExpiresIn)) {
+    throw new Error('JWT_EXPIRES_IN must be a positive duration such as 24h.');
   }
   const nodeEnv = env.NODE_ENV ?? 'development';
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
     throw new Error('NODE_ENV must be development, test, or production.');
   }
   return {
-    port, mongodbUri, clientOrigin, sessionSecret, sessionTtlHours, nodeEnv,
+    port, mongodbUri, clientOrigin, jwtSecret, jwtExpiresIn, nodeEnv,
   };
 }

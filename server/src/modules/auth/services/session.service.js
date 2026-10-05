@@ -15,11 +15,3 @@ export async function getCurrentMember(userId, users) {
   if (!user) throw new HttpError(401, 'Authentication required.');
   return toPublicUser(user);
 }
-
-export function regenerateSession(session) {
-  return new Promise((resolve, reject) => session.regenerate((error) => (error ? reject(error) : resolve())));
-}
-
-export function destroySession(session) {
-  return new Promise((resolve, reject) => session.destroy((error) => (error ? reject(error) : resolve())));
-}

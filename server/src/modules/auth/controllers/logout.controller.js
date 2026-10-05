@@ -1,9 +1,10 @@
-import { destroySession } from '../services/session.service.js';
+import { AUTH_TOKEN_COOKIE } from '../config/auth.constants.js';
 
-export function createLogoutController() {
+export function createLogoutController({ nodeEnv }) {
   return async function logout(req, res) {
-    await destroySession(req.session);
-    res.clearCookie('wildguard.sid');
+    res.clearCookie(AUTH_TOKEN_COOKIE, {
+      httpOnly: true, sameSite: 'lax', secure: nodeEnv === 'production', path: '/',
+    });
     res.status(200).json({ message: 'Logged out.' });
   };
 }

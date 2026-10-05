@@ -38,7 +38,7 @@ Copy these only on initial setup; preserve existing settings. Both `.env` files 
 | --- | --- |
 | Server `PORT` | `5000` |
 | Server `MONGODB_URI` | `mongodb://127.0.0.1:27017/wildguard` |
-| Server `CLIENT_ORIGIN` | `http://127.0.0.1:5173` |
+| Server `CLIENT_ORIGIN` | `http://localhost:3000` |
 | Server `SESSION_SECRET` | A locally generated secret of at least 32 characters |
 | Server `SESSION_TTL_HOURS` | `24` |
 | Client `VITE_API_BASE_URL` | `/api` |
@@ -83,7 +83,7 @@ npm run dev:server
 npm run dev:client
 ```
 
-- Frontend: <http://127.0.0.1:5173>
+- Frontend: <http://localhost:3000>
 - API health: <http://127.0.0.1:5000/api/health>
 
 These are loopback (localhost) URLs. Open the frontend with the hostname configured in `CLIENT_ORIGIN`; `localhost` and `127.0.0.1` are distinct browser origins. Vite uses a strict port to keep CORS predictable. During development, Vite proxies `/api` to the backend so browser requests include the session cookie consistently. The frontend restores the session with `/api/auth/me` before deciding which page to show.

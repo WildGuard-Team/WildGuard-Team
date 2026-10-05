@@ -8,6 +8,6 @@ export function validateRegistration(body) {
   const password = typeof body.password === 'string' ? body.password : '';
   if (fullName.length < 2 || fullName.length > 100) throw validationError('Full name must be between 2 and 100 characters.');
   if (!isValidEmail(email)) throw validationError('Enter a valid email address.');
-  if (password.length < 12 || password.length > 128) throw validationError('Password must be between 12 and 128 characters.');
+  if (password.length < 6 || password.length > 12) throw validationError('Password must be 6–12 characters.');
   return { fullName, email, password };
 }
