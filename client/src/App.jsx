@@ -4,9 +4,14 @@ import { useAuth } from './context/useAuth.js';
 import LoginPage from './features/auth/pages/LoginPage.jsx';
 import RegisterPage from './features/auth/pages/RegisterPage.jsx';
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
+import { ReportDraftProvider } from './features/reports/context/ReportDraftContext.jsx';
+import ReportTypePage from './features/reports/pages/ReportTypePage.jsx';
+import ReportDetailsPage from './features/reports/pages/ReportDetailsPage.jsx';
+import ReviewReportPage from './features/reports/pages/ReviewReportPage.jsx';
+import ReportConfirmationPage from './features/reports/pages/ReportConfirmationPage.jsx';
 
 export default function App() {
-  return <AuthProvider><AppRoutes /></AuthProvider>;
+  return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
 }
 
 function AppRoutes() {
@@ -23,7 +28,7 @@ function AppRoutes() {
   useEffect(() => {
     if (isCheckingSession) return;
     if (user && (path === '/login' || path === '/register' || path === '/')) navigate('/member', { replace: true });
-    if (!user && path === '/member') navigate('/login', { replace: true });
+    if (!user && path !== '/login' && path !== '/register') navigate('/login', { replace: true });
   }, [isCheckingSession, path, user]);
 
   function navigate(nextPath, options = {}) {
@@ -34,9 +39,13 @@ function AppRoutes() {
     setMessage(options.message ?? '');
   }
 
-  if (isCheckingSession || (user && path !== '/member') || (!user && path === '/member')) {
+  if (isCheckingSession || (user && (path === '/login' || path === '/register' || path === '/')) || (!user && path !== '/login' && path !== '/register')) {
     return <main className="session-loading" aria-live="polite"><span className="loading-mark" />Checking your WildGuard session…</main>;
   }
+  if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
+  if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
+  if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;
+  if (user && path === '/reports/confirmation') return <ReportConfirmationPage navigate={navigate} />;
   if (user) return <MemberLandingPage navigate={navigate} />;
   if (path === '/register') return <RegisterPage navigate={navigate} />;
   return <LoginPage navigate={navigate} successMessage={message} />;

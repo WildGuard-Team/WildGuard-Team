@@ -26,9 +26,12 @@ export default function MemberLandingPage({ navigate }) {
         <img src="/logo.jpg" alt="WildGuard" />
         <p className="member-kicker">Community member</p>
         <h1>Welcome, {user.fullName}.</h1>
-        <p>Your WildGuard account is signed in and ready. Community reporting will arrive in the next project milestone.</p>
+        <p>Your WildGuard account is ready. Help your community by submitting a wildlife report.</p>
         <FormAlert type="error">{error}</FormAlert>
+        <button className="primary-button" type="button" onClick={() => navigate('/reports/type')}>Submit a Community Report</button>
+        <div className="member-logout">
         <button className="primary-button" type="button" onClick={signOut} disabled={isLoading}>{isLoading ? 'Signing out…' : 'Log out'}</button>
+        </div>
       </section>
     </main>
   );
