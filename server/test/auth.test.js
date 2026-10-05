@@ -133,6 +133,17 @@ test('login uses a safe shared response for wrong and unknown credentials', asyn
   assert.deepEqual(await wrong.json(), await unknown.json());
 });
 
+test('login treats a malformed stored password hash as invalid credentials', async (t) => {
+  const base = await startApi(t, {
+    findByEmail: async () => ({ passwordHash: null }),
+  });
+  const response = await jsonRequest(`${base}/api/auth/login`, {
+    method: 'POST', body: JSON.stringify({ email: testEmail('malformed-hash'), password: 'WildPass9' }),
+  });
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { error: { message: 'Invalid email or password.' } });
+});
+
 test('me requires a JWT cookie and database errors remain safe', async (t) => {
   const base = await startApi(t);
   assert.equal((await fetch(`${base}/api/auth/me`)).status, 401);
