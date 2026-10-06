@@ -1,15 +1,31 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '../../../context/useAuth.js';
 import { ReportDraftContext } from './report-draft-context.js';
+import {
+  clearCommunityReportDraft, emptyCommunityReportDraft, loadCommunityReportDraft, saveCommunityReportDraft,
+} from './community-report-draft.storage.js';
 
-const emptyDraft = {
-  reportType: '',
-  description: '',
-  location: { source: null, coordinates: null, displayName: '', manualLocation: '' },
-  evidence: [],
-};
 export function ReportDraftProvider({ children }) {
-  const [draft, setDraft] = useState(emptyDraft);
+  const { user, isCheckingSession } = useAuth();
+  const [draft, setDraft] = useState(loadCommunityReportDraft);
   const [submittedReport, setSubmittedReport] = useState(null);
+  const lastUserId = useRef(undefined);
+
+  useEffect(() => { saveCommunityReportDraft(draft); }, [draft]);
+  useEffect(() => {
+    if (isCheckingSession) return;
+    const currentUserId = user?.id ?? null;
+    if (lastUserId.current === undefined) {
+      lastUserId.current = currentUserId;
+      if (!currentUserId) { clearCommunityReportDraft(); setDraft(emptyCommunityReportDraft); }
+      return;
+    }
+    if (lastUserId.current !== currentUserId) {
+      lastUserId.current = currentUserId;
+      clearCommunityReportDraft();
+      setDraft(emptyCommunityReportDraft);
+    }
+  }, [isCheckingSession, user]);
 
   const value = useMemo(() => ({
     draft,
@@ -21,9 +37,12 @@ export function ReportDraftProvider({ children }) {
     }),
     submittedReport,
     setSubmittedReport,
-    clearDraft: () => setDraft(emptyDraft),
+    setEvidence: (evidence) => setDraft((current) => ({ ...current, evidence, evidenceRestoreRequired: false, wasRestored: false })),
+    continueWithoutEvidence: () => setDraft((current) => ({ ...current, evidence: [], evidenceRestoreRequired: false })),
+    clearDraft: () => { clearCommunityReportDraft(); setDraft(emptyCommunityReportDraft); },
     resetDraft: () => {
-      setDraft(emptyDraft);
+      clearCommunityReportDraft();
+      setDraft(emptyCommunityReportDraft);
       setSubmittedReport(null);
     },
   }), [draft, submittedReport]);

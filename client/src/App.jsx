@@ -5,6 +5,8 @@ import LoginPage from './features/auth/pages/LoginPage.jsx';
 import RegisterPage from './features/auth/pages/RegisterPage.jsx';
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
 import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
+import { useReportDraft } from './features/community-reports/context/useReportDraft.js';
+import { hasCompleteCommunityReportDetails } from './features/community-reports/context/community-report-draft.storage.js';
 import ReportTypePage from './features/community-reports/pages/ReportTypePage.jsx';
 import ReportDetailsPage from './features/community-reports/pages/ReportDetailsPage.jsx';
 import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
@@ -17,6 +19,7 @@ export default function App() {
 
 function AppRoutes() {
   const { user, isCheckingSession } = useAuth();
+  const { draft } = useReportDraft();
   const [path, setPath] = useState(window.location.pathname);
   const [message, setMessage] = useState('');
 
@@ -31,6 +34,16 @@ function AppRoutes() {
     if (user && (path === '/login' || path === '/register' || path === '/')) navigate('/member', { replace: true });
     if (!user && path !== '/login' && path !== '/register') navigate('/login', { replace: true });
   }, [isCheckingSession, path, user]);
+
+  useEffect(() => {
+    if (isCheckingSession || !user) return;
+    if (path === '/reports/details' && !draft.reportType) navigate('/reports/type', { replace: true });
+    else if ((path === '/reports/evidence' || path === '/reports/review') && !hasCompleteCommunityReportDetails(draft)) {
+      navigate(draft.reportType ? '/reports/details' : '/reports/type', { replace: true });
+    } else if (path === '/reports/review' && draft.evidenceRestoreRequired) {
+      navigate('/reports/evidence', { replace: true });
+    }
+  }, [draft, isCheckingSession, path, user]);
 
   function navigate(nextPath, options = {}) {
     if (window.location.pathname !== nextPath) {
