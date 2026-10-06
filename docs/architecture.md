@@ -126,6 +126,6 @@ Evidence media is uploaded by the backend to Cloudinary using server-only creden
 
 The frontend keeps selected evidence as in-memory browser `File` objects only. It creates temporary object URLs for local previews and revokes them when previews change or unmount. A report with files is submitted as `FormData`, with `location` passed through `JSON.stringify(...)` and each file appended under the repeated `evidence` field. A report without evidence preserves the JSON submission contract.
 
-Serializable Community Report details are saved in tab-scoped `sessionStorage` so a refresh can restore the report type, description, and location. Evidence `File` objects remain memory-only; when a refreshed draft previously had evidence, the member is told to select it again. Successful submission, logout or account change, and explicitly starting a new report clear the saved draft.
+Serializable Community Report details are saved in tab-scoped `sessionStorage` so a refresh can restore the report type, description, and location. Evidence `File` objects are stored temporarily in an owner- and draft-scoped native IndexedDB record (expiring after 24 hours), then reconstructed as `File` objects during refresh recovery. Successful submission, logout or account change, explicitly starting a new report, and skipping/removing all evidence clear the temporary draft data. If IndexedDB recovery fails, the member is asked to select evidence again.
 
 SMS reporting, offline synchronization, and durable retry remain deferred.

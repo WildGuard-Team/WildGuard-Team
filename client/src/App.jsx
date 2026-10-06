@@ -19,7 +19,7 @@ export default function App() {
 
 function AppRoutes() {
   const { user, isCheckingSession } = useAuth();
-  const { draft } = useReportDraft();
+  const { draft, evidenceHydrationStatus } = useReportDraft();
   const [path, setPath] = useState(window.location.pathname);
   const [message, setMessage] = useState('');
 
@@ -40,10 +40,10 @@ function AppRoutes() {
     if (path === '/reports/details' && !draft.reportType) navigate('/reports/type', { replace: true });
     else if ((path === '/reports/evidence' || path === '/reports/review') && !hasCompleteCommunityReportDetails(draft)) {
       navigate(draft.reportType ? '/reports/details' : '/reports/type', { replace: true });
-    } else if (path === '/reports/review' && draft.evidenceRestoreRequired) {
+    } else if (path === '/reports/review' && draft.evidenceRestoreRequired && evidenceHydrationStatus !== 'loading' && evidenceHydrationStatus !== 'idle') {
       navigate('/reports/evidence', { replace: true });
     }
-  }, [draft, isCheckingSession, path, user]);
+  }, [draft, evidenceHydrationStatus, isCheckingSession, path, user]);
 
   function navigate(nextPath, options = {}) {
     if (window.location.pathname !== nextPath) {
