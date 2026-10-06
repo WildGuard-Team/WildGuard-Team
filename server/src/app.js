@@ -6,10 +6,13 @@ import { createUserRepository } from './modules/auth/repositories/user.repositor
 import { createAuthRouter } from './modules/auth/routes/auth.routes.js';
 import { createCommunityReportRepository } from './modules/community-reports/repositories/community-report.repository.js';
 import { createCommunityReportRouter } from './modules/community-reports/routes/community-report.routes.js';
+import { createGeocodingProvider } from './modules/community-reports/integrations/geocoding.provider.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
   communityReports = createCommunityReportRepository(),
+  geocoding,
+  geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
 }) {
   const app = express();
   app.disable('x-powered-by');
@@ -29,7 +32,12 @@ export function createApp({
   });
 
   app.use('/api/auth', createAuthRouter(users, { jwtSecret, jwtExpiresIn, nodeEnv }));
-  app.use('/api/reports', createCommunityReportRouter(communityReports, users, { jwtSecret }));
+  const configuredGeocoding = geocoding ?? createGeocodingProvider({
+    baseUrl: geocodingBaseUrl ?? 'https://nominatim.openstreetmap.org',
+    userAgent: geocodingUserAgent ?? 'WildGuard/0.1 (contact: team@example.invalid)',
+    timeoutMs: geocodingTimeoutMs ?? 5000,
+  });
+  app.use('/api/reports', createCommunityReportRouter(communityReports, users, { jwtSecret, geocoding: configuredGeocoding }));
 
   app.use(notFound);
   app.use(errorHandler);

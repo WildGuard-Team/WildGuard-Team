@@ -4,7 +4,7 @@ export function notFound(req, res) {
 
 export function errorHandler(error, req, res, next) {
   if (res.headersSent) return next(error);
-  const status = Number.isInteger(error.status) && error.status >= 400 && error.status < 500
+  const status = Number.isInteger(error.status) && error.status >= 400 && error.status < 600
     ? error.status : 500;
   const message = error.type === 'entity.parse.failed' ? 'Invalid JSON body.'
     : status === 413 ? 'Request body too large.'

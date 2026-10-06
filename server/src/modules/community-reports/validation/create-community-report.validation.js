@@ -1,10 +1,11 @@
 import { HttpError } from '../../../shared/http-error.js';
 import {
   COMMUNITY_REPORT_TYPES, COMMUNITY_REPORT_DESCRIPTION_LIMITS,
-  COMMUNITY_REPORT_MANUAL_LOCATION_LIMITS,
 } from '../config/community-report.constants.js';
+import { normalizeLegacyManualLocation, validateLocation } from './location.validation.js';
 
-const allowedFields = new Set(['reportType', 'description', 'manualLocation']);
+// TODO: Remove the top-level manualLocation compatibility field after the frontend location migration.
+const allowedFields = new Set(['reportType', 'description', 'location', 'manualLocation']);
 
 function requiredText(value, label, limits) {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -19,14 +20,17 @@ export function validateCreateCommunityReport(body) {
     throw new HttpError(400, 'A JSON object is required.');
   }
   if (Object.keys(body).some((field) => !allowedFields.has(field))) {
-    throw new HttpError(400, 'Only reportType, description, and manualLocation are allowed.');
+    throw new HttpError(400, 'Only reportType, description, location, and legacy manualLocation are allowed.');
   }
   if (!COMMUNITY_REPORT_TYPES.includes(body.reportType)) {
     throw new HttpError(400, `Report type must be one of: ${COMMUNITY_REPORT_TYPES.join(', ')}.`);
   }
+  if (body.location !== undefined && body.manualLocation !== undefined) {
+    throw new HttpError(400, 'Provide either location or legacy manualLocation, not both.');
+  }
   return {
     reportType: body.reportType,
     description: requiredText(body.description, 'Description', COMMUNITY_REPORT_DESCRIPTION_LIMITS),
-    manualLocation: requiredText(body.manualLocation, 'Manual location', COMMUNITY_REPORT_MANUAL_LOCATION_LIMITS),
+    location: body.location !== undefined ? validateLocation(body.location) : normalizeLegacyManualLocation(body.manualLocation),
   };
 }

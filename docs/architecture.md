@@ -83,8 +83,33 @@ Keep queries out of controllers. Split services when responsibilities diverge; a
 
 ## Community Reporting
 
-`modules/community-reports/` owns Community Member report submission. Its `routes` layer maps `POST /api/reports`; `middleware` applies JWT authentication and the Community Member restriction; `controllers` translate HTTP input/output; `validation` normalizes and validates the request; `services` generate a reference and coordinate submission; `repositories` own Report collection writes; `models` define persistence; and `config`/`utils` hold report rules and reference generation.
+`modules/community-reports/` owns Community Member report submission and location lookup. Its routes apply the existing JWT and Community Member restrictions; validation normalizes request contracts; services coordinate submission or lookups; the provider adapter owns external geocoding HTTP; the repository/model own the existing `reports` collection.
 
-The implemented endpoint requires the existing HttpOnly JWT cookie and accepts `{ "reportType", "description", "manualLocation" }`. It returns `201 { "report": { "id", "referenceNumber", "reportType", "description", "location", "source", "createdAt" } }`. The request is a Community Member report only; it is distinct from a Ranger field incident and a Park Manager-generated conservation report. The `CommunityReport` Mongoose model explicitly keeps the existing `reports` collection.
+### Location contract
 
-Implemented functionality is authenticated manual-location submission, report-type and text validation, safe response shaping, collision-safe reference generation, and client review/confirmation screens with API error messaging. Pending original use-case scenarios are GPS with manual fallback, optional evidence, SMS submission, durable network-failure recovery, and submission retry. These are not implemented here and do not change the current authentication policy.
+`POST /api/reports` accepts `reportType`, `description`, and a `location` object:
+
+```json
+{
+  "location": {
+    "source": "GPS",
+    "coordinates": { "latitude": 7.9465, "longitude": 80.7593 },
+    "displayName": "Habarana, Anuradhapura District"
+  }
+}
+```
+
+`source` is `GPS`, `MAP`, or `MANUAL`. Coordinates are required for all new submissions; MANUAL additionally requires a 3–300 character `manualLocation`. `displayName` is optional. API coordinates use named latitude/longitude, while MongoDB stores GeoJSON points in `[longitude, latitude]` order. Legacy `{ reportType, description, manualLocation }` submissions remain temporarily supported and normalize to MANUAL with no point; the top-level compatibility field can be removed after the frontend migration.
+
+Responses return the safe report shape with `location.source`, named `location.coordinates` (or `null` for legacy reports without a point), `displayName`, and `manualLocation`.
+
+### Location lookup
+
+Authenticated Community Members can explicitly call:
+
+- `GET /api/reports/locations/search?q=<text>` — Sri Lanka-restricted manual search, returning up to five `{ placeId, displayName, coordinates }` candidates.
+- `GET /api/reports/locations/reverse?latitude=<lat>&longitude=<lng>` — returns `{ location }`, with `location: null` when no address is found.
+
+Search is an explicit action, not per-keystroke autocomplete. The configurable OpenStreetMap-compatible development provider uses a one-request-per-second shared limit, a small in-memory five-minute cache, an identifying User-Agent, and a request timeout. The public Nominatim service is a development integration only; it does not provide production availability guarantees.
+
+Leaflet rendering, OpenStreetMap tile display, browser/device geolocation, map clicking, marker dragging, and selected-candidate placement are frontend responsibilities. The backend never reads device GPS and does not serve map tiles. Remaining frontend work is to call explicit search/reverse actions, collect GPS or map coordinates, and submit the normalized location contract.

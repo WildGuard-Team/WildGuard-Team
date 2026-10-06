@@ -30,7 +30,26 @@ export function readConfig(env) {
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
     throw new Error('NODE_ENV must be development, test, or production.');
   }
+  const geocodingBaseUrl = readHttpUrl(env.GEOCODING_BASE_URL ?? 'https://nominatim.openstreetmap.org', 'GEOCODING_BASE_URL');
+  const geocodingUserAgent = (env.GEOCODING_USER_AGENT ?? 'WildGuard/0.1 (contact: team@example.invalid)').trim();
+  if (!geocodingUserAgent || geocodingUserAgent.length > 200) {
+    throw new Error('GEOCODING_USER_AGENT must contain 1 to 200 characters.');
+  }
+  const geocodingTimeoutMs = Number(env.GEOCODING_TIMEOUT_MS ?? 5000);
+  if (!Number.isInteger(geocodingTimeoutMs) || geocodingTimeoutMs < 1000 || geocodingTimeoutMs > 30000) {
+    throw new Error('GEOCODING_TIMEOUT_MS must be an integer between 1000 and 30000.');
+  }
   return {
     port, mongodbUri, clientOrigin, jwtSecret, jwtExpiresIn, nodeEnv,
+    geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
   };
+}
+
+function readHttpUrl(value, name) {
+  let url;
+  try { url = new URL(value); } catch { /* Report the stable configuration error below. */ }
+  if (!url || !['http:', 'https:'].includes(url.protocol)) {
+    throw new Error(`${name} must be an HTTP(S) URL.`);
+  }
+  return url.toString().replace(/\/$/, '');
 }

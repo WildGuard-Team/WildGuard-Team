@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/useAuth.js';
 import FormAlert from '../../auth/components/FormAlert.jsx';
 import CommunityIcon from './CommunityIcon.jsx';
@@ -11,6 +11,16 @@ const navigation = [
 export default function CommunityLayout({ children, navigate, active = 'report' }) {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false); const [error, setError] = useState(''); const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add('community-page-active');
+    document.body.classList.add('community-page-active');
+    return () => {
+      document.documentElement.classList.remove('community-page-active');
+      document.body.classList.remove('community-page-active');
+    };
+  }, []);
+
   async function signOut() {
     setIsLoggingOut(true); setError('');
     try { await logout(); navigate('/login'); } catch (requestError) { setError(requestError.message); } finally { setIsLoggingOut(false); }

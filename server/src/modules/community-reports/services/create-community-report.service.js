@@ -1,8 +1,9 @@
 import {
-  COMMUNITY_REPORT_MANUAL_LOCATION_SOURCE, COMMUNITY_REPORT_WEB_SOURCE,
+  COMMUNITY_REPORT_WEB_SOURCE,
   COMMUNITY_REPORT_REFERENCE_MAX_ATTEMPTS,
 } from '../config/community-report.constants.js';
 import { createCommunityReportReferenceNumber } from '../utils/reference-number.js';
+import { toGeoJsonPoint, toPublicLocation } from '../utils/location-mapper.js';
 
 function isReferenceCollision(error) {
   return error?.code === 11000 && (
@@ -17,10 +18,7 @@ function toPublicCommunityReport(report) {
     referenceNumber: report.referenceNumber,
     reportType: report.reportType,
     description: report.description,
-    location: {
-      locationSource: report.location.locationSource,
-      manualLocation: report.location.manualLocation,
-    },
+    location: toPublicLocation(report.location),
     source: report.source,
     createdAt: report.createdAt,
   };
@@ -35,8 +33,10 @@ export async function createCommunityReport(input, reporterId, communityReports)
         reportType: input.reportType,
         description: input.description,
         location: {
-          locationSource: COMMUNITY_REPORT_MANUAL_LOCATION_SOURCE,
-          manualLocation: input.manualLocation,
+          source: input.location.source,
+          point: toGeoJsonPoint(input.location.coordinates),
+          displayName: input.location.displayName,
+          manualLocation: input.location.manualLocation,
         },
         source: COMMUNITY_REPORT_WEB_SOURCE,
       });
