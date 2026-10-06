@@ -1,26 +1,107 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReportLayout from '../components/ReportLayout.jsx';
-import ReportProgress from '../components/ReportProgress.jsx';
+import IncidentDetailsForm from '../components/IncidentDetailsForm.jsx';
+import LocationMap from '../components/LocationMap.jsx';
+import LocationSearch from '../components/LocationSearch.jsx';
+import SelectedLocation from '../components/SelectedLocation.jsx';
 import { useReportDraft } from '../context/useReportDraft.js';
-import { validateDetails } from '../utils/report-options.js';
+import { useCurrentLocation } from '../hooks/useCurrentLocation.js';
+import { reverseGeocode } from '../services/locationApi.js';
+import { validateReportDetails } from '../validation/reportDetails.validation.js';
 
 export default function ReportDetailsPage({ navigate }) {
-  const { draft, updateDraft } = useReportDraft();
+  const { draft, updateDraft, updateLocation } = useReportDraft();
   const [errors, setErrors] = useState({});
-  function update(event) { updateDraft({ [event.target.name]: event.target.value }); setErrors((current) => ({ ...current, [event.target.name]: '' })); }
+  const [lookupWarning, setLookupWarning] = useState('');
+  const [isResolving, setIsResolving] = useState(false);
+  const lookupId = useRef(0);
+  const isMounted = useRef(true);
+  const { requestCurrentLocation, isLocating, locationError } = useCurrentLocation();
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
+
+  function saveLocation(changes) {
+    updateLocation(changes);
+    setErrors((current) => ({ ...current, location: '', manualLocation: '' }));
+  }
+
+  function coordinatesMatch(first, second) {
+    return first?.latitude === second?.latitude && first?.longitude === second?.longitude;
+  }
+
+  async function resolveCoordinates(coordinates, source) {
+    const requestId = ++lookupId.current;
+    const selectedCoordinates = { latitude: coordinates.latitude, longitude: coordinates.longitude };
+    const selectedLocation = {
+      source,
+      coordinates: selectedCoordinates,
+      displayName: '',
+      manualLocation: source === 'MANUAL' ? draft.location.manualLocation : '',
+    };
+    saveLocation(selectedLocation);
+    setLookupWarning(''); setIsResolving(true);
+    try {
+      const result = await reverseGeocode(coordinates);
+      if (isMounted.current && requestId === lookupId.current && result) {
+        saveLocation((currentLocation) => (
+          coordinatesMatch(currentLocation.coordinates, selectedCoordinates)
+            ? { displayName: result.displayName }
+            : null
+        ));
+      }
+      if (isMounted.current && requestId === lookupId.current && !result) setLookupWarning('Coordinates were selected, but no readable address was found.');
+    } catch (requestError) {
+      if (isMounted.current && requestId === lookupId.current) setLookupWarning(`${requestError.message} Your selected coordinates will be kept.`);
+    } finally {
+      if (isMounted.current && requestId === lookupId.current) setIsResolving(false);
+    }
+  }
+
+  async function handleUseCurrentLocation() {
+    if (isLocating || isResolving) return;
+    try {
+      const coordinates = await requestCurrentLocation();
+      if (coordinates) await resolveCoordinates(coordinates, 'GPS');
+    } catch {
+      if (isMounted.current) setLookupWarning('Unable to get your current location. Select a point on the map or search manually.');
+    }
+  }
+
+  function selectManualResult(result, manualLocation) {
+    lookupId.current += 1;
+    saveLocation({
+      source: 'MANUAL',
+      coordinates: { latitude: result.coordinates.latitude, longitude: result.coordinates.longitude },
+      displayName: result.displayName,
+      manualLocation,
+    });
+    setLookupWarning(''); setIsResolving(false);
+  }
+
   function continueToReview(event) {
     event.preventDefault();
-    const nextErrors = validateDetails(draft); setErrors(nextErrors);
+    const nextErrors = validateReportDetails(draft);
+    if (isResolving) nextErrors.location = 'Please wait for the current location lookup to finish.';
+    setErrors(nextErrors);
     if (!Object.keys(nextErrors).length) navigate('/reports/review');
   }
-  return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Provide the information currently supported by WildGuard." step={2}>
-    <ReportProgress currentStep={2} />
-    <form className="report-form" noValidate onSubmit={continueToReview}>
-      <label className="form-field" htmlFor="description">Incident description <textarea id="description" name="description" value={draft.description} onChange={update} aria-invalid={Boolean(errors.description)} aria-describedby="description-hint" placeholder="Describe what you saw or what happened." /></label>
-      <span id="description-hint" className={errors.description ? 'field-hint field-hint--error' : 'field-hint'}>{errors.description || `${draft.description.trim().length}/2,000 characters · minimum 10`}</span>
-      <label className="form-field" htmlFor="manualLocation">Manual location <input id="manualLocation" name="manualLocation" value={draft.manualLocation} onChange={update} aria-invalid={Boolean(errors.manualLocation)} placeholder="e.g. Kegalle, Main Road" /></label>
-      <span className={errors.manualLocation ? 'field-hint field-hint--error' : 'field-hint'}>{errors.manualLocation || `${draft.manualLocation.trim().length}/300 characters · minimum 3`}</span>
-      <div className="report-actions"><button type="button" className="secondary-button" onClick={() => navigate('/reports/type')}>Back</button><button className="primary-button" type="submit">Continue</button></div>
+
+  return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Describe what you observed and confirm where it happened." step={2}>
+    <form className="incident-details-panel" noValidate onSubmit={continueToReview}>
+      <IncidentDetailsForm description={draft.description} error={errors.description} onChange={(description) => { updateDraft({ description }); setErrors((current) => ({ ...current, description: '' })); }} />
+      <section className="incident-location" aria-labelledby="location-title">
+        <h2 id="location-title">Location</h2><p>Select the exact location where the incident occurred on the map.</p>
+        <LocationMap coordinates={draft.location.coordinates} onMapSelect={(coordinates) => resolveCoordinates(coordinates, 'MAP')} onMarkerDrag={(coordinates) => resolveCoordinates(coordinates, draft.location.source === 'MANUAL' ? 'MANUAL' : 'MAP')} />
+        <button className="current-location-button" type="button" onClick={handleUseCurrentLocation} disabled={isLocating || isResolving}>{isLocating ? 'Locating…' : '⌖ Use My Current Location'}</button>
+        <div className="location-message" aria-live="polite">{locationError}</div>
+        <SelectedLocation location={draft.location} error={errors.location} warning={lookupWarning} />
+        <LocationSearch value={draft.location.manualLocation} onChange={(manualLocation) => saveLocation({ manualLocation })} onSelect={selectManualResult} />
+        {errors.manualLocation && <p className="details-field-status is-error" role="alert">{errors.manualLocation}</p>}
+      </section>
+      <div className="incident-details-actions"><button type="button" className="secondary-button" onClick={() => navigate('/reports/type')}>Back</button><button className="primary-button" type="submit" disabled={isResolving}>{isResolving ? 'Confirming location…' : 'Continue'}</button></div>
     </form>
   </ReportLayout>;
 }

@@ -5,7 +5,7 @@ import { createCommunityReportController } from '../controllers/create-community
 import { searchLocationController } from '../controllers/search-location.controller.js';
 import { reverseLocationController } from '../controllers/reverse-location.controller.js';
 
-export function createCommunityReportRouter(communityReports, users, { jwtSecret, geocoding }) {
+export function createCommunityReportRouter(communityReports, users, { jwtSecret, geocoding, nodeEnv }) {
   const router = Router();
   const submitReport = createCommunityReportController(communityReports);
   const searchLocations = searchLocationController(geocoding);
@@ -16,5 +16,6 @@ export function createCommunityReportRouter(communityReports, users, { jwtSecret
     (req, res, next) => Promise.resolve(reverseLocation(req, res)).catch(next));
   router.post('/', requireAuthentication(jwtSecret), requireCommunityMember(users),
     (req, res, next) => Promise.resolve(submitReport(req, res)).catch(next));
+  if (nodeEnv === 'development') console.info('Registered route: GET /api/reports/locations/reverse');
   return router;
 }

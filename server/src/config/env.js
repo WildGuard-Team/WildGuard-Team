@@ -30,12 +30,12 @@ export function readConfig(env) {
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
     throw new Error('NODE_ENV must be development, test, or production.');
   }
-  const geocodingBaseUrl = readHttpUrl(env.GEOCODING_BASE_URL ?? 'https://nominatim.openstreetmap.org', 'GEOCODING_BASE_URL');
-  const geocodingUserAgent = (env.GEOCODING_USER_AGENT ?? 'WildGuard/0.1 (contact: team@example.invalid)').trim();
-  if (!geocodingUserAgent || geocodingUserAgent.length > 200) {
-    throw new Error('GEOCODING_USER_AGENT must contain 1 to 200 characters.');
+  const geocodingBaseUrl = readHttpUrl(requiredText(env.GEOCODING_BASE_URL, 'GEOCODING_BASE_URL'), 'GEOCODING_BASE_URL');
+  const geocodingUserAgent = requiredText(env.GEOCODING_USER_AGENT, 'GEOCODING_USER_AGENT');
+  if (geocodingUserAgent.length > 200 || /^(node|undici|mozilla|wildguard)$/i.test(geocodingUserAgent) || /YOUR_EMAIL|example\.invalid/i.test(geocodingUserAgent)) {
+    throw new Error('GEOCODING_USER_AGENT must be an identifying value of at most 200 characters.');
   }
-  const geocodingTimeoutMs = Number(env.GEOCODING_TIMEOUT_MS ?? 5000);
+  const geocodingTimeoutMs = Number(env.GEOCODING_TIMEOUT_MS ?? 10000);
   if (!Number.isInteger(geocodingTimeoutMs) || geocodingTimeoutMs < 1000 || geocodingTimeoutMs > 30000) {
     throw new Error('GEOCODING_TIMEOUT_MS must be an integer between 1000 and 30000.');
   }
@@ -43,6 +43,11 @@ export function readConfig(env) {
     port, mongodbUri, clientOrigin, jwtSecret, jwtExpiresIn, nodeEnv,
     geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
   };
+}
+
+function requiredText(value, name) {
+  if (!value?.trim()) throw new Error(`Missing ${name}. Configure it in server/.env.`);
+  return value.trim();
 }
 
 function readHttpUrl(value, name) {

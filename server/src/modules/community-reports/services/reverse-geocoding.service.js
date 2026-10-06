@@ -15,8 +15,11 @@ export async function reverseGeocodeLocation(coordinates, geocoding) {
     }
     const latitude = providerCoordinate(payload.lat, -90, 90);
     const longitude = providerCoordinate(payload.lon, -180, 180);
-    if (typeof payload.display_name !== 'string' || latitude === null || longitude === null) return null;
-    return { displayName: payload.display_name, coordinates: { latitude, longitude } };
+    if (latitude === null || longitude === null) return null;
+    const displayName = typeof payload.display_name === 'string' && payload.display_name.trim()
+      ? payload.display_name
+      : `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+    return { displayName, coordinates: { latitude, longitude } };
   } catch (error) {
     if (error instanceof GeocodingUnavailableError) {
       throw new HttpError(503, 'Reverse geocoding is temporarily unavailable.');

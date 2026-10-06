@@ -112,4 +112,10 @@ Authenticated Community Members can explicitly call:
 
 Search is an explicit action, not per-keystroke autocomplete. The configurable OpenStreetMap-compatible development provider uses a one-request-per-second shared limit, a small in-memory five-minute cache, an identifying User-Agent, and a request timeout. The public Nominatim service is a development integration only; it does not provide production availability guarantees.
 
-Leaflet rendering, OpenStreetMap tile display, browser/device geolocation, map clicking, marker dragging, and selected-candidate placement are frontend responsibilities. The backend never reads device GPS and does not serve map tiles. Remaining frontend work is to call explicit search/reverse actions, collect GPS or map coordinates, and submit the normalized location contract.
+Leaflet rendering, OpenStreetMap tile display, browser/device geolocation, map clicking, marker dragging, and selected-candidate placement are frontend responsibilities. The backend never reads device GPS and does not serve map tiles. The client calls explicit search/reverse actions, collects GPS or map coordinates, and submits the normalized location contract.
+
+### Community Reporting location UI
+
+The Incident Details & Location screen uses Leaflet and OpenStreetMap tiles in the client. It asks for browser location permission only when the member selects **Use My Current Location**; a successful result is reverse-geocoded and saved as a GPS location. Members can instead click the map, drag the one report marker (reverse lookup runs after dragging), or explicitly submit a manual search. Search is not per-keystroke autocomplete: selecting a candidate saves its text and coordinates as a MANUAL location. The client submits the nested location payload described above, preserving the JWT-cookie request behavior.
+
+Evidence uploads, SMS reporting, offline synchronization, and durable retry remain deferred.

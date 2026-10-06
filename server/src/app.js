@@ -33,11 +33,14 @@ export function createApp({
 
   app.use('/api/auth', createAuthRouter(users, { jwtSecret, jwtExpiresIn, nodeEnv }));
   const configuredGeocoding = geocoding ?? createGeocodingProvider({
-    baseUrl: geocodingBaseUrl ?? 'https://nominatim.openstreetmap.org',
-    userAgent: geocodingUserAgent ?? 'WildGuard/0.1 (contact: team@example.invalid)',
-    timeoutMs: geocodingTimeoutMs ?? 5000,
+    baseUrl: geocodingBaseUrl,
+    userAgent: geocodingUserAgent,
+    timeoutMs: geocodingTimeoutMs,
+    nodeEnv,
   });
-  app.use('/api/reports', createCommunityReportRouter(communityReports, users, { jwtSecret, geocoding: configuredGeocoding }));
+  app.use('/api/reports', createCommunityReportRouter(communityReports, users, {
+    jwtSecret, geocoding: configuredGeocoding, nodeEnv,
+  }));
 
   app.use(notFound);
   app.use(errorHandler);
