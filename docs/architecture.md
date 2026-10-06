@@ -44,7 +44,7 @@ client/src/
 
 Pages coordinate behavior and compose small components. Extract forms, validation, API calls, and substantial loading behavior into focused components, functions, services, or hooks. Generic UI belongs in `components/common`; feature UI belongs in its feature. Avoid global context for state used by one form.
 
-The implemented Community Reporting UI provides the Community Member dashboard, report-type selection, incident details/manual location, review with accuracy confirmation, submission progress, and a reference-number confirmation screen. It sends credentialed `POST /api/reports` requests and keeps draft data when moving between steps. GPS/manual fallback, optional evidence, SMS reporting, offline persistence, and durable retry remain pending because the current API does not persist them.
+The implemented Community Reporting UI provides the Community Member dashboard, report-type selection, incident details/manual location, optional evidence, review with accuracy confirmation, submission progress, and a reference-number confirmation screen. It sends credentialed `POST /api/reports` requests and keeps draft data when moving between steps. GPS/manual fallback, SMS reporting, offline persistence, and durable retry remain pending.
 
 ### Backend
 
@@ -118,4 +118,12 @@ Leaflet rendering, OpenStreetMap tile display, browser/device geolocation, map c
 
 The Incident Details & Location screen uses Leaflet and OpenStreetMap tiles in the client. It asks for browser location permission only when the member selects **Use My Current Location**; a successful result is reverse-geocoded and saved as a GPS location. Members can instead click the map, drag the one report marker (reverse lookup runs after dragging), or explicitly submit a manual search. Search is not per-keystroke autocomplete: selecting a candidate saves its text and coordinates as a MANUAL location. The client submits the nested location payload described above, preserving the JWT-cookie request behavior.
 
-Evidence uploads, SMS reporting, offline synchronization, and durable retry remain deferred.
+### Optional evidence contract
+
+`POST /api/reports` continues to accept its JSON contract without evidence. It also accepts `multipart/form-data` with `reportType`, `description`, `location` as a JSON string, and zero to three `evidence` files. Evidence is optional; images may be JPEG, PNG, or WebP up to 5 MB each, and video may be MP4 up to 25 MB.
+
+Evidence media is uploaded by the backend to Cloudinary using server-only credentials. MongoDB stores only normalized metadata and secure HTTPS URLs, never buffers or provider credentials. Before uploads begin, report and file validation complete; uploaded assets are removed if a later upload or report persistence fails. API responses expose only safe evidence metadata, not Cloudinary public IDs or provider responses.
+
+The frontend keeps selected evidence as in-memory browser `File` objects only. It creates temporary object URLs for local previews and revokes them when previews change or unmount. A report with files is submitted as `FormData`, with `location` passed through `JSON.stringify(...)` and each file appended under the repeated `evidence` field. A report without evidence preserves the JSON submission contract.
+
+SMS reporting, offline synchronization, and durable retry remain deferred.

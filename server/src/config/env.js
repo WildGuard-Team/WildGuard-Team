@@ -1,5 +1,5 @@
 export function readConfig(env) {
-  const required = ['PORT', 'MONGODB_URI', 'CLIENT_ORIGIN', 'JWT_SECRET', 'JWT_EXPIRES_IN'];
+  const required = ['PORT', 'MONGODB_URI', 'CLIENT_ORIGIN', 'JWT_SECRET', 'JWT_EXPIRES_IN', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
   for (const key of required) {
     if (!env[key]?.trim()) throw new Error(`Missing ${key}. Copy server/.env.example to server/.env and configure it.`);
   }
@@ -39,9 +39,13 @@ export function readConfig(env) {
   if (!Number.isInteger(geocodingTimeoutMs) || geocodingTimeoutMs < 1000 || geocodingTimeoutMs > 30000) {
     throw new Error('GEOCODING_TIMEOUT_MS must be an integer between 1000 and 30000.');
   }
+  const cloudinaryCloudName = requiredText(env.CLOUDINARY_CLOUD_NAME, 'CLOUDINARY_CLOUD_NAME');
+  const cloudinaryApiKey = requiredText(env.CLOUDINARY_API_KEY, 'CLOUDINARY_API_KEY');
+  const cloudinaryApiSecret = requiredText(env.CLOUDINARY_API_SECRET, 'CLOUDINARY_API_SECRET');
   return {
     port, mongodbUri, clientOrigin, jwtSecret, jwtExpiresIn, nodeEnv,
     geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
+    cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret,
   };
 }
 

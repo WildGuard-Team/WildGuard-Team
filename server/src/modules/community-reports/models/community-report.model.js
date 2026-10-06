@@ -25,6 +25,19 @@ const locationSchema = new mongoose.Schema({
   },
 }, { _id: false });
 
+const evidenceSchema = new mongoose.Schema({
+  publicId: { type: String, required: true, trim: true },
+  secureUrl: { type: String, required: true, trim: true },
+  resourceType: { type: String, required: true, enum: ['image', 'video'] },
+  originalName: { type: String, required: true, trim: true },
+  mimeType: { type: String, required: true },
+  bytes: { type: Number, required: true, min: 1 },
+  format: { type: String },
+  width: { type: Number },
+  height: { type: Number },
+  duration: { type: Number },
+}, { _id: false });
+
 const communityReportSchema = new mongoose.Schema({
   referenceNumber: { type: String, required: true, unique: true },
   reporterId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -35,6 +48,7 @@ const communityReportSchema = new mongoose.Schema({
     maxlength: COMMUNITY_REPORT_DESCRIPTION_LIMITS.max,
   },
   location: { type: locationSchema, required: true },
+  evidence: { type: [evidenceSchema], default: [] },
   source: {
     type: String, required: true,
     enum: [COMMUNITY_REPORT_WEB_SOURCE], default: COMMUNITY_REPORT_WEB_SOURCE,

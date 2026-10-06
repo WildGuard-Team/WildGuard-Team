@@ -5,6 +5,7 @@ const emptyDraft = {
   reportType: '',
   description: '',
   location: { source: null, coordinates: null, displayName: '', manualLocation: '' },
+  evidence: [],
 };
 export function ReportDraftProvider({ children }) {
   const [draft, setDraft] = useState(emptyDraft);
@@ -20,6 +21,7 @@ export function ReportDraftProvider({ children }) {
     }),
     submittedReport,
     setSubmittedReport,
+    clearDraft: () => setDraft(emptyDraft),
     resetDraft: () => {
       setDraft(emptyDraft);
       setSubmittedReport(null);

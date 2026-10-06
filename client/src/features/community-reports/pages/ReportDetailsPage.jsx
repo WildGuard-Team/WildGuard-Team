@@ -81,16 +81,16 @@ export default function ReportDetailsPage({ navigate }) {
     setLookupWarning(''); setIsResolving(false);
   }
 
-  function continueToReview(event) {
+  function continueToEvidence(event) {
     event.preventDefault();
     const nextErrors = validateReportDetails(draft);
     if (isResolving) nextErrors.location = 'Please wait for the current location lookup to finish.';
     setErrors(nextErrors);
-    if (!Object.keys(nextErrors).length) navigate('/reports/review');
+    if (!Object.keys(nextErrors).length) navigate('/reports/evidence');
   }
 
   return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Describe what you observed and confirm where it happened." step={2}>
-    <form className="incident-details-panel" noValidate onSubmit={continueToReview}>
+    <form className="incident-details-panel" noValidate onSubmit={continueToEvidence}>
       <IncidentDetailsForm description={draft.description} error={errors.description} onChange={(description) => { updateDraft({ description }); setErrors((current) => ({ ...current, description: '' })); }} />
       <section className="incident-location" aria-labelledby="location-title">
         <h2 id="location-title">Location</h2><p>Select the exact location where the incident occurred on the map.</p>

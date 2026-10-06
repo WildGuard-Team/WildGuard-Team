@@ -7,6 +7,7 @@ import MemberLandingPage from './pages/MemberLandingPage.jsx';
 import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
 import ReportTypePage from './features/community-reports/pages/ReportTypePage.jsx';
 import ReportDetailsPage from './features/community-reports/pages/ReportDetailsPage.jsx';
+import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 
@@ -44,6 +45,7 @@ function AppRoutes() {
   }
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
   if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
+  if (user && path === '/reports/evidence') return <ReportEvidencePage navigate={navigate} />;
   if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;
   if (user && path === '/reports/confirmation') return <ReportConfirmationPage navigate={navigate} />;
   if (user) return <MemberLandingPage navigate={navigate} />;

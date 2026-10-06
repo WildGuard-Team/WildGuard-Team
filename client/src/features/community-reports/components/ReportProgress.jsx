@@ -1,4 +1,4 @@
-const steps = ['Report type', 'Details & location', 'Review'];
+const steps = ['Report type', 'Details & location', 'Optional evidence', 'Review'];
 
 export default function ReportProgress({ currentStep }) {
   return <ol className="report-progress" aria-label="Report submission progress">
