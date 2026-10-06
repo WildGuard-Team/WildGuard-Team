@@ -36,12 +36,9 @@ export async function createCommunityReport(input, reporterId, communityReports,
   let evidence;
   try {
     evidence = files.length
-      ? await uploadEvidenceFiles(files, cloudinary, (asset) => uploadedAssets.push(asset))
+      ? await uploadEvidenceFiles(files, cloudinary, (asset) => uploadedAssets.push(asset), nodeEnv)
       : [];
   } catch (error) {
-    if (nodeEnv === 'development' && !(error instanceof HttpError)) {
-      console.warn('Evidence upload failed', { errorName: error?.name, errorMessage: error?.message });
-    }
     await rollbackEvidence(uploadedAssets, cloudinary, nodeEnv, 'upload');
     if (error instanceof HttpError) throw error;
     throw new HttpError(503, 'Evidence upload is temporarily unavailable.');

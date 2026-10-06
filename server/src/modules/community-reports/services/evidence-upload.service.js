@@ -26,24 +26,54 @@ export function validateEvidenceFiles(files = []) {
   });
 }
 
-function uploadBuffer(cloudinary, file, resourceType) {
+function uploadBuffer(cloudinary, file, options) {
   return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream({
-      folder: EVIDENCE_CLOUDINARY_FOLDER,
-      resource_type: resourceType,
-      overwrite: false,
-      unique_filename: true,
-      use_filename: false,
-    }, (error, result) => (error ? reject(error) : resolve(result)));
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      if (!result) {
+        reject(new Error('Cloudinary returned no upload result.'));
+        return;
+      }
+      resolve(result);
+    });
+    stream.on('error', reject);
     stream.end(file.buffer);
   });
 }
 
-export async function uploadEvidenceFiles(files, cloudinary, onUploaded) {
+export async function uploadEvidenceFiles(files, cloudinary, onUploaded, nodeEnv = 'production') {
   const resourceTypes = validateEvidenceFiles(files);
   const evidence = [];
   for (const [index, file] of files.entries()) {
-    const uploaded = await uploadBuffer(cloudinary, file, resourceTypes[index]);
+    const resourceType = resourceTypes[index];
+    let uploaded;
+    try {
+      uploaded = await uploadBuffer(cloudinary, file, {
+        folder: EVIDENCE_CLOUDINARY_FOLDER,
+        resource_type: resourceType,
+        overwrite: false,
+        unique_filename: true,
+        use_filename: false,
+      });
+    } catch (error) {
+      if (nodeEnv === 'development') {
+        console.error('[Cloudinary upload failure]', {
+          name: error?.name ?? null,
+          message: error?.message ?? null,
+          httpCode: error?.http_code ?? error?.statusCode ?? null,
+          code: error?.code ?? null,
+          causeName: error?.cause?.name ?? null,
+          causeMessage: error?.cause?.message ?? null,
+          resourceType,
+          mimeType: file?.mimetype ?? null,
+          bytes: file?.size ?? null,
+        });
+      }
+      throw error;
+    }
     const metadata = toEvidenceMetadata(uploaded, file);
     onUploaded(metadata);
     evidence.push(metadata);
