@@ -1,4 +1,10 @@
 const paths = {
+  calendar: 'M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2Zm2-2v4m10-4v4M3 10h18M7 14h2m4 0h2m-8 3h2m4 0h2',
+  document: 'M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h4',
+  pin: 'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+  edit: 'm14 5 5 5M3 21l5-1L21 7a2 2 0 0 0 0-3l-1-1a2 2 0 0 0-3 0L4 16l-1 5Z',
+  plus: 'M12 4v16M4 12h16',
+  play: 'm8 5 11 7-11 7V5Z',
   dashboard: 'M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8Z',
   report: 'M12 3 21 19H3L12 3Zm0 5.2v4.4m0 3.2v.1',
   map: 'm3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2V5Zm6-2v16m6-14v16',

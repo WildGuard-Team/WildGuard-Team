@@ -8,10 +8,12 @@ import { useReportDraft } from '../context/useReportDraft.js';
 import { useCurrentLocation } from '../hooks/useCurrentLocation.js';
 import { reverseGeocode } from '../services/locationApi.js';
 import { validateReportDetails } from '../validation/reportDetails.validation.js';
+import { validateIncidentDateTime } from '../validation/incidentDateTime.validation.js';
 
 export default function ReportDetailsPage({ navigate }) {
   const { draft, updateDraft, updateLocation } = useReportDraft();
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState(() => draft.wasRestored && validateIncidentDateTime(draft.incidentDateTime)
+    ? { incidentDateTime: validateIncidentDateTime(draft.incidentDateTime) } : {});
   const [lookupWarning, setLookupWarning] = useState('');
   const [isResolving, setIsResolving] = useState(false);
   const lookupId = useRef(0);
@@ -91,7 +93,8 @@ export default function ReportDetailsPage({ navigate }) {
 
   return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Describe what you observed and confirm where it happened." step={2}>
     <form className="incident-details-panel" noValidate onSubmit={continueToEvidence}>
-      <IncidentDetailsForm description={draft.description} error={errors.description} onChange={(description) => { updateDraft({ description }); setErrors((current) => ({ ...current, description: '' })); }} />
+      <IncidentDetailsForm description={draft.description} error={errors.description} onChange={(description) => { updateDraft({ description }); setErrors((current) => ({ ...current, description: '' })); }}
+        incidentDateTime={draft.incidentDateTime} dateError={errors.incidentDateTime} onDateChange={(incidentDateTime) => { updateDraft({ incidentDateTime }); setErrors((current) => ({ ...current, incidentDateTime: validateIncidentDateTime(incidentDateTime) })); }} />
       <section className="incident-location" aria-labelledby="location-title">
         <h2 id="location-title">Location</h2><p>Select the exact location where the incident occurred on the map.</p>
         <LocationMap coordinates={draft.location.coordinates} onMapSelect={(coordinates) => resolveCoordinates(coordinates, 'MAP')} onMarkerDrag={(coordinates) => resolveCoordinates(coordinates, draft.location.source === 'MANUAL' ? 'MANUAL' : 'MAP')} />

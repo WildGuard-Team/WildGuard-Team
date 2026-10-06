@@ -87,7 +87,7 @@ Keep queries out of controllers. Split services when responsibilities diverge; a
 
 ### Location contract
 
-`POST /api/reports` accepts `reportType`, `description`, and a `location` object:
+`POST /api/reports` accepts `reportType`, `description`, `incidentDateTime`, and a `location` object:
 
 ```json
 {
@@ -119,6 +119,8 @@ Leaflet rendering, OpenStreetMap tile display, browser/device geolocation, map c
 The Incident Details & Location screen uses Leaflet and OpenStreetMap tiles in the client. It asks for browser location permission only when the member selects **Use My Current Location**; a successful result is reverse-geocoded and saved as a GPS location. Members can instead click the map, drag the one report marker (reverse lookup runs after dragging), or explicitly submit a manual search. Search is not per-keystroke autocomplete: selecting a candidate saves its text and coordinates as a MANUAL location. The client submits the nested location payload described above, preserving the JWT-cookie request behavior.
 
 ### Optional evidence contract
+
+`incidentDateTime` is when the member observed the incident, distinct from the server's `createdAt` submission timestamp. Details provides a required editable `datetime-local` input, defaulted once for a new draft. The frontend validates the local calendar value and converts it to UTC ISO; the backend requires a timezone-qualified ISO string, rejects invalid calendar values and times more than five minutes in the future, and stores a MongoDB Date. JSON includes `incidentDateTime`; multipart includes the same ISO string as a text field alongside the existing fields. Safe responses return the ISO incident time separately from `createdAt` (or `null` for legacy records without it). The v2 session draft retains the local input value; older/malformed dates become blank and require correction on Details without discarding location or evidence. No historical cutoff is imposed.
 
 `POST /api/reports` continues to accept its JSON contract without evidence. It also accepts `multipart/form-data` with `reportType`, `description`, `location` as a JSON string, and zero to three `evidence` files. Evidence is optional; images may be JPEG, PNG, or WebP up to 5 MB each, and video may be MP4 up to 25 MB.
 

@@ -48,6 +48,8 @@ const communityReportSchema = new mongoose.Schema({
     maxlength: COMMUNITY_REPORT_DESCRIPTION_LIMITS.max,
   },
   location: { type: locationSchema, required: true },
+  // New submissions require this in request validation; legacy documents may omit it.
+  incidentDateTime: { type: Date, required: false },
   evidence: { type: [evidenceSchema], default: [] },
   source: {
     type: String, required: true,

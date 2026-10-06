@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { formatFileSize } from '../validation/evidence.validation.js';
+import CommunityIcon from './CommunityIcon.jsx';
 
 export default function EvidencePreviewCard({ file, onRemove, compact = false }) {
   const [previewUrl, setPreviewUrl] = useState('');
@@ -18,9 +18,8 @@ export default function EvidencePreviewCard({ file, onRemove, compact = false })
     <div className="evidence-preview-media">
       {previewUrl && (isVideo ? <video src={previewUrl} muted preload="metadata" controls aria-label={`Preview ${fileName}`} />
         : <img src={previewUrl} alt={`Preview of ${fileName}`} />)}
-      {previewUrl && isVideo && <span className="evidence-play-indicator" aria-hidden="true">▶</span>}
-      {onRemove && <button type="button" className="evidence-remove" onClick={onRemove} aria-label={`Remove ${fileName}`}>×</button>}
+      {previewUrl && isVideo && <span className="evidence-play-indicator" aria-hidden="true">{compact ? <CommunityIcon name="play" /> : '▶'}</span>}
+      {onRemove && <button type="button" className="evidence-remove" onClick={onRemove} aria-label={`Remove ${fileName}`}>{compact ? <CommunityIcon name="close" size={18} /> : '×'}</button>}
     </div>
-    <p title={fileName}>{fileName}</p><small>{formatFileSize(file.size)}</small>
   </article>;
 }

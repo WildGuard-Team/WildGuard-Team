@@ -1,3 +1,5 @@
+import { validateIncidentDateTime } from './incidentDateTime.validation.js';
+
 const DESCRIPTION_LIMITS = { min: 10, max: 2000 };
 const MANUAL_LOCATION_LIMITS = { min: 3, max: 300 };
 
@@ -8,8 +10,10 @@ function hasValidCoordinates(coordinates) {
     && coordinates.longitude >= -180 && coordinates.longitude <= 180;
 }
 
-export function validateReportDetails({ description, location }) {
+export function validateReportDetails({ description, location, incidentDateTime }) {
   const errors = {};
+  const dateError = validateIncidentDateTime(incidentDateTime);
+  if (dateError) errors.incidentDateTime = dateError;
   const normalizedDescription = typeof description === 'string' ? description.trim() : '';
   if (normalizedDescription.length < DESCRIPTION_LIMITS.min || normalizedDescription.length > DESCRIPTION_LIMITS.max) {
     errors.description = 'Description must be between 10 and 2,000 characters.';
