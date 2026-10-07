@@ -1,12 +1,41 @@
+import { useState } from 'react';
 import { formatOption, REPORT_TYPES } from '../config/report-options.js';
+import { downloadReportCsv, shareReport } from '../services/report-delivery.service.js';
 import ManagerIcon from './ManagerIcon.jsx';
 import { BarChart, LineChart } from './ReportCharts.jsx';
 
 export default function ReportResults({ report, onGenerateAnother }) {
   const definition = REPORT_TYPES.find((item) => item.value === report.reportType);
+  const [activeAction, setActiveAction] = useState('');
+  const [deliveryMessage, setDeliveryMessage] = useState(null);
+
+  async function deliver(action, operation, successMessage) {
+    setActiveAction(action);
+    setDeliveryMessage(null);
+    try {
+      await operation();
+      setDeliveryMessage({ kind: 'success', text: successMessage });
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        setDeliveryMessage({ kind: 'error', text: error.message });
+      }
+    } finally {
+      setActiveAction('');
+    }
+  }
+
   return <div className="cr-results" aria-live="polite">
     <section className="cr-report-banner"><div className="cr-success-mark"><ManagerIcon name="check" size={25} /></div><div><span>Report generated successfully</span><h1>{definition?.title ?? formatOption(report.reportType)}</h1><p>All statistics and chart values reflect the selected filters.</p></div><button type="button" className="cr-secondary-button" onClick={onGenerateAnother}><ManagerIcon name="refresh" size={18} />Generate another</button></section>
     <ReportMetadata report={report} />
+    <section className="cr-delivery-toolbar" aria-label="Export and share report">
+      <div><strong>Export or share</strong><span>The generated report remains available if an export fails.</span></div>
+      <div className="cr-delivery-actions">
+        <button type="button" disabled={Boolean(activeAction)} onClick={() => deliver('csv', () => downloadReportCsv(report.reportId), 'CSV downloaded successfully.')}><ManagerIcon name="download" size={18} />{activeAction === 'csv' ? 'Exporting…' : 'Export CSV'}</button>
+        <button type="button" disabled={Boolean(activeAction)} onClick={() => window.print()}><ManagerIcon name="print" size={18} />Print / Save PDF</button>
+        <button type="button" disabled={Boolean(activeAction)} onClick={() => deliver('share', () => shareReport(report), 'Report link shared or copied successfully.')}><ManagerIcon name="share" size={18} />{activeAction === 'share' ? 'Sharing…' : 'Share report'}</button>
+      </div>
+    </section>
+    {deliveryMessage && <div className={`cr-delivery-message is-${deliveryMessage.kind}`} role={deliveryMessage.kind === 'error' ? 'alert' : 'status'}>{deliveryMessage.text}</div>}
     {report.results.dataSource && <div className="cr-seed-notice"><strong>Data source</strong><span>{report.results.dataSource.label}. This report does not represent a live patrol-recording module.</span></div>}
     {report.reportType === 'INCIDENT_REPORT' && <IncidentResults results={report.results} />}
     {report.reportType === 'PATROL_COVERAGE_REPORT' && <PatrolResults results={report.results} />}

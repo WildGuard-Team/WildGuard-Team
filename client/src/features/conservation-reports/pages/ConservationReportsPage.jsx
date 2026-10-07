@@ -5,7 +5,7 @@ import ReportResults from '../components/ReportResults.jsx';
 import ReportTypeSelector from '../components/ReportTypeSelector.jsx';
 import { PATROL_ROUTES } from '../config/report-options.js';
 import {
-  generateConservationReport, getConservationReportOptions,
+  generateConservationReport, getConservationReportOptions, getGeneratedConservationReport,
 } from '../services/conservation-report.api.js';
 import {
   toReportRequest, validateReportForm,
@@ -23,7 +23,12 @@ export default function ConservationReportsPage({ navigate }) {
 
   useEffect(() => {
     let active = true;
-    getConservationReportOptions()
+    const reportId = new URLSearchParams(window.location.search).get('report');
+    Promise.all([
+      getConservationReportOptions(),
+      reportId ? getGeneratedConservationReport(reportId) : Promise.resolve(null),
+    ])
+      .then(([, savedReport]) => { if (active && savedReport) setReport(savedReport.report); })
       .catch((error) => { if (active) setApiError(error.message); })
       .finally(() => { if (active) setOptionsLoading(false); });
     return () => { active = false; };
@@ -64,6 +69,7 @@ export default function ConservationReportsPage({ navigate }) {
         setReport(null); setNoData(result.message);
       } else {
         setReport(result.report);
+        window.history.replaceState({}, '', `/manager/reports?report=${encodeURIComponent(result.report.reportId)}`);
         window.requestAnimationFrame(() => document.querySelector('.cr-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
       }
     } catch (error) {
@@ -76,6 +82,7 @@ export default function ConservationReportsPage({ navigate }) {
   function generateAnother() {
     setReport(null); setNoData(''); setApiError(''); setErrors({});
     setForm(createInitialForm());
+    window.history.replaceState({}, '', '/manager/reports');
     window.requestAnimationFrame(() => document.querySelector('.cr-workspace')?.scrollIntoView({ behavior: 'smooth' }));
   }
 

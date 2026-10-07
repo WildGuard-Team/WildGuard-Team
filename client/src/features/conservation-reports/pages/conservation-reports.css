@@ -27,3 +27,37 @@ body.manager-page-active #root { height: 100%; min-height: 0; }
 @media (max-width: 880px) { .manager-app { display: block; }.manager-sidebar { position: fixed; inset: 0 auto 0 0; width: min(290px, 86vw); transform: translateX(-105%); transition: transform .2s ease; }.manager-sidebar.is-open { transform: translateX(0); }.manager-brand > button { display: grid; width: 36px; height: 36px; margin-left: auto; place-items: center; color: #fff; background: transparent; border: 0; }.manager-sidebar-toggle { position: fixed; top: 14px; left: 15px; z-index: 12; display: grid; width: 40px; height: 40px; place-items: center; color: #0a6144; background: #fff; border: 1px solid #ceded7; border-radius: 8px; box-shadow: 0 4px 12px rgba(8,64,43,.1); }.manager-sidebar-scrim { position: fixed; inset: 0; z-index: 15; display: block; background: rgba(1,31,22,.44); border: 0; }.manager-header { padding-left: 66px; }.cr-type-grid { grid-template-columns: 1fr; }.cr-type-card { min-height: 104px; }.cr-chart-grid { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .manager-content { padding: 18px 14px 35px; }.manager-header { padding-right: 14px; }.manager-user { display: none; }.cr-page-heading { display: block; padding: 21px 19px; }.cr-heading-badge { width: fit-content; margin-top: 15px; }.cr-panel { padding: 19px 16px; }.cr-filter-grid { grid-template-columns: 1fr; }.cr-report-banner { align-items: flex-start; flex-wrap: wrap; padding: 19px; }.cr-report-banner .cr-secondary-button { width: 100%; }.cr-metadata { grid-template-columns: 1fr; }.cr-meta-filters { grid-column: auto; }.cr-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.cr-chart-card { min-height: 240px; padding: 15px; }.cr-results-footer .cr-primary-button { width: 100%; } }
 @media (max-width: 390px) { .cr-metric-grid { grid-template-columns: 1fr; }.cr-type-card { grid-template-columns: auto minmax(0, 1fr); }.cr-type-card > i { position: absolute; top: 9px; right: 9px; } }
+
+.cr-delivery-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 15px; padding: 15px 17px; background: #fff; border: 1px solid #dce8e2; border-radius: 10px; }
+.cr-delivery-toolbar > div:first-child { display: grid; gap: 3px; }
+.cr-delivery-toolbar strong { font-size: .88rem; }
+.cr-delivery-toolbar span { color: #6c7f78; font-size: .74rem; }
+.cr-delivery-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.cr-delivery-actions button { display: inline-flex; min-height: 39px; align-items: center; gap: 7px; padding: 8px 12px; color: #0f6748; background: #f2f9f6; border: 1px solid #bcd7cb; border-radius: 7px; font-size: .76rem; font-weight: 750; }
+.cr-delivery-actions button:hover:not(:disabled) { color: #fff; background: #08734e; border-color: #08734e; }
+.cr-delivery-actions button:disabled { opacity: .58; cursor: wait; }
+.cr-delivery-message { margin-top: 9px; padding: 10px 13px; border-radius: 8px; font-size: .8rem; font-weight: 650; }
+.cr-delivery-message.is-success { color: #176044; background: #e5f5ed; border: 1px solid #bee2d0; }
+.cr-delivery-message.is-error { color: #8a3434; background: #fff0ef; border: 1px solid #f0c7c3; }
+
+@media (max-width: 760px) {
+  .cr-delivery-toolbar { align-items: stretch; flex-direction: column; }
+  .cr-delivery-actions { justify-content: stretch; }
+  .cr-delivery-actions button { flex: 1; justify-content: center; }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html.manager-page-active, body.manager-page-active, body.manager-page-active #root { height: auto; overflow: visible; background: #fff; }
+  .manager-app { display: block; height: auto; overflow: visible; background: #fff; }
+  .manager-sidebar, .manager-header, .manager-sidebar-toggle, .cr-report-banner button, .cr-delivery-toolbar, .cr-delivery-message, .cr-results-footer { display: none !important; }
+  .manager-main, .manager-content { display: block; height: auto; overflow: visible; padding: 0; }
+  .cr-workspace { width: 100%; }
+  .cr-report-banner { padding: 0 0 12px; background: #fff; border: 0; border-bottom: 2px solid #08734e; border-radius: 0; }
+  .cr-success-mark { display: none; }
+  .cr-metadata, .cr-metric-grid, .cr-chart-grid { break-inside: avoid; }
+  .cr-chart-card, .cr-table-card { break-inside: avoid; box-shadow: none; }
+  .cr-table-scroll { overflow: visible; }
+  .cr-table-card table { min-width: 0; font-size: 9px; }
+  .cr-table-card th, .cr-table-card td { padding: 7px 8px; }
+}
