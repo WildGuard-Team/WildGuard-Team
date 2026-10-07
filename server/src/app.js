@@ -10,11 +10,16 @@ import { createGeocodingProvider } from './modules/community-reports/integration
 import { createCloudinaryClient } from './config/cloudinary.js';
 import { createGeneratedReportRepository } from './modules/conservation-reports/repositories/generated-report.repository.js';
 import { createConservationReportRouter } from './modules/conservation-reports/routes/conservation-report.routes.js';
+import { createIncidentReportSourceRepository } from './modules/conservation-reports/repositories/incident-report-source.repository.js';
+import { createIncidentReportStrategy } from './modules/conservation-reports/services/incident-report.strategy.js';
+import { createReportStrategyRegistry } from './modules/conservation-reports/services/report-strategy-registry.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
   communityReports = createCommunityReportRepository(),
   conservationReports = createGeneratedReportRepository(),
+  incidentReportSources = createIncidentReportSourceRepository(),
+  conservationReportStrategies,
   geocoding,
   geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
   cloudinary,
@@ -50,7 +55,11 @@ export function createApp({
   app.use('/api/reports', createCommunityReportRouter(communityReports, users, {
     jwtSecret, geocoding: configuredGeocoding, cloudinary: configuredCloudinary, nodeEnv,
   }));
-  app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, { jwtSecret }));
+  const configuredReportStrategies = conservationReportStrategies
+    ?? createReportStrategyRegistry([createIncidentReportStrategy(incidentReportSources)]);
+  app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, {
+    jwtSecret, strategies: configuredReportStrategies,
+  }));
 
   app.use(notFound);
   app.use(errorHandler);

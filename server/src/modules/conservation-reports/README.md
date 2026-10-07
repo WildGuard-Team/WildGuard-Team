@@ -43,3 +43,11 @@ The protected reporting API is mounted at `/api/conservation-reports`:
 Both endpoints require the existing JWT cookie and verify that the token role and current database role are `PARK_MANAGER`. Public registration continues to create only `COMMUNITY_MEMBER` accounts. For local assessment, create the account normally and set that test user's `role` to `PARK_MANAGER` in the MongoDB `users` collection; a user-management workflow is intentionally outside this use case.
 
 Generation parameters use `YYYY-MM-DD` dates, an inclusive maximum range of 366 days, and only the filters declared for the selected report type. The validation layer normalizes dates, text, codes, duplicates, and rejects unknown or inapplicable fields before any database query is made.
+
+## Incident Report generation
+
+`POST /api/conservation-reports` generates an Incident Report for an authenticated Park Manager. The request uses the shared report parameters and supports park, location, incident type, and severity filters. The source query uses inclusive date boundaries and escapes user-entered location text before building a case-insensitive MongoDB expression.
+
+The stored result contains calculated totals, distinct locations, high/critical counts, average incidents per day, breakdowns by type/location/severity, a zero-filled time series, and the filtered incident table. Time grouping is selected from the requested range: daily up to 45 days, weekly up to 180 days, and monthly for longer ranges. Every chart series is derived from the same filtered records as the displayed total.
+
+A successful generation returns HTTP `201` and stores a stable `/api/conservation-reports/:reportId` view location. When no records match, the API returns HTTP `200` with `noData: true` and does not store an empty report. Other report strategies remain separate and are added without modifying the Incident strategy.
