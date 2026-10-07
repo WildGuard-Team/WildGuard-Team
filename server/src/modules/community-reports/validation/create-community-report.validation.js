@@ -6,7 +6,7 @@ import { normalizeLegacyManualLocation, validateLocation } from './location.vali
 import { validateIncidentDateTime } from './incident-date-time.validation.js';
 
 // TODO: Remove the top-level manualLocation compatibility field after the frontend location migration.
-const allowedFields = new Set(['reportType', 'description', 'incidentDateTime', 'location', 'manualLocation']);
+const allowedFields = new Set(['clientSubmissionId', 'reportType', 'description', 'incidentDateTime', 'location', 'manualLocation']);
 
 function requiredText(value, label, limits) {
   const text = typeof value === 'string' ? value.trim() : '';
@@ -21,7 +21,7 @@ export function validateCreateCommunityReport(body) {
     throw new HttpError(400, 'A JSON object is required.');
   }
   if (Object.keys(body).some((field) => !allowedFields.has(field))) {
-    throw new HttpError(400, 'Only reportType, description, incidentDateTime, location, and legacy manualLocation are allowed.');
+    throw new HttpError(400, 'Only clientSubmissionId, reportType, description, incidentDateTime, location, and legacy manualLocation are allowed.');
   }
   if (!COMMUNITY_REPORT_TYPES.includes(body.reportType)) {
     throw new HttpError(400, `Report type must be one of: ${COMMUNITY_REPORT_TYPES.join(', ')}.`);
@@ -30,6 +30,7 @@ export function validateCreateCommunityReport(body) {
     throw new HttpError(400, 'Provide either location or legacy manualLocation, not both.');
   }
   return {
+    clientSubmissionId: requiredText(body.clientSubmissionId, 'clientSubmissionId', { min: 1, max: 100 }),
     reportType: body.reportType,
     description: requiredText(body.description, 'Description', COMMUNITY_REPORT_DESCRIPTION_LIMITS),
     incidentDateTime: validateIncidentDateTime(body.incidentDateTime),

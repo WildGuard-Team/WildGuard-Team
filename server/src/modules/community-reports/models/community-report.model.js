@@ -41,6 +41,7 @@ const evidenceSchema = new mongoose.Schema({
 const communityReportSchema = new mongoose.Schema({
   referenceNumber: { type: String, required: true, unique: true },
   reporterId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  clientSubmissionId: { type: String, required: true, trim: true, maxlength: 100 },
   reportType: { type: String, required: true, enum: COMMUNITY_REPORT_TYPES },
   description: {
     type: String, required: true, trim: true,
@@ -58,6 +59,11 @@ const communityReportSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 communityReportSchema.index({ 'location.point': '2dsphere' });
+// Exclude legacy reports without a submission id so their existing data can coexist.
+communityReportSchema.index({ reporterId: 1, clientSubmissionId: 1 }, {
+  unique: true,
+  partialFilterExpression: { clientSubmissionId: { $type: 'string' } },
+});
 
 // The former Report model used Mongoose's default pluralized "reports" collection.
 // Retaining it explicitly prevents a code-only rename from redirecting persistence.
