@@ -7,7 +7,9 @@ import { AUTH_TOKEN_COOKIE, PARK_MANAGER } from '../src/modules/auth/config/auth
 import { createAuthToken } from '../src/modules/auth/utils/token.js';
 import { CONSERVATION_REPORT_TYPES } from '../src/modules/conservation-reports/config/conservation-report.constants.js';
 import { exportConservationReportCsv } from '../src/modules/conservation-reports/services/export-conservation-report.service.js';
-import { exportConservationReportPdf } from '../src/modules/conservation-reports/services/export-conservation-report-pdf.service.js';
+import {
+  calculateLineChartSeries, exportConservationReportPdf,
+} from '../src/modules/conservation-reports/services/export-conservation-report-pdf.service.js';
 
 const clientOrigin = 'http://localhost:3000';
 const jwtSecret = 'a-test-secret-that-is-longer-than-thirty-two-characters';
@@ -49,6 +51,22 @@ test('PDF export creates a valid document for direct download', async () => {
 
   assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
   assert.ok(pdf.length > 10_000);
+});
+
+test('PDF trend chart preserves every point including zero values', () => {
+  const rows = [
+    { label: 'Day 1', count: 0 }, { label: 'Day 2', count: 4 }, { label: 'Day 3', count: 2 },
+  ];
+  const series = calculateLineChartSeries(rows, {
+    valueKey: 'count', plotX: 10, plotY: 20, plotWidth: 100, plotHeight: 80,
+  });
+
+  assert.equal(series.maximum, 4);
+  assert.deepEqual(series.points.map(({ value, x, y }) => ({ value, x, y })), [
+    { value: 0, x: 10, y: 100 },
+    { value: 4, x: 60, y: 20 },
+    { value: 2, x: 110, y: 60 },
+  ]);
 });
 
 test('PDF export supports Patrol Coverage and Conflict Trend report content', async () => {

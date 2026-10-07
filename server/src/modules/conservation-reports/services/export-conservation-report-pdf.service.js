@@ -48,6 +48,8 @@ function drawCoverHeader(document, report, logoPath) {
     .text(reportTitle(report.reportType), { align: 'center' });
   document.moveDown(0.25).fillColor(COLORS.muted).font('Helvetica').fontSize(9)
     .text('Conservation operations report', { align: 'center' });
+  document.moveDown(0.35).fontSize(7.8)
+    .text('All statistics and chart values reflect the selected filters.', { align: 'center' });
   document.moveDown(1);
   document.strokeColor(COLORS.forest).lineWidth(2)
     .moveTo(PAGE_MARGIN, document.y).lineTo(document.page.width - PAGE_MARGIN, document.y).stroke();
@@ -130,8 +132,70 @@ function drawDataSource(document, dataSource) {
 function drawCharts(document, report) {
   const charts = chartDefinitions(report);
   if (charts.length === 0) return;
+  ensureSpace(document, 30 + chartHeight(charts[0], document));
   sectionHeading(document, 'Charts and breakdowns');
-  charts.forEach((chart) => drawBarChart(document, chart));
+  charts.forEach((chart) => {
+    if (chart.kind === 'line') drawLineChart(document, chart);
+    else drawBarChart(document, chart);
+  });
+}
+
+function drawLineChart(document, chart) {
+  const rows = chart.data ?? [];
+  const height = chartHeight(chart, document);
+  ensureSpace(document, height);
+  const x = PAGE_MARGIN;
+  const y = document.y;
+  document.fillColor(COLORS.dark).font('Helvetica-Bold').fontSize(10).text(chart.title, x, y);
+  if (rows.length === 0) {
+    document.fillColor(COLORS.muted).font('Helvetica').fontSize(8).text('No trend data available.', x, y + 20);
+    document.y = y + 48;
+    return;
+  }
+
+  const plotX = x + 34;
+  const plotY = y + 28;
+  const plotWidth = contentWidth(document) - 50;
+  const plotHeight = 112;
+  const plotBottom = plotY + plotHeight;
+  const { maximum, points } = calculateLineChartSeries(rows, {
+    valueKey: chart.valueKey, plotX, plotY, plotWidth, plotHeight,
+  });
+
+  for (let index = 0; index <= 4; index += 1) {
+    const gridY = plotY + index * plotHeight / 4;
+    const axisValue = roundChartValue(maximum * (4 - index) / 4);
+    document.strokeColor(index === 4 ? '#afc9bd' : '#dfebe5').lineWidth(index === 4 ? 0.9 : 0.5)
+      .moveTo(plotX, gridY).lineTo(plotX + plotWidth, gridY).stroke();
+    document.fillColor(COLORS.muted).font('Helvetica').fontSize(6.2)
+      .text(String(axisValue), x, gridY - 4, { width: 27, align: 'right', lineBreak: false });
+  }
+
+  document.save().fillColor('#d7eee4').fillOpacity(0.72)
+    .moveTo(points[0].x, plotBottom);
+  points.forEach((point) => document.lineTo(point.x, point.y));
+  document.lineTo(points.at(-1).x, plotBottom).closePath().fill().restore();
+
+  document.strokeColor(COLORS.forest).lineWidth(2.1).moveTo(points[0].x, points[0].y);
+  points.slice(1).forEach((point) => document.lineTo(point.x, point.y));
+  document.stroke();
+
+  points.forEach((point) => {
+    document.circle(point.x, point.y, rows.length > 35 ? 1.15 : 2.3)
+      .fillAndStroke(COLORS.white, COLORS.forest);
+    if (rows.length <= 16) {
+      document.fillColor(COLORS.dark).font('Helvetica-Bold').fontSize(5.8)
+        .text(`${point.value}${chart.suffix ?? ''}`, point.x - 15, Math.max(plotY - 1, point.y - 11), { width: 30, align: 'center', lineBreak: false });
+    }
+  });
+
+  const firstLabel = String(rows[0][chart.labelKey] ?? '');
+  const lastLabel = String(rows.at(-1)[chart.labelKey] ?? '');
+  document.fillColor(COLORS.muted).font('Helvetica').fontSize(6.5)
+    .text(firstLabel, plotX, plotBottom + 8, { width: 110, lineBreak: false })
+    .text(`Peak ${roundChartValue(maximum)}${chart.suffix ?? ''}`, plotX + plotWidth / 2 - 60, plotBottom + 8, { width: 120, align: 'center', lineBreak: false })
+    .text(lastLabel, plotX + plotWidth - 110, plotBottom + 8, { width: 110, align: 'right', lineBreak: false });
+  document.y = y + height;
 }
 
 function drawBarChart(document, chart) {
@@ -213,18 +277,18 @@ function drawTable(document, columns, rows) {
 function chartDefinitions(report) {
   const breakdowns = report.results.breakdowns ?? {};
   if (report.reportType === CONSERVATION_REPORT_TYPES.INCIDENT) return [
-    { title: `Incidents by ${String(report.results.timeGranularity).toLowerCase()}`, data: breakdowns.byTime, labelKey: 'label', valueKey: 'count' },
+    { kind: 'line', title: `Incidents by ${String(report.results.timeGranularity).toLowerCase()}`, data: breakdowns.byTime, labelKey: 'label', valueKey: 'count' },
     { title: 'Incidents by type', data: breakdowns.byType, labelKey: 'label', valueKey: 'count' },
     { title: 'Severity distribution', data: breakdowns.bySeverity, labelKey: 'label', valueKey: 'count' },
     { title: 'Incidents by location', data: breakdowns.byLocation, labelKey: 'label', valueKey: 'count' },
   ];
   if (report.reportType === CONSERVATION_REPORT_TYPES.PATROL_COVERAGE) return [
-    { title: 'Daily distance covered', data: breakdowns.byDate, labelKey: 'label', valueKey: 'distanceKm', suffix: ' km' },
+    { kind: 'line', title: 'Daily distance covered', data: breakdowns.byDate, labelKey: 'label', valueKey: 'distanceKm', suffix: ' km' },
     { title: 'Patrol status', data: breakdowns.byStatus, labelKey: 'label', valueKey: 'count' },
     { title: 'Completed patrols by route', data: breakdowns.byRoute, labelKey: 'routeName', valueKey: 'completedPatrols' },
   ];
   if (report.reportType === CONSERVATION_REPORT_TYPES.CONFLICT_TREND) return [
-    { title: `Conflict trend by ${String(report.results.timeGranularity).toLowerCase()}`, data: breakdowns.byTime, labelKey: 'label', valueKey: 'count' },
+    { kind: 'line', title: `Conflict trend by ${String(report.results.timeGranularity).toLowerCase()}`, data: breakdowns.byTime, labelKey: 'label', valueKey: 'count' },
     { title: 'Conflict types', data: breakdowns.byConflictType, labelKey: 'label', valueKey: 'count' },
     { title: 'Conflict hotspots', data: breakdowns.byLocation, labelKey: 'label', valueKey: 'count' },
     { title: 'Species involved', data: breakdowns.bySpecies, labelKey: 'label', valueKey: 'count' },
@@ -279,6 +343,32 @@ function addPageFooters(document, reportId) {
 
 function contentWidth(document) { return document.page.width - PAGE_MARGIN * 2; }
 function usablePageHeight(document) { return document.page.height - PAGE_MARGIN - 65; }
+
+function chartHeight(chart, document) {
+  if (chart.kind === 'line') return 174;
+  return Math.min(37 + Math.max(1, chart.data?.length ?? 0) * 18, usablePageHeight(document));
+}
+
+function roundChartValue(value) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+export function calculateLineChartSeries(rows, {
+  valueKey, plotX, plotY, plotWidth, plotHeight,
+}) {
+  const maximum = Math.max(1, ...rows.map((item) => Number(item[valueKey]) || 0));
+  const plotBottom = plotY + plotHeight;
+  const points = rows.map((item, index) => {
+    const value = Number(item[valueKey]) || 0;
+    return {
+      item,
+      value,
+      x: rows.length === 1 ? plotX + plotWidth / 2 : plotX + index * plotWidth / (rows.length - 1),
+      y: plotBottom - (value / maximum) * plotHeight,
+    };
+  });
+  return { maximum, points };
+}
 
 function reportTitle(type) {
   return ({
