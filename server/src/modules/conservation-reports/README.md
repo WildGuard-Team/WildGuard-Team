@@ -32,3 +32,14 @@ They allow the report implementation to perform real MongoDB queries and calcula
 - **Averages:** completed-patrol distance or hours divided by completed patrol count.
 
 All percentages and decimal metrics are rounded to two decimal places. Date boundaries are inclusive.
+
+## Park Manager reporting foundation
+
+The protected reporting API is mounted at `/api/conservation-reports`:
+
+- `GET /options` returns the three supported report types and their applicable filters.
+- `GET /:reportId` returns a stored report only when it belongs to the authenticated Park Manager.
+
+Both endpoints require the existing JWT cookie and verify that the token role and current database role are `PARK_MANAGER`. Public registration continues to create only `COMMUNITY_MEMBER` accounts. For local assessment, create the account normally and set that test user's `role` to `PARK_MANAGER` in the MongoDB `users` collection; a user-management workflow is intentionally outside this use case.
+
+Generation parameters use `YYYY-MM-DD` dates, an inclusive maximum range of 366 days, and only the filters declared for the selected report type. The validation layer normalizes dates, text, codes, duplicates, and rejects unknown or inapplicable fields before any database query is made.
