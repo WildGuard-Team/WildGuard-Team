@@ -8,10 +8,26 @@ import { createCommunityReportRepository } from './modules/community-reports/rep
 import { createCommunityReportRouter } from './modules/community-reports/routes/community-report.routes.js';
 import { createGeocodingProvider } from './modules/community-reports/integrations/geocoding.provider.js';
 import { createCloudinaryClient } from './config/cloudinary.js';
+import { createGeneratedReportRepository } from './modules/conservation-reports/repositories/generated-report.repository.js';
+import { createConservationReportRouter } from './modules/conservation-reports/routes/conservation-report.routes.js';
+import { createIncidentReportSourceRepository } from './modules/conservation-reports/repositories/incident-report-source.repository.js';
+import { createIncidentReportStrategy } from './modules/conservation-reports/services/incident-report.strategy.js';
+import { createReportStrategyRegistry } from './modules/conservation-reports/services/report-strategy-registry.js';
+import { createPatrolReportSourceRepository } from './modules/conservation-reports/repositories/patrol-report-source.repository.js';
+import { createPatrolCoverageReportStrategy } from './modules/conservation-reports/services/patrol-coverage-report.strategy.js';
+import { createConflictReportSourceRepository } from './modules/conservation-reports/repositories/conflict-report-source.repository.js';
+import { createConflictTrendReportStrategy } from './modules/conservation-reports/services/conflict-trend-report.strategy.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
   communityReports = createCommunityReportRepository(),
+  conservationReports = createGeneratedReportRepository(),
+  incidentReportSources = createIncidentReportSourceRepository(),
+  patrolReportSources = createPatrolReportSourceRepository(),
+  conflictReportSources = createConflictReportSourceRepository(),
+  conservationReportStrategies,
+  conservationReportExporter,
+  conservationReportPdfExporter,
   geocoding,
   geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
   cloudinary,
@@ -46,6 +62,16 @@ export function createApp({
   });
   app.use('/api/reports', createCommunityReportRouter(communityReports, users, {
     jwtSecret, geocoding: configuredGeocoding, cloudinary: configuredCloudinary, nodeEnv,
+  }));
+  const configuredReportStrategies = conservationReportStrategies
+    ?? createReportStrategyRegistry([
+      createIncidentReportStrategy(incidentReportSources),
+      createPatrolCoverageReportStrategy(patrolReportSources),
+      createConflictTrendReportStrategy(conflictReportSources),
+    ]);
+  app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, {
+    jwtSecret, strategies: configuredReportStrategies,
+    exporter: conservationReportExporter, pdfExporter: conservationReportPdfExporter,
   }));
 
   app.use(notFound);
