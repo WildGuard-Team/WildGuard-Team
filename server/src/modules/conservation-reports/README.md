@@ -51,3 +51,11 @@ Generation parameters use `YYYY-MM-DD` dates, an inclusive maximum range of 366 
 The stored result contains calculated totals, distinct locations, high/critical counts, average incidents per day, breakdowns by type/location/severity, a zero-filled time series, and the filtered incident table. Time grouping is selected from the requested range: daily up to 45 days, weekly up to 180 days, and monthly for longer ranges. Every chart series is derived from the same filtered records as the displayed total.
 
 A successful generation returns HTTP `201` and stores a stable `/api/conservation-reports/:reportId` view location. When no records match, the API returns HTTP `200` with `noData: true` and does not store an empty report. Other report strategies remain separate and are added without modifying the Incident strategy.
+
+## Patrol Coverage Report generation
+
+The same `POST /api/conservation-reports` endpoint accepts `PATROL_COVERAGE_REPORT` with park, route, and patrol-status filters. MongoDB supplies the matching patrol records and the route definitions used as the coverage denominator.
+
+The result contains completed/cancelled totals, distance, patrol hours, route coverage, zone coverage, completion rate, averages, observations, per-route metrics, status counts, a zero-filled daily series, and a detailed patrol table. Distance, time, route, and zone values are calculated from filtered records rather than fixed UI values.
+
+Every Patrol Coverage result includes `dataSource.type: SEEDED_ASSIGNMENT_DATA` and the visible label **Based on seeded patrol data**. This provides a real data-backed reporting dependency without introducing a patrol-recording use case.

@@ -36,6 +36,26 @@ export function calculatePatrolCoverage({ records, routeDefinitions }) {
   };
 }
 
+export function calculateRouteCoverageRows({ records, routeDefinitions }) {
+  return routeDefinitions.map((route) => {
+    const routeRecords = records.filter((record) => record.routeSourceId === route.sourceId);
+    const completed = routeRecords.filter((record) => record.status === 'COMPLETED');
+    const coveredZones = new Set(completed.flatMap((record) => record.zonesCovered));
+    return {
+      routeSourceId: route.sourceId,
+      routeName: route.name,
+      park: route.park,
+      totalPatrols: routeRecords.length,
+      completedPatrols: completed.length,
+      distanceKm: round(sum(completed, (record) => record.distanceKm)),
+      patrolHours: round(sum(completed, durationHours)),
+      zonesCovered: coveredZones.size,
+      zonesDefined: route.zones.length,
+      zoneCoveragePercent: percentage(coveredZones.size, route.zones.length),
+    };
+  });
+}
+
 function matchesRoute(route, filters) {
   if (filters.park && route.park !== filters.park) return false;
   if (filters.routeSourceIds?.length && !filters.routeSourceIds.includes(route.sourceId)) return false;
