@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "seed:park-manager": "node src/modules/auth/scripts/seed-park-manager.js",
     "seed:reporting-data": "node src/modules/conservation-reports/scripts/seed-reporting-data.js",
     "test": "node --test"
   },

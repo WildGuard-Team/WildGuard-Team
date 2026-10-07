@@ -40,7 +40,7 @@ The protected reporting API is mounted at `/api/conservation-reports`:
 - `GET /options` returns the three supported report types and their applicable filters.
 - `GET /:reportId` returns a stored report only when it belongs to the authenticated Park Manager.
 
-Both endpoints require the existing JWT cookie and verify that the token role and current database role are `PARK_MANAGER`. Public registration continues to create only `COMMUNITY_MEMBER` accounts. For local assessment, create the account normally and set that test user's `role` to `PARK_MANAGER` in the MongoDB `users` collection; a user-management workflow is intentionally outside this use case.
+Both endpoints require the existing JWT cookie and verify that the token role and current database role are `PARK_MANAGER`. Public registration continues to create only `COMMUNITY_MEMBER` accounts. For local assessment, run `npm run seed:park-manager` from the repository root. This creates or repairs the fixed assessment account `parkmanager@wildguard.lk` with password `Manager@123`; the password is stored only as a bcrypt hash. A user-management workflow is intentionally outside this use case.
 
 Generation parameters use `YYYY-MM-DD` dates, an inclusive maximum range of 366 days, and only the filters declared for the selected report type. The validation layer normalizes dates, text, codes, duplicates, and rejects unknown or inapplicable fields before any database query is made.
 
