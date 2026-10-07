@@ -1,35 +1,13 @@
-import { useState } from 'react';
 import { useAuth } from '../context/useAuth.js';
-import FormAlert from '../features/auth/components/FormAlert.jsx';
+import CommunityLayout from '../features/community-reports/components/CommunityLayout.jsx';
+import CommunityIcon from '../features/community-reports/components/CommunityIcon.jsx';
+import { useReportDraft } from '../features/community-reports/context/useReportDraft.js';
 
 export default function MemberLandingPage({ navigate }) {
-  const { user, logout } = useAuth();
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function signOut() {
-    setIsLoading(true);
-    setError('');
-    try {
-      await logout();
-      navigate('/login');
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const { user } = useAuth();
+  const { resetDraft } = useReportDraft();
 
   return (
-    <main className="member-page">
-      <section className="member-card">
-        <img src="/logo.jpg" alt="WildGuard" />
-        <p className="member-kicker">Community member</p>
-        <h1>Welcome, {user.fullName}.</h1>
-        <p>Your WildGuard account is signed in and ready. Community reporting will arrive in the next project milestone.</p>
-        <FormAlert type="error">{error}</FormAlert>
-        <button className="primary-button" type="button" onClick={signOut} disabled={isLoading}>{isLoading ? 'Signing out…' : 'Log out'}</button>
-      </section>
-    </main>
+    <CommunityLayout navigate={navigate} active="dashboard"><section className="dashboard-welcome"><p>Community member dashboard</p><h1>Welcome back, {user.fullName}.</h1><span>Help WildGuard protect wildlife by sharing incidents in your community.</span><button type="button" className="primary-button" onClick={() => { resetDraft(); navigate('/reports/type'); }}>Submit a Community Report <CommunityIcon name="chevron" size={20} /></button></section></CommunityLayout>
   );
 }
