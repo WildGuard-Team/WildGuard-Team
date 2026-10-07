@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { COMMUNITY_MEMBER } from "../config/auth.constants.js";
+export const SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
 const userSchema = new mongoose.Schema(
   {
@@ -16,7 +17,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      enum: [COMMUNITY_MEMBER],
+      enum: [COMMUNITY_MEMBER, SYSTEM_ADMIN],
       default: COMMUNITY_MEMBER,
     },
   },
