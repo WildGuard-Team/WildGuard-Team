@@ -15,6 +15,8 @@ import { createIncidentReportStrategy } from './modules/conservation-reports/ser
 import { createReportStrategyRegistry } from './modules/conservation-reports/services/report-strategy-registry.js';
 import { createPatrolReportSourceRepository } from './modules/conservation-reports/repositories/patrol-report-source.repository.js';
 import { createPatrolCoverageReportStrategy } from './modules/conservation-reports/services/patrol-coverage-report.strategy.js';
+import { createConflictReportSourceRepository } from './modules/conservation-reports/repositories/conflict-report-source.repository.js';
+import { createConflictTrendReportStrategy } from './modules/conservation-reports/services/conflict-trend-report.strategy.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
@@ -22,6 +24,7 @@ export function createApp({
   conservationReports = createGeneratedReportRepository(),
   incidentReportSources = createIncidentReportSourceRepository(),
   patrolReportSources = createPatrolReportSourceRepository(),
+  conflictReportSources = createConflictReportSourceRepository(),
   conservationReportStrategies,
   geocoding,
   geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
@@ -62,6 +65,7 @@ export function createApp({
     ?? createReportStrategyRegistry([
       createIncidentReportStrategy(incidentReportSources),
       createPatrolCoverageReportStrategy(patrolReportSources),
+      createConflictTrendReportStrategy(conflictReportSources),
     ]);
   app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, {
     jwtSecret, strategies: configuredReportStrategies,

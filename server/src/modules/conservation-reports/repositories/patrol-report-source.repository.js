@@ -1,5 +1,6 @@
 import { PatrolRecord } from '../models/patrol-record.model.js';
 import { PatrolRoute } from '../models/patrol-route.model.js';
+import { exactCaseInsensitive } from '../utils/mongo-text-filter.js';
 
 export function createPatrolReportSourceRepository({
   patrolModel = PatrolRecord, routeModel = PatrolRoute,
@@ -29,12 +30,4 @@ export function buildPatrolRouteQuery({ filters }) {
   if (filters.park) query.park = exactCaseInsensitive(filters.park);
   if (filters.routeSourceIds?.length) query.sourceId = { $in: filters.routeSourceIds };
   return query;
-}
-
-function exactCaseInsensitive(value) {
-  return new RegExp(`^${escapeRegularExpression(value)}$`, 'i');
-}
-
-function escapeRegularExpression(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

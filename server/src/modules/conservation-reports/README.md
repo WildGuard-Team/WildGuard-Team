@@ -59,3 +59,9 @@ The same `POST /api/conservation-reports` endpoint accepts `PATROL_COVERAGE_REPO
 The result contains completed/cancelled totals, distance, patrol hours, route coverage, zone coverage, completion rate, averages, observations, per-route metrics, status counts, a zero-filled daily series, and a detailed patrol table. Distance, time, route, and zone values are calculated from filtered records rather than fixed UI values.
 
 Every Patrol Coverage result includes `dataSource.type: SEEDED_ASSIGNMENT_DATA` and the visible label **Based on seeded patrol data**. This provides a real data-backed reporting dependency without introducing a patrol-recording use case.
+
+## Conflict Trend Report generation
+
+`CONFLICT_TREND_REPORT` uses the same protected generation endpoint with date, park, location, severity, and conflict-type filters. Its source query always requires `humanWildlifeConflict: true`, so unrelated incidents cannot enter the result.
+
+The result contains total conflicts, affected locations, high-risk and critical totals, average conflicts per day, the leading hotspot, period-over-period direction and percentage change, and breakdowns by conflict type, location, severity, species, and time. The detailed table contains only the filtered human–wildlife conflicts. Hotspots and chart values are computed from the same records as the displayed total.
