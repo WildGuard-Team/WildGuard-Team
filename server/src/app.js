@@ -4,9 +4,18 @@ import { errorHandler, notFound } from './middleware/errors.js';
 import { requireTrustedOrigin } from './modules/auth/middleware/validate-origin.middleware.js';
 import { createUserRepository } from './modules/auth/repositories/user.repository.js';
 import { createAuthRouter } from './modules/auth/routes/auth.routes.js';
+import { createCommunityReportRepository } from './modules/community-reports/repositories/community-report.repository.js';
+import { createCommunityReportRouter } from './modules/community-reports/routes/community-report.routes.js';
+import { createGeocodingProvider } from './modules/community-reports/integrations/geocoding.provider.js';
+import { createCloudinaryClient } from './config/cloudinary.js';
 
 export function createApp({
   clientOrigin, isDatabaseConnected, jwtSecret, jwtExpiresIn, nodeEnv = 'test', users = createUserRepository(),
+  communityReports = createCommunityReportRepository(),
+  geocoding,
+  geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
+  cloudinary,
+  cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret,
 }) {
   const app = express();
   app.disable('x-powered-by');
@@ -26,6 +35,18 @@ export function createApp({
   });
 
   app.use('/api/auth', createAuthRouter(users, { jwtSecret, jwtExpiresIn, nodeEnv }));
+  const configuredGeocoding = geocoding ?? createGeocodingProvider({
+    baseUrl: geocodingBaseUrl,
+    userAgent: geocodingUserAgent,
+    timeoutMs: geocodingTimeoutMs,
+    nodeEnv,
+  });
+  const configuredCloudinary = cloudinary ?? createCloudinaryClient({
+    cloudinaryCloudName, cloudinaryApiKey, cloudinaryApiSecret,
+  });
+  app.use('/api/reports', createCommunityReportRouter(communityReports, users, {
+    jwtSecret, geocoding: configuredGeocoding, cloudinary: configuredCloudinary, nodeEnv,
+  }));
 
   app.use(notFound);
   app.use(errorHandler);

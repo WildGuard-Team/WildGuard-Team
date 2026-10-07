@@ -7,6 +7,8 @@ import { readConfig } from '../src/config/env.js';
 const validEnv = {
   PORT: '5000', MONGODB_URI: 'mongodb://127.0.0.1:27017/wildguard',
   CLIENT_ORIGIN: 'http://localhost:3000', JWT_SECRET: 'a-test-secret-that-is-longer-than-thirty-two-characters', JWT_EXPIRES_IN: '24h',
+  CLOUDINARY_CLOUD_NAME: 'test-cloud', CLOUDINARY_API_KEY: 'test-key', CLOUDINARY_API_SECRET: 'test-secret',
+  GEOCODING_BASE_URL: 'https://geocoding.example.test', GEOCODING_USER_AGENT: 'WildGuard Test/1.0 (contact=test@example.test)',
 };
 
 test('startup validates missing and malformed configuration', () => {
