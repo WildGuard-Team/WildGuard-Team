@@ -50,6 +50,8 @@ Generation parameters use `YYYY-MM-DD` dates, an inclusive maximum range of 366 
 
 `GET /api/conservation-reports/:reportId/export` downloads an authenticated manager's stored report as CSV. The export contains the stored metadata, applied parameters, calculated summary statistics, and detailed records. Export generation is read-only, so a failed download does not remove or alter the stored report view.
 
+`GET /api/conservation-reports/:reportId/export/pdf` directly downloads a styled A4 PDF containing the WildGuard logo, stored metadata, applied filters, calculated statistics, charts, data-source disclosure, and detailed records. PDF export is also read-only and owner-scoped.
+
 The stored result contains calculated totals, distinct locations, high/critical counts, average incidents per day, breakdowns by type/location/severity, a zero-filled time series, and the filtered incident table. Time grouping is selected from the requested range: daily up to 45 days, weekly up to 180 days, and monthly for longer ranges. Every chart series is derived from the same filtered records as the displayed total.
 
 A successful generation returns HTTP `201` and stores a stable `/api/conservation-reports/:reportId` view location. When no records match, the API returns HTTP `200` with `noData: true` and does not store an empty report. Other report strategies remain separate and are added without modifying the Incident strategy.

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  buildReportShareUrl, downloadReportCsv, shareReport,
+  buildReportShareUrl, downloadReportCsv, downloadReportPdf, shareReport,
 } from '../src/features/conservation-reports/services/report-delivery.service.js';
 
 test('share URL targets the protected Park Manager report view', () => {
@@ -55,4 +55,16 @@ test('failed CSV export rejects without starting a browser download', async () =
     urlObject: {},
   }), /Export unavailable/);
   assert.equal(createdLink, false);
+});
+
+test('PDF download uses the server-provided PDF filename', async () => {
+  const link = { style: {}, click() {}, remove() {} };
+  const fileName = await downloadReportPdf('CR-2026-ABC123', {
+    fetchExport: async () => ({ blob: { pdf: true }, fileName: 'CR-2026-ABC123.pdf' }),
+    documentObject: { createElement: () => link, body: { append() {} } },
+    urlObject: { createObjectURL: () => 'blob:pdf', revokeObjectURL() {} },
+  });
+
+  assert.equal(fileName, 'CR-2026-ABC123.pdf');
+  assert.equal(link.download, fileName);
 });

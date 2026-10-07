@@ -20,7 +20,15 @@ export function getGeneratedConservationReport(reportId) {
 }
 
 export async function exportGeneratedConservationReport(reportId) {
-  const response = await fetch(`${apiBaseUrl}/conservation-reports/${encodeURIComponent(reportId)}/export`, {
+  return downloadReportFile(reportId, 'export', 'csv');
+}
+
+export async function exportGeneratedConservationReportPdf(reportId) {
+  return downloadReportFile(reportId, 'export/pdf', 'pdf');
+}
+
+async function downloadReportFile(reportId, path, extension) {
+  const response = await fetch(`${apiBaseUrl}/conservation-reports/${encodeURIComponent(reportId)}/${path}`, {
     credentials: 'include',
   }).catch(() => {
     throw new ConservationReportApiError('Unable to reach WildGuard. The generated report is still available on screen.');
@@ -30,7 +38,7 @@ export async function exportGeneratedConservationReport(reportId) {
     throw createResponseError(response.status, payload, 'The report could not be exported. It is still available on screen.');
   }
   const disposition = response.headers.get('Content-Disposition') ?? '';
-  const fileName = disposition.match(/filename="([^"]+)"/)?.[1] ?? `${reportId}.csv`;
+  const fileName = disposition.match(/filename="([^"]+)"/)?.[1] ?? `${reportId}.${extension}`;
   return { blob: await response.blob(), fileName };
 }
 

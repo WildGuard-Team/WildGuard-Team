@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { formatOption, REPORT_TYPES } from '../config/report-options.js';
-import { downloadReportCsv, shareReport } from '../services/report-delivery.service.js';
+import {
+  downloadReportCsv, downloadReportPdf, shareReport,
+} from '../services/report-delivery.service.js';
 import ManagerIcon from './ManagerIcon.jsx';
 import { BarChart, LineChart } from './ReportCharts.jsx';
 
@@ -31,7 +33,7 @@ export default function ReportResults({ report, onGenerateAnother }) {
       <div><strong>Export or share</strong><span>The generated report remains available if an export fails.</span></div>
       <div className="cr-delivery-actions">
         <button type="button" disabled={Boolean(activeAction)} onClick={() => deliver('csv', () => downloadReportCsv(report.reportId), 'CSV downloaded successfully.')}><ManagerIcon name="download" size={18} />{activeAction === 'csv' ? 'Exporting…' : 'Export CSV'}</button>
-        <button type="button" disabled={Boolean(activeAction)} onClick={() => window.print()}><ManagerIcon name="print" size={18} />Print / Save PDF</button>
+        <button type="button" disabled={Boolean(activeAction)} onClick={() => deliver('pdf', () => downloadReportPdf(report.reportId), 'PDF downloaded successfully.')}><ManagerIcon name="download" size={18} />{activeAction === 'pdf' ? 'Preparing PDF…' : 'Download PDF'}</button>
         <button type="button" disabled={Boolean(activeAction)} onClick={() => deliver('share', () => shareReport(report), 'Report link shared or copied successfully.')}><ManagerIcon name="share" size={18} />{activeAction === 'share' ? 'Sharing…' : 'Share report'}</button>
       </div>
     </section>

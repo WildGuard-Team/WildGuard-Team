@@ -27,6 +27,7 @@ export function createApp({
   conflictReportSources = createConflictReportSourceRepository(),
   conservationReportStrategies,
   conservationReportExporter,
+  conservationReportPdfExporter,
   geocoding,
   geocodingBaseUrl, geocodingUserAgent, geocodingTimeoutMs,
   cloudinary,
@@ -69,7 +70,8 @@ export function createApp({
       createConflictTrendReportStrategy(conflictReportSources),
     ]);
   app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, {
-    jwtSecret, strategies: configuredReportStrategies, exporter: conservationReportExporter,
+    jwtSecret, strategies: configuredReportStrategies,
+    exporter: conservationReportExporter, pdfExporter: conservationReportPdfExporter,
   }));
 
   app.use(notFound);

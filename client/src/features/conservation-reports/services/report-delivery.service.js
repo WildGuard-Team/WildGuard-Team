@@ -1,4 +1,6 @@
-import { exportGeneratedConservationReport } from './conservation-report.api.js';
+import {
+  exportGeneratedConservationReport, exportGeneratedConservationReportPdf,
+} from './conservation-report.api.js';
 
 export async function downloadReportCsv(
   reportId,
@@ -8,6 +10,21 @@ export async function downloadReportCsv(
     urlObject: URL,
   },
 ) {
+  return downloadReportFile(reportId, dependencies);
+}
+
+export async function downloadReportPdf(
+  reportId,
+  dependencies = {
+    fetchExport: exportGeneratedConservationReportPdf,
+    documentObject: document,
+    urlObject: URL,
+  },
+) {
+  return downloadReportFile(reportId, dependencies);
+}
+
+async function downloadReportFile(reportId, dependencies) {
   const file = await dependencies.fetchExport(reportId);
   const objectUrl = dependencies.urlObject.createObjectURL(file.blob);
   try {
