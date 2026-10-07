@@ -12,6 +12,7 @@
     "build": "npm run build --workspace client",
     "lint": "eslint .",
     "test": "npm run test --workspace server",
+    "seed:reporting-data": "npm run seed:reporting-data --workspace server",
     "start": "npm run start --workspace server"
   },
   "devDependencies": {
