@@ -539,3 +539,101 @@ body.community-page-active #root { height: 100%; min-height: 0; background: #eff
   .field-incident-reference small {
     color: #6b7b75;
   }
+  .field-incident-camera {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid #d9e7e1;
+    border-radius: 12px;
+    background: #f8fcfa;
+  }
+  
+  .field-incident-camera-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .field-incident-camera-heading h2 {
+    margin: 0 0 6px;
+    color: #082f28;
+    font-size: 18px;
+  }
+  
+  .field-incident-camera-heading p {
+    margin: 0;
+    color: #64748b;
+  }
+  
+  .field-incident-camera-open {
+    min-width: 150px;
+  }
+  
+  .field-incident-camera-preview {
+    display: none;
+    margin-top: 18px;
+  }
+  
+  .field-incident-camera-preview.is-active {
+    display: block;
+  }
+  
+  .field-incident-camera-preview video {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #071c18;
+  }
+  
+  .field-incident-camera-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  
+  .field-incident-camera-message {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  
+  .field-incident-camera-message.is-error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+  
+  .field-incident-camera-message.is-success {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+  }
+  
+  .field-incident-camera-limit {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 720px) {
+    .field-incident-camera-heading {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  
+    .field-incident-camera-open {
+      width: 100%;
+    }
+  
+    .field-incident-camera-actions {
+      flex-direction: column-reverse;
+    }
+  
+    .field-incident-camera-actions button {
+      width: 100%;
+    }
+  }
