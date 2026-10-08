@@ -2,6 +2,16 @@ const apiBaseUrl =
   (import.meta.env.VITE_API_BASE_URL ?? '/api')
     .replace(/\/+$/, '');
 
+export class FieldIncidentNetworkError
+  extends Error {
+  constructor(message) {
+    super(message);
+
+    this.name =
+      'FieldIncidentNetworkError';
+  }
+}
+
 function createIncidentDateTime(
   incidentDate,
   incidentTime,
@@ -24,12 +34,17 @@ function createIncidentDateTime(
   return value.toISOString();
 }
 
-function createRequestBody(draft) {
+function createRequestBody(
+  draft,
+) {
   const source =
     draft.location.source
     || 'MANUAL';
 
   return {
+    clientIncidentId:
+      draft.clientIncidentId,
+
     incidentType:
       draft.incidentType,
 
@@ -72,6 +87,15 @@ function toFormData(
 ) {
   const formData =
     new FormData();
+
+  if (
+    incident.clientIncidentId
+  ) {
+    formData.append(
+      'clientIncidentId',
+      incident.clientIncidentId,
+    );
+  }
 
   formData.append(
     'incidentType',
@@ -170,8 +194,8 @@ export async function submitFieldIncident(
       },
     );
   } catch {
-    throw new Error(
-      'Unable to reach WildGuard. Check your connection and try again.',
+    throw new FieldIncidentNetworkError(
+      'Unable to reach WildGuard.',
     );
   }
 
@@ -194,6 +218,14 @@ export async function submitFieldIncident(
     ) {
       throw new Error(
         'You do not have permission to submit field incidents.',
+      );
+    }
+
+    if (
+      response.status === 409
+    ) {
+      throw new Error(
+        'This field incident has already been submitted.',
       );
     }
 

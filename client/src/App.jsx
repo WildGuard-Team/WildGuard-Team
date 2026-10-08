@@ -17,13 +17,24 @@ import FieldIncidentEvidencePage from './features/field-incidents/pages/FieldInc
 import FieldIncidentReviewPage from './features/field-incidents/pages/FieldIncidentReviewPage.jsx';
 import FieldIncidentConfirmationPage from './features/field-incidents/pages/FieldIncidentConfirmationPage.jsx';
 
+import FieldIncidentSyncManager
+  from './features/field-incidents/components/FieldIncidentSyncManager.jsx';
+
 import {
   FieldIncidentDraftProvider,
 } from './features/field-incidents/context/FieldIncidentDraftContext.jsx';
 
-import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
-import { useReportDraft } from './features/community-reports/context/useReportDraft.js';
-import { hasCompleteCommunityReportDetails } from './features/community-reports/context/community-report-draft.storage.js';
+import {
+  ReportDraftProvider,
+} from './features/community-reports/context/ReportDraftContext.jsx';
+
+import {
+  useReportDraft,
+} from './features/community-reports/context/useReportDraft.js';
+
+import {
+  hasCompleteCommunityReportDetails,
+} from './features/community-reports/context/community-report-draft.storage.js';
 
 import ReportTypePage from './features/community-reports/pages/ReportTypePage.jsx';
 import ReportDetailsPage from './features/community-reports/pages/ReportDetailsPage.jsx';
@@ -38,6 +49,8 @@ export default function App() {
     <AuthProvider>
       <ReportDraftProvider>
         <FieldIncidentDraftProvider>
+          <FieldIncidentSyncManager />
+
           <AppRoutes />
         </FieldIncidentDraftProvider>
       </ReportDraftProvider>
@@ -56,15 +69,24 @@ function AppRoutes() {
     evidenceHydrationStatus,
   } = useReportDraft();
 
-  const [path, setPath] = useState(
+  const [
+    path,
+    setPath,
+  ] = useState(
     window.location.pathname,
   );
 
-  const [message, setMessage] = useState('');
+  const [
+    message,
+    setMessage,
+  ] = useState('');
 
   useEffect(() => {
     const handlePopState = () => {
-      setPath(window.location.pathname);
+      setPath(
+        window.location.pathname,
+      );
+
       setMessage('');
     };
 
@@ -82,18 +104,25 @@ function AppRoutes() {
   }, []);
 
   useEffect(() => {
-    if (isCheckingSession) {
+    if (
+      isCheckingSession
+    ) {
       return;
     }
 
-    let homePath = '/member';
+    let homePath =
+      '/member';
 
-    if (user?.role === 'PARK_MANAGER') {
-      homePath = '/manager/reports';
+    if (
+      user?.role === 'PARK_MANAGER'
+    ) {
+      homePath =
+        '/manager/reports';
     } else if (
       user?.role === 'PARK_RANGER'
     ) {
-      homePath = '/ranger';
+      homePath =
+        '/ranger';
     }
 
     /*
@@ -124,7 +153,9 @@ function AppRoutes() {
      */
     if (
       user?.role === 'PARK_MANAGER'
-      && !path.startsWith('/manager/')
+      && !path.startsWith(
+        '/manager/',
+      )
     ) {
       navigate(
         '/manager/reports',
@@ -141,7 +172,9 @@ function AppRoutes() {
      */
     if (
       user?.role === 'PARK_RANGER'
-      && !path.startsWith('/ranger')
+      && !path.startsWith(
+        '/ranger',
+      )
     ) {
       navigate(
         '/ranger',
@@ -162,8 +195,12 @@ function AppRoutes() {
       && user.role !== 'PARK_MANAGER'
       && user.role !== 'PARK_RANGER'
       && (
-        path.startsWith('/manager/')
-        || path.startsWith('/ranger')
+        path.startsWith(
+          '/manager/',
+        )
+        || path.startsWith(
+          '/ranger',
+        )
       )
     ) {
       navigate(
@@ -276,11 +313,14 @@ function AppRoutes() {
         nextPath,
       );
 
-      setPath(nextPath);
+      setPath(
+        nextPath,
+      );
     }
 
     setMessage(
-      options.message ?? '',
+      options.message
+      ?? '',
     );
   }
 
@@ -310,7 +350,9 @@ function AppRoutes() {
         className="session-loading"
         aria-live="polite"
       >
-        <span className="loading-mark" />
+        <span
+          className="loading-mark"
+        />
 
         Checking your WildGuard session…
       </main>
@@ -344,7 +386,6 @@ function AppRoutes() {
   /*
    * Park Ranger routes
    */
-
   if (
     user?.role === 'PARK_RANGER'
     && path === '/ranger/incidents/confirmation'

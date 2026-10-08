@@ -11,6 +11,22 @@ import {
   const STORAGE_KEY =
     'wildguard.fieldIncidentDraft.v1';
   
+  function createClientIncidentId() {
+    if (
+      typeof crypto !== 'undefined'
+      && typeof crypto.randomUUID === 'function'
+    ) {
+      return crypto.randomUUID();
+    }
+  
+    return (
+      `incident-${Date.now()}-`
+      + Math.random()
+        .toString(16)
+        .slice(2)
+    );
+  }
+  
   function getCurrentDate() {
     const now = new Date();
   
@@ -48,6 +64,9 @@ import {
   
   function createEmptyDraft() {
     return {
+      clientIncidentId:
+        createClientIncidentId(),
+  
       incidentType: '',
   
       incidentDate:
@@ -63,12 +82,16 @@ import {
   
       location: {
         source: null,
+  
         coordinates: null,
+  
         manualCoordinates: '',
+  
         description: '',
       },
   
       description: '',
+  
       additionalNotes: '',
   
       evidence: [],
@@ -91,15 +114,35 @@ import {
           stored,
         );
   
+      const emptyDraft =
+        createEmptyDraft();
+  
       return {
-        ...createEmptyDraft(),
+        ...emptyDraft,
         ...parsed,
   
+        /*
+         * If an older saved draft does not
+         * contain a clientIncidentId,
+         * generate one now.
+         */
+        clientIncidentId:
+          parsed.clientIncidentId
+          || createClientIncidentId(),
+  
         location: {
-          ...createEmptyDraft().location,
+          ...emptyDraft.location,
           ...parsed.location,
         },
   
+        /*
+         * Normal sessionStorage cannot
+         * restore File objects.
+         *
+         * Pending offline incidents will
+         * store evidence separately in
+         * IndexedDB.
+         */
         evidence: [],
       };
     } catch {
@@ -107,9 +150,14 @@ import {
     }
   }
   
-  function saveDraft(draft) {
+  function saveDraft(
+    draft,
+  ) {
     try {
       const snapshot = {
+        clientIncidentId:
+          draft.clientIncidentId,
+  
         incidentType:
           draft.incidentType,
   
@@ -140,10 +188,15 @@ import {
   
       sessionStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(snapshot),
+        JSON.stringify(
+          snapshot,
+        ),
       );
     } catch {
-      // Keep the in-memory draft available.
+      /*
+       * Keep the in-memory draft available
+       * if browser storage is unavailable.
+       */
     }
   }
   
@@ -153,89 +206,100 @@ import {
         STORAGE_KEY,
       );
     } catch {
-      // Ignore unavailable storage.
+      // Ignore unavailable browser storage.
     }
   }
   
   export function FieldIncidentDraftProvider({
     children,
   }) {
-    const [draft, setDraft] =
-      useState(loadDraft);
+    const [
+      draft,
+      setDraft,
+    ] = useState(
+      loadDraft,
+    );
   
     const [
       submittedIncident,
       setSubmittedIncident,
-    ] = useState(null);
+    ] = useState(
+      null,
+    );
   
     useEffect(() => {
-      saveDraft(draft);
-    }, [draft]);
-  
-    const value = useMemo(
-      () => ({
+      saveDraft(
         draft,
+      );
+    }, [
+      draft,
+    ]);
   
-        submittedIncident,
+    const value =
+      useMemo(
+        () => ({
+          draft,
   
-        setSubmittedIncident,
+          submittedIncident,
   
-        updateDraft(changes) {
-          setDraft(
-            (current) => ({
-              ...current,
-              ...changes,
-            }),
-          );
-        },
+          setSubmittedIncident,
   
-        updateLocation(changes) {
-          setDraft(
-            (current) => ({
-              ...current,
-  
-              location: {
-                ...current.location,
+          updateDraft(changes) {
+            setDraft(
+              (current) => ({
+                ...current,
                 ...changes,
-              },
-            }),
-          );
-        },
+              }),
+            );
+          },
   
-        setEvidence(evidence) {
-          setDraft(
-            (current) => ({
-              ...current,
-              evidence,
-            }),
-          );
-        },
+          updateLocation(changes) {
+            setDraft(
+              (current) => ({
+                ...current,
   
-        clearDraft() {
-          clearStoredDraft();
+                location: {
+                  ...current.location,
+                  ...changes,
+                },
+              }),
+            );
+          },
   
-          setDraft(
-            createEmptyDraft(),
-          );
-        },
+          setEvidence(evidence) {
+            setDraft(
+              (current) => ({
+                ...current,
+                evidence,
+              }),
+            );
+          },
   
-        resetDraft() {
-          clearStoredDraft();
+          clearDraft() {
+            clearStoredDraft();
   
-          setSubmittedIncident(
-            null,
-          );
+            setDraft(
+              createEmptyDraft(),
+            );
+          },
   
-          setDraft(
-            createEmptyDraft(),
-          );
-        },
-      }),
-      [
-        draft,
-        submittedIncident,
-      ],
-    );
+          resetDraft() {
+            clearStoredDraft();
+  
+            setSubmittedIncident(
+              null,
+            );
+  
+            setDraft(
+              createEmptyDraft(),
+            );
+          },
+        }),
+        [
+          draft,
+          submittedIncident,
+        ],
+      );
   
     return (
       <FieldIncidentDraftContext.Provider

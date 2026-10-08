@@ -24,6 +24,10 @@ export default function FieldIncidentConfirmationPage({
     return null;
   }
 
+  const isPendingSync =
+    submittedIncident.status
+    === 'PENDING_SYNC';
+
   function reportAnother() {
     resetDraft();
 
@@ -51,34 +55,70 @@ export default function FieldIncidentConfirmationPage({
             className="field-incident-confirmation-icon"
             aria-hidden="true"
           >
-            ✓
+            {isPendingSync
+              ? '↻'
+              : '✓'}
           </div>
 
           <h1>
-            Incident Report Submitted
+            {isPendingSync
+              ? 'Incident Saved Offline'
+              : 'Incident Report Submitted'}
           </h1>
 
           <p>
-            The field incident has been
-            recorded successfully.
+            {isPendingSync
+              ? (
+                <>
+                  No network connection was available.
+                  The incident has been saved safely
+                  and is pending synchronization.
+                </>
+              )
+              : (
+                <>
+                  The field incident has been
+                  recorded successfully.
+                </>
+              )}
           </p>
 
           <div className="field-incident-reference">
-            <span>
-              Incident Reference Number
-            </span>
+            {isPendingSync ? (
+              <>
+                <span>
+                  Synchronization Status
+                </span>
 
-            <strong>
-              {
-                submittedIncident
-                  .referenceNumber
-              }
-            </strong>
+                <strong>
+                  Pending Synchronization
+                </strong>
 
-            <small>
-              Keep this reference number
-              for your records.
-            </small>
+                <small>
+                  WildGuard will retry this
+                  incident when a network
+                  connection becomes available.
+                </small>
+              </>
+            ) : (
+              <>
+                <span>
+                  Incident Reference Number
+                </span>
+
+                <strong>
+                  {
+                    submittedIncident
+                      .referenceNumber
+                  }
+                </strong>
+
+                <small>
+                  Keep this reference number
+                  for your records.
+                </small>
+              </>
+            )}
           </div>
 
           <div className="report-actions">

@@ -29,7 +29,22 @@ import {
     );
   }
   
-  function toGeoJsonPoint(coordinates) {
+  function isClientIncidentCollision(error) {
+    return (
+      error?.code === 11000
+      && (
+        error.keyPattern?.clientIncidentId === 1
+        || Object.hasOwn(
+          error.keyValue ?? {},
+          'clientIncidentId',
+        )
+      )
+    );
+  }
+  
+  function toGeoJsonPoint(
+    coordinates,
+  ) {
     if (!coordinates) {
       return undefined;
     }
@@ -44,7 +59,9 @@ import {
     };
   }
   
-  function toPublicEvidence(evidence) {
+  function toPublicEvidence(
+    evidence,
+  ) {
     return {
       secureUrl:
         evidence.secureUrl,
@@ -75,7 +92,9 @@ import {
     };
   }
   
-  function toPublicIncident(incident) {
+  function toPublicIncident(
+    incident,
+  ) {
     const coordinates =
       incident.location?.point
         ?.coordinates;
@@ -86,6 +105,10 @@ import {
   
       referenceNumber:
         incident.referenceNumber,
+  
+      clientIncidentId:
+        incident.clientIncidentId
+        ?? null,
   
       incidentType:
         incident.incidentType,
@@ -131,7 +154,9 @@ import {
   
       evidence:
         (incident.evidence ?? [])
-          .map(toPublicEvidence),
+          .map(
+            toPublicEvidence,
+          ),
   
       status:
         incident.status,
@@ -173,6 +198,22 @@ import {
     }
   }
   
+  async function findExistingIncident(
+    fieldIncidents,
+    rangerUserId,
+    clientIncidentId,
+  ) {
+    if (!clientIncidentId) {
+      return null;
+    }
+  
+    return fieldIncidents
+      .findByClientIncidentId(
+        rangerUserId,
+        clientIncidentId,
+      );
+  }
+  
   export async function createFieldIncident(
     input,
     ranger,
@@ -181,14 +222,39 @@ import {
     cloudinary,
     nodeEnv = 'production',
   ) {
+    /*
+     * Validate evidence before uploading
+     * anything to Cloudinary.
+     */
     validateFieldIncidentEvidence(
       files,
     );
   
+    /*
+     * Idempotency check.
+     *
+     * If this Ranger has already submitted
+     * the same clientIncidentId, return the
+     * existing incident instead of uploading
+     * evidence or creating another document.
+     */
+    const existingIncident =
+      await findExistingIncident(
+        fieldIncidents,
+        ranger.id,
+        input.clientIncidentId,
+      );
+  
+    if (existingIncident) {
+      return toPublicIncident(
+        existingIncident,
+      );
+    }
+  
     let evidence = [];
   
     /*
-     * Upload evidence first.
+     * Upload evidence.
      */
     try {
       if (files.length) {
@@ -227,107 +293,162 @@ import {
     }
   
     /*
-     * Save incident after evidence is uploaded.
+     * Save incident.
      */
-    try {
-      for (
-        let attempt = 0;
-        attempt
-          < FIELD_INCIDENT_REFERENCE_MAX_ATTEMPTS;
-        attempt += 1
-      ) {
-        try {
-          const incident =
-            await fieldIncidents.create({
-              referenceNumber:
-                createFieldIncidentReferenceNumber(),
+    for (
+      let attempt = 0;
+      attempt
+        < FIELD_INCIDENT_REFERENCE_MAX_ATTEMPTS;
+      attempt += 1
+    ) {
+      try {
+        const incident =
+          await fieldIncidents.create({
+            referenceNumber:
+              createFieldIncidentReferenceNumber(),
   
-              rangerUserId:
-                ranger.id,
+            /*
+             * Only store a clientIncidentId
+             * when the request actually has one.
+             */
+            ...(input.clientIncidentId
+              ? {
+                  clientIncidentId:
+                    input.clientIncidentId,
+                }
+              : {}),
   
-              rangerIdSnapshot:
-                ranger.rangerId,
+            rangerUserId:
+              ranger.id,
   
-              assignedParkSnapshot:
-                ranger.assignedPark,
+            rangerIdSnapshot:
+              ranger.rangerId,
   
-              incidentType:
-                input.incidentType,
+            assignedParkSnapshot:
+              ranger.assignedPark,
   
-              incidentDateTime:
-                input.incidentDateTime,
+            incidentType:
+              input.incidentType,
   
-              riskLevel:
-                input.riskLevel,
+            incidentDateTime:
+              input.incidentDateTime,
   
-              parkZone:
-                input.parkZone,
+            riskLevel:
+              input.riskLevel,
   
-              blockArea:
-                input.blockArea,
+            parkZone:
+              input.parkZone,
   
-              location: {
-                source:
-                  input.location.source,
+            blockArea:
+              input.blockArea,
   
-                point:
-                  toGeoJsonPoint(
-                    input.location.coordinates,
-                  ),
+            location: {
+              source:
+                input.location.source,
   
-                description:
-                  input.location.description,
-              },
+              point:
+                toGeoJsonPoint(
+                  input.location.coordinates,
+                ),
   
               description:
-                input.description,
+                input.location.description,
+            },
   
-              additionalNotes:
-                input.additionalNotes,
+            description:
+              input.description,
   
-              evidence,
+            additionalNotes:
+              input.additionalNotes,
   
-              status:
-                'SUBMITTED',
-            });
+            evidence,
   
-          return toPublicIncident(
-            incident,
+            status:
+              'SUBMITTED',
+          });
+  
+        return toPublicIncident(
+          incident,
+        );
+      } catch (error) {
+        /*
+         * Another request may have submitted
+         * the same Ranger + clientIncidentId
+         * at exactly the same time.
+         */
+        if (
+          input.clientIncidentId
+          && isClientIncidentCollision(
+            error,
+          )
+        ) {
+          /*
+           * This duplicate request may already
+           * have uploaded its own Cloudinary
+           * evidence. Remove those unused files.
+           */
+          await rollbackEvidence(
+            evidence,
+            cloudinary,
+            nodeEnv,
           );
-        } catch (error) {
-          if (
-            !isReferenceCollision(
-              error,
-            )
-          ) {
-            throw error;
+  
+          const duplicateIncident =
+            await findExistingIncident(
+              fieldIncidents,
+              ranger.id,
+              input.clientIncidentId,
+            );
+  
+          if (duplicateIncident) {
+            return toPublicIncident(
+              duplicateIncident,
+            );
           }
+  
+          throw new HttpError(
+            409,
+            'This field incident has already been submitted.',
+          );
         }
-      }
-    } catch (error) {
-      /*
-       * DB failed after Cloudinary upload.
-       * Remove uploaded evidence so we
-       * do not leave unused assets.
-       */
-      await rollbackEvidence(
-        evidence,
-        cloudinary,
-        nodeEnv,
-      );
   
-      if (
-        error instanceof HttpError
-      ) {
-        throw error;
-      }
+        /*
+         * Generated reference number collision:
+         * retry using another reference number.
+         */
+        if (
+          isReferenceCollision(
+            error,
+          )
+        ) {
+          continue;
+        }
   
-      throw new HttpError(
-        500,
-        'The field incident could not be saved.',
-      );
+        /*
+         * Database failure after evidence upload.
+         */
+        await rollbackEvidence(
+          evidence,
+          cloudinary,
+          nodeEnv,
+        );
+  
+        if (
+          error instanceof HttpError
+        ) {
+          throw error;
+        }
+  
+        throw new HttpError(
+          500,
+          'The field incident could not be saved.',
+        );
+      }
     }
   
+    /*
+     * All generated reference attempts failed.
+     */
     await rollbackEvidence(
       evidence,
       cloudinary,

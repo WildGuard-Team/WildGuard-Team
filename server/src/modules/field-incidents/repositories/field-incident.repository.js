@@ -9,10 +9,14 @@ import {
       async create(incident) {
         await model.init();
   
-        return model.create(incident);
+        return model.create(
+          incident,
+        );
       },
   
-      findByRanger(rangerUserId) {
+      findByRanger(
+        rangerUserId,
+      ) {
         return model
           .find({
             rangerUserId,
@@ -22,9 +26,21 @@ import {
           });
       },
   
-      findByReferenceNumber(referenceNumber) {
+      findByReferenceNumber(
+        referenceNumber,
+      ) {
         return model.findOne({
           referenceNumber,
+        });
+      },
+  
+      findByClientIncidentId(
+        rangerUserId,
+        clientIncidentId,
+      ) {
+        return model.findOne({
+          rangerUserId,
+          clientIncidentId,
         });
       },
     };

@@ -9,6 +9,7 @@ import {
   } from '../config/field-incident.constants.js';
   
   const allowedFields = new Set([
+    'clientIncidentId',
     'incidentType',
     'incidentDateTime',
     'riskLevel',
@@ -56,16 +57,21 @@ import {
       return '';
     }
   
-    if (typeof value !== 'string') {
+    if (
+      typeof value !== 'string'
+    ) {
       throw new HttpError(
         400,
         `${label} must be text.`,
       );
     }
   
-    const text = value.trim();
+    const text =
+      value.trim();
   
-    if (text.length > max) {
+    if (
+      text.length > max
+    ) {
       throw new HttpError(
         400,
         `${label} cannot exceed ${max} characters.`,
@@ -75,7 +81,26 @@ import {
     return text;
   }
   
-  function validateCoordinates(value) {
+  function validateClientIncidentId(
+    value,
+  ) {
+    const clientIncidentId =
+      optionalText(
+        value,
+        'Client incident ID',
+        100,
+      );
+  
+    if (!clientIncidentId) {
+      return undefined;
+    }
+  
+    return clientIncidentId;
+  }
+  
+  function validateCoordinates(
+    value,
+  ) {
     if (
       value === undefined
       || value === null
@@ -94,10 +119,14 @@ import {
     }
   
     const latitude =
-      Number(value.latitude);
+      Number(
+        value.latitude,
+      );
   
     const longitude =
-      Number(value.longitude);
+      Number(
+        value.longitude,
+      );
   
     if (
       !Number.isFinite(latitude)
@@ -119,7 +148,9 @@ import {
     };
   }
   
-  function validateLocation(location) {
+  function validateLocation(
+    location,
+  ) {
     if (
       !location
       || typeof location !== 'object'
@@ -133,7 +164,9 @@ import {
   
     const source =
       typeof location.source === 'string'
-        ? location.source.trim().toUpperCase()
+        ? location.source
+          .trim()
+          .toUpperCase()
         : '';
   
     if (
@@ -186,7 +219,9 @@ import {
     };
   }
   
-  function validateIncidentDateTime(value) {
+  function validateIncidentDateTime(
+    value,
+  ) {
     if (
       typeof value !== 'string'
       || !value.trim()
@@ -263,6 +298,11 @@ import {
     }
   
     return {
+      clientIncidentId:
+        validateClientIncidentId(
+          body.clientIncidentId,
+        ),
+  
       incidentType:
         body.incidentType,
   

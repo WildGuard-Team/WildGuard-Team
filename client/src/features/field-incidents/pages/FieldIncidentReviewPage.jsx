@@ -3,6 +3,10 @@ import {
     useState,
   } from 'react';
   
+  import {
+    useAuth,
+  } from '../../../context/useAuth.js';
+  
   import FormAlert
     from '../../auth/components/FormAlert.jsx';
   
@@ -21,8 +25,13 @@ import {
   } from '../utils/field-incident-options.js';
   
   import {
+    FieldIncidentNetworkError,
     submitFieldIncident,
   } from '../services/field-incident.service.js';
+  
+  import {
+    savePendingFieldIncident,
+  } from '../services/field-incident-offline-db.js';
   
   function formatRiskLevel(value) {
     if (!value) {
@@ -54,13 +63,19 @@ import {
     navigate,
   }) {
     const {
+      user,
+    } = useAuth();
+  
+    const {
       draft,
       setSubmittedIncident,
       clearDraft,
     } = useFieldIncidentDraft();
   
-    const [error, setError] =
-      useState('');
+    const [
+      error,
+      setError,
+    ] = useState('');
   
     const [
       isSubmitting,
@@ -69,6 +84,46 @@ import {
   
     const submissionLock =
       useRef(false);
+  
+    async function saveForSynchronization() {
+      try {
+        const pendingIncident =
+          await savePendingFieldIncident({
+            ownerId:
+              user?.id,
+  
+            draft,
+          });
+  
+        setSubmittedIncident({
+          clientIncidentId:
+            pendingIncident.clientIncidentId,
+  
+          referenceNumber:
+            null,
+  
+          status:
+            'PENDING_SYNC',
+  
+          createdAt:
+            pendingIncident.createdAt,
+        });
+  
+        clearDraft();
+  
+        navigate(
+          '/ranger/incidents/confirmation',
+        );
+  
+        return true;
+      } catch {
+        setError(
+          'The incident could not be saved for offline synchronization. Keep this page open and try again.',
+        );
+  
+        return false;
+      }
+    }
   
     async function submit() {
       if (
@@ -84,6 +139,19 @@ import {
       setError('');
   
       try {
+        /*
+         * If the browser already knows that
+         * it is offline, do not attempt the API.
+         */
+        if (
+          typeof navigator !== 'undefined'
+          && navigator.onLine === false
+        ) {
+          await saveForSynchronization();
+  
+          return;
+        }
+  
         const incident =
           await submitFieldIncident(
             draft,
@@ -99,8 +167,22 @@ import {
           '/ranger/incidents/confirmation',
         );
       } catch (requestError) {
+        /*
+         * The browser may report online but the
+         * API can still be unreachable.
+         */
+        if (
+          requestError
+          instanceof FieldIncidentNetworkError
+        ) {
+          await saveForSynchronization();
+  
+          return;
+        }
+  
         setError(
-          requestError.message,
+          requestError.message
+          || 'The field incident could not be submitted.',
         );
       } finally {
         submissionLock.current =
@@ -394,7 +476,7 @@ import {
               onClick={submit}
             >
               {isSubmitting
-                ? 'Submitting...'
+                ? 'Saving...'
                 : 'Submit Report'}
             </button>
           </div>
