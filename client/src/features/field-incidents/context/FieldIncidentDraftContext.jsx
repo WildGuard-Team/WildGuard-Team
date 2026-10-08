@@ -53,33 +53,39 @@ import {
     );
   
     const value = useMemo(
-      () => ({
-        draft,
-  
-        updateDraft(changes) {
-          setDraft((current) => ({
-            ...current,
-            ...changes,
-          }));
-        },
-  
-        updateLocation(changes) {
-          setDraft((current) => ({
-            ...current,
-  
-            location: {
-              ...current.location,
+        () => ({
+          draft,
+      
+          updateDraft(changes) {
+            setDraft((current) => ({
+              ...current,
               ...changes,
-            },
-          }));
-        },
-  
-        resetDraft() {
-          setDraft(createEmptyDraft());
-        },
-      }),
-      [draft],
-    );
+            }));
+          },
+      
+          updateLocation(changes) {
+            setDraft((current) => ({
+              ...current,
+              location: {
+                ...current.location,
+                ...changes,
+              },
+            }));
+          },
+      
+          setEvidence(evidence) {
+            setDraft((current) => ({
+              ...current,
+              evidence,
+            }));
+          },
+      
+          resetDraft() {
+            setDraft(createEmptyDraft());
+          },
+        }),
+        [draft],
+      );
   
     return (
       <FieldIncidentDraftContext.Provider

@@ -13,6 +13,7 @@ import MemberLandingPage from './pages/MemberLandingPage.jsx';
 import RangerDashboardPage from './features/field-incidents/pages/RangerDashboardPage.jsx';
 import FieldIncidentTypePage from './features/field-incidents/pages/FieldIncidentTypePage.jsx';
 import FieldIncidentDetailsPage from './features/field-incidents/pages/FieldIncidentDetailsPage.jsx';
+import FieldIncidentEvidencePage from './features/field-incidents/pages/FieldIncidentEvidencePage.jsx';
 
 import {
   FieldIncidentDraftProvider,
@@ -338,6 +339,17 @@ function AppRoutes() {
   /*
    * Park Ranger routes
    */
+  if (
+    user?.role === 'PARK_RANGER'
+    && path === '/ranger/incidents/evidence'
+  ) {
+    return (
+      <FieldIncidentEvidencePage
+        navigate={navigate}
+      />
+    );
+  }
+
   if (
     user?.role === 'PARK_RANGER'
     && path === '/ranger/incidents/details'
