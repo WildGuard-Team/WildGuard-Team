@@ -9,7 +9,13 @@ import RangerRegisterPage from './features/auth/pages/RangerRegisterPage.jsx';
 import PendingRangersPage from './features/auth/pages/PendingRangersPage.jsx';
 
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
+
 import RangerDashboardPage from './features/field-incidents/pages/RangerDashboardPage.jsx';
+import FieldIncidentTypePage from './features/field-incidents/pages/FieldIncidentTypePage.jsx';
+
+import {
+  FieldIncidentDraftProvider,
+} from './features/field-incidents/context/FieldIncidentDraftContext.jsx';
 
 import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
 import { useReportDraft } from './features/community-reports/context/useReportDraft.js';
@@ -27,14 +33,19 @@ export default function App() {
   return (
     <AuthProvider>
       <ReportDraftProvider>
-        <AppRoutes />
+        <FieldIncidentDraftProvider>
+          <AppRoutes />
+        </FieldIncidentDraftProvider>
       </ReportDraftProvider>
     </AuthProvider>
   );
 }
 
 function AppRoutes() {
-  const { user, isCheckingSession } = useAuth();
+  const {
+    user,
+    isCheckingSession,
+  } = useAuth();
 
   const {
     draft,
@@ -75,7 +86,9 @@ function AppRoutes() {
 
     if (user?.role === 'PARK_MANAGER') {
       homePath = '/manager/reports';
-    } else if (user?.role === 'PARK_RANGER') {
+    } else if (
+      user?.role === 'PARK_RANGER'
+    ) {
       homePath = '/ranger';
     }
 
@@ -291,6 +304,7 @@ function AppRoutes() {
         aria-live="polite"
       >
         <span className="loading-mark" />
+
         Checking your WildGuard session…
       </main>
     );
@@ -323,6 +337,17 @@ function AppRoutes() {
   /*
    * Park Ranger routes
    */
+  if (
+    user?.role === 'PARK_RANGER'
+    && path === '/ranger/incidents/new'
+  ) {
+    return (
+      <FieldIncidentTypePage
+        navigate={navigate}
+      />
+    );
+  }
+
   if (
     user?.role === 'PARK_RANGER'
     && path === '/ranger'

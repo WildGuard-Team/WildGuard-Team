@@ -130,3 +130,114 @@ body.community-page-active #root { height: 100%; min-height: 0; background: #eff
 .review-evidence { grid-column: 1 / -1; }.review-evidence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }.evidence-preview-card.is-compact .evidence-preview-media { height: 105px; }.evidence-preview-card.is-compact > p { font-size: .78rem; }.evidence-preview-card.is-compact > small { font-size: .72rem; }
 @media (max-width: 760px) { .evidence-panel { padding: 18px; }.evidence-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.evidence-actions { flex-wrap: wrap; }.evidence-actions > button { flex: 1 1 160px; }.review-evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 460px) { .evidence-panel { padding: 15px; }.evidence-drop-zone { min-height: 230px; }.evidence-preview-grid, .review-evidence-grid { grid-template-columns: 1fr; }.evidence-preview-media { height: 175px; }.evidence-actions { display: grid; grid-template-columns: 1fr; }.evidence-actions > button { width: 100%; }.evidence-skip { order: 3; } }
+
+/* Park Ranger - Field Incident Reporting */
+
+.field-incident-type-grid {
+    display: grid;
+    max-width: 1050px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #deebe5;
+    border-radius: 10px;
+    box-shadow: 0 7px 18px rgba(24, 65, 53, 0.05);
+  }
+  
+  .field-incident-type-card {
+    position: relative;
+    display: grid;
+    min-height: 165px;
+    align-content: start;
+    gap: 10px;
+    padding: 18px;
+    color: #15352b;
+    background: #fbfdfc;
+    border: 1px solid #d4e2dc;
+    border-radius: 9px;
+    text-align: left;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  
+  .field-incident-type-card:hover {
+    transform: translateY(-2px);
+    border-color: #72aa92;
+    box-shadow: 0 6px 16px rgba(8, 91, 60, 0.09);
+  }
+  
+  .field-incident-type-card.is-selected {
+    background: #edf9f3;
+    border-color: #087248;
+    box-shadow: 0 0 0 2px rgba(8, 114, 72, 0.14);
+  }
+  
+  .field-incident-type-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: #087248;
+    background: #e2f4eb;
+    border-radius: 9px;
+  }
+  
+  .field-incident-type-card strong {
+    padding-right: 25px;
+    font-size: 1rem;
+  }
+  
+  .field-incident-type-card small {
+    color: #65786f;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  
+  .field-incident-radio {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: grid;
+    width: 23px;
+    height: 23px;
+    place-items: center;
+    color: #fff;
+    background: #fff;
+    border: 2px solid #9aaba3;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+  
+  .field-incident-type-card.is-selected
+    .field-incident-radio {
+    background: #087248;
+    border-color: #087248;
+  }
+  
+  .field-incident-type-card:focus-visible {
+    outline: 3px solid rgba(8, 114, 72, 0.3);
+    outline-offset: 3px;
+  }
+  
+  @media (max-width: 1100px) {
+    .field-incident-type-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .field-incident-type-grid {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+  
+    .field-incident-type-card {
+      min-height: 135px;
+    }
+  }
