@@ -9,6 +9,7 @@ import RangerRegisterPage from './features/auth/pages/RangerRegisterPage.jsx';
 import PendingRangersPage from './features/auth/pages/PendingRangersPage.jsx';
 
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
+import RangerDashboardPage from './features/field-incidents/pages/RangerDashboardPage.jsx';
 
 import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
 import { useReportDraft } from './features/community-reports/context/useReportDraft.js';
@@ -70,11 +71,18 @@ function AppRoutes() {
       return;
     }
 
-    const homePath =
-      user?.role === 'PARK_MANAGER'
-        ? '/manager/reports'
-        : '/member';
+    let homePath = '/member';
 
+    if (user?.role === 'PARK_MANAGER') {
+      homePath = '/manager/reports';
+    } else if (user?.role === 'PARK_RANGER') {
+      homePath = '/ranger';
+    }
+
+    /*
+     * Logged-in users should not stay
+     * on public authentication pages.
+     */
     if (
       user
       && (
@@ -87,7 +95,14 @@ function AppRoutes() {
       navigate(homePath, {
         replace: true,
       });
-    } else if (
+
+      return;
+    }
+
+    /*
+     * Park Manager route protection.
+     */
+    if (
       user?.role === 'PARK_MANAGER'
       && !path.startsWith('/manager/')
     ) {
@@ -97,10 +112,39 @@ function AppRoutes() {
           replace: true,
         },
       );
-    } else if (
+
+      return;
+    }
+
+    /*
+     * Park Ranger route protection.
+     */
+    if (
+      user?.role === 'PARK_RANGER'
+      && !path.startsWith('/ranger')
+    ) {
+      navigate(
+        '/ranger',
+        {
+          replace: true,
+        },
+      );
+
+      return;
+    }
+
+    /*
+     * Community Member cannot access
+     * Manager or Ranger pages.
+     */
+    if (
       user
       && user.role !== 'PARK_MANAGER'
-      && path.startsWith('/manager/')
+      && user.role !== 'PARK_RANGER'
+      && (
+        path.startsWith('/manager/')
+        || path.startsWith('/ranger')
+      )
     ) {
       navigate(
         '/member',
@@ -108,8 +152,13 @@ function AppRoutes() {
           replace: true,
         },
       );
+
+      return;
     }
 
+    /*
+     * Unauthenticated route protection.
+     */
     if (
       !user
       && path !== '/login'
@@ -129,10 +178,14 @@ function AppRoutes() {
     user,
   ]);
 
+  /*
+   * Community report draft protection.
+   */
   useEffect(() => {
     if (
       isCheckingSession
       || !user
+      || user.role !== 'COMMUNITY_MEMBER'
     ) {
       return;
     }
@@ -268,10 +321,24 @@ function AppRoutes() {
   }
 
   /*
-   * Community Member report routes
+   * Park Ranger routes
    */
   if (
-    user
+    user?.role === 'PARK_RANGER'
+    && path === '/ranger'
+  ) {
+    return (
+      <RangerDashboardPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  /*
+   * Community Member routes
+   */
+  if (
+    user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/type'
   ) {
     return (
@@ -282,7 +349,7 @@ function AppRoutes() {
   }
 
   if (
-    user
+    user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/details'
   ) {
     return (
@@ -293,7 +360,7 @@ function AppRoutes() {
   }
 
   if (
-    user
+    user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/evidence'
   ) {
     return (
@@ -304,7 +371,7 @@ function AppRoutes() {
   }
 
   if (
-    user
+    user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/review'
   ) {
     return (
@@ -315,7 +382,7 @@ function AppRoutes() {
   }
 
   if (
-    user
+    user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/confirmation'
   ) {
     return (
@@ -325,10 +392,9 @@ function AppRoutes() {
     );
   }
 
-  /*
-   * Authenticated non-manager users
-   */
-  if (user) {
+  if (
+    user?.role === 'COMMUNITY_MEMBER'
+  ) {
     return (
       <MemberLandingPage
         navigate={navigate}
@@ -337,7 +403,7 @@ function AppRoutes() {
   }
 
   /*
-   * Public registration routes
+   * Public routes
    */
   if (
     path === '/register-ranger'
