@@ -12,6 +12,7 @@ import ReportDetailsPage from './features/community-reports/pages/ReportDetailsP
 import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
+import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
 
 export default function App() {
   return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
@@ -57,6 +58,7 @@ function AppRoutes() {
     return <main className="session-loading" aria-live="polite"><span className="loading-mark" />Checking your WildGuard session…</main>;
   }
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
+  if (user && path === '/reports/my-reports') return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
   if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
   if (user && path === '/reports/evidence') return <ReportEvidencePage navigate={navigate} />;
   if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;

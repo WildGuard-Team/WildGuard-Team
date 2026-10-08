@@ -5,10 +5,14 @@ import { createCommunityReportController } from '../controllers/create-community
 import { searchLocationController } from '../controllers/search-location.controller.js';
 import { reverseLocationController } from '../controllers/reverse-location.controller.js';
 import { parseEvidenceUpload } from '../middleware/evidence-upload.middleware.js';
+import { myReportsController } from '../controllers/my-reports.controller.js';
 
 export function createCommunityReportRouter(communityReports, users, { jwtSecret, geocoding, cloudinary, nodeEnv }) {
   const router = Router();
   const submitReport = createCommunityReportController(communityReports, { cloudinary, nodeEnv });
+  const myReports = myReportsController(communityReports);
+  router.get('/my-reports', requireAuthentication(jwtSecret), requireCommunityMember(users),
+    (req, res, next) => Promise.resolve(myReports(req, res)).catch(next));
   const searchLocations = searchLocationController(geocoding);
   const reverseLocation = reverseLocationController(geocoding);
   router.get('/locations/search', requireAuthentication(jwtSecret), requireCommunityMember(users),

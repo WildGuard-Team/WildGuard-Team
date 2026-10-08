@@ -3,19 +3,22 @@ import FormAlert from '../../auth/components/FormAlert.jsx';
 import ReportLayout from '../components/ReportLayout.jsx';
 import SubmissionOverlay from '../components/SubmissionOverlay.jsx';
 import { useReportDraft } from '../context/useReportDraft.js';
-import { submitReport } from '../services/report.service.js';
+import { prepareReportSubmission, ReportNetworkError, submitReport } from '../services/report.service.js';
+import { savePendingReport } from '../services/pending-reports.indexeddb.js';
+import { useAuth } from '../../../context/useAuth.js';
 import { reportTypeLabel } from '../utils/report-options.js';
 import CommunityIcon from '../components/CommunityIcon.jsx';
 import ReviewAttachments from '../components/ReviewAttachments.jsx';
 import { evidenceFileKey, validateEvidenceSelection } from '../validation/evidence.validation.js';
-import { hasCompleteCommunityReportDetails } from '../context/community-report-draft.storage.js';
+import { hasCompleteCommunityReportDetails, saveCommunityReportDraft } from '../context/community-report-draft.storage.js';
 import { parseIncidentDateTime } from '../validation/incidentDateTime.validation.js';
 import './review-report.css';
 
 const locationSourceLabel = { GPS: 'Current GPS location', MAP: 'Selected on map', MANUAL: 'Entered manually' };
 
 export default function ReviewReportPage({ navigate }) {
-  const { draft, setSubmittedReport, clearDraft, setEvidence, continueWithoutEvidence, evidenceHydrationStatus, evidenceRestoreError } = useReportDraft();
+  const { draft, updateDraft, setSubmittedReport, clearDraft, setEvidence, continueWithoutEvidence, evidenceHydrationStatus, evidenceRestoreError } = useReportDraft();
+  const { user } = useAuth();
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -57,7 +60,23 @@ export default function ReviewReportPage({ navigate }) {
     submissionLock.current = true;
     setIsSubmitting(true); setError('');
     try {
-      const report = await submitReport(draft);
+      const clientSubmissionId = draft.clientSubmissionId ?? crypto.randomUUID();
+      const identifiedDraft = { ...draft, clientSubmissionId };
+      updateDraft({ clientSubmissionId });
+      saveCommunityReportDraft(identifiedDraft);
+      const submission = prepareReportSubmission(identifiedDraft);
+      let report;
+      try {
+        if (navigator.onLine === false) throw new ReportNetworkError();
+        report = await submitReport(submission);
+      } catch (requestError) {
+        if (!(requestError instanceof ReportNetworkError)) throw requestError;
+        try { await savePendingReport(user.id, submission); }
+        catch { throw new Error('Your report could not be saved on this device. Keep this page open and try again when connected.'); }
+        clearDraft();
+        navigate('/reports/my-reports', { message: 'Report saved on this device. It will be ready to send when you reconnect.' });
+        return;
+      }
       setSubmittedReport(report);
       clearDraft();
       navigate('/reports/confirmation');
