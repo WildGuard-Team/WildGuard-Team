@@ -24,6 +24,25 @@ export function registerMember({ fullName, email, password }) {
   return request('/register', { method: 'POST', body: JSON.stringify({ fullName, email, password }) });
 }
 
+export function registerRanger({
+  fullName,
+  email,
+  password,
+  rangerId,
+  assignedPark,
+}) {
+  return request('/register-ranger', {
+    method: 'POST',
+    body: JSON.stringify({
+      fullName,
+      email,
+      password,
+      rangerId,
+      assignedPark,
+    }),
+  });
+}
+
 export function loginMember({ email, password }) {
   return request('/login', { method: 'POST', body: JSON.stringify({ email, password }) });
 }

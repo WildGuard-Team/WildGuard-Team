@@ -1,72 +1,345 @@
 import { useEffect, useState } from 'react';
+
 import { AuthProvider } from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth.js';
+
 import LoginPage from './features/auth/pages/LoginPage.jsx';
 import RegisterPage from './features/auth/pages/RegisterPage.jsx';
+import RangerRegisterPage from './features/auth/pages/RangerRegisterPage.jsx';
+
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
+
 import { ReportDraftProvider } from './features/community-reports/context/ReportDraftContext.jsx';
 import { useReportDraft } from './features/community-reports/context/useReportDraft.js';
 import { hasCompleteCommunityReportDetails } from './features/community-reports/context/community-report-draft.storage.js';
+
 import ReportTypePage from './features/community-reports/pages/ReportTypePage.jsx';
 import ReportDetailsPage from './features/community-reports/pages/ReportDetailsPage.jsx';
 import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
+
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 
 export default function App() {
-  return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
+  return (
+    <AuthProvider>
+      <ReportDraftProvider>
+        <AppRoutes />
+      </ReportDraftProvider>
+    </AuthProvider>
+  );
 }
 
 function AppRoutes() {
   const { user, isCheckingSession } = useAuth();
-  const { draft, evidenceHydrationStatus } = useReportDraft();
-  const [path, setPath] = useState(window.location.pathname);
+
+  const {
+    draft,
+    evidenceHydrationStatus,
+  } = useReportDraft();
+
+  const [path, setPath] = useState(
+    window.location.pathname,
+  );
+
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const handlePopState = () => { setPath(window.location.pathname); setMessage(''); };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    const handlePopState = () => {
+      setPath(window.location.pathname);
+      setMessage('');
+    };
+
+    window.addEventListener(
+      'popstate',
+      handlePopState,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'popstate',
+        handlePopState,
+      );
+    };
   }, []);
 
   useEffect(() => {
-    if (isCheckingSession) return;
-    const homePath = user?.role === 'PARK_MANAGER' ? '/manager/reports' : '/member';
-    if (user && (path === '/login' || path === '/register' || path === '/')) navigate(homePath, { replace: true });
-    else if (user?.role === 'PARK_MANAGER' && path !== '/manager/reports') navigate('/manager/reports', { replace: true });
-    else if (user && user.role !== 'PARK_MANAGER' && path.startsWith('/manager/')) navigate('/member', { replace: true });
-    if (!user && path !== '/login' && path !== '/register') navigate('/login', { replace: true });
-  }, [isCheckingSession, path, user]);
+    if (isCheckingSession) {
+      return;
+    }
+
+    const homePath =
+      user?.role === 'PARK_MANAGER'
+        ? '/manager/reports'
+        : '/member';
+
+    if (
+      user
+      && (
+        path === '/login'
+        || path === '/register'
+        || path === '/register-ranger'
+        || path === '/'
+      )
+    ) {
+      navigate(homePath, {
+        replace: true,
+      });
+    } else if (
+      user?.role === 'PARK_MANAGER'
+      && path !== '/manager/reports'
+    ) {
+      navigate(
+        '/manager/reports',
+        {
+          replace: true,
+        },
+      );
+    } else if (
+      user
+      && user.role !== 'PARK_MANAGER'
+      && path.startsWith('/manager/')
+    ) {
+      navigate(
+        '/member',
+        {
+          replace: true,
+        },
+      );
+    }
+
+    if (
+      !user
+      && path !== '/login'
+      && path !== '/register'
+      && path !== '/register-ranger'
+    ) {
+      navigate(
+        '/login',
+        {
+          replace: true,
+        },
+      );
+    }
+  }, [
+    isCheckingSession,
+    path,
+    user,
+  ]);
 
   useEffect(() => {
-    if (isCheckingSession || !user) return;
-    if (path === '/reports/details' && !draft.reportType) navigate('/reports/type', { replace: true });
-    else if ((path === '/reports/evidence' || path === '/reports/review') && !hasCompleteCommunityReportDetails(draft)) {
-      navigate(draft.reportType ? '/reports/details' : '/reports/type', { replace: true });
-    } else if (path === '/reports/review' && draft.evidenceRestoreRequired && evidenceHydrationStatus !== 'loading' && evidenceHydrationStatus !== 'idle') {
-      navigate('/reports/evidence', { replace: true });
+    if (
+      isCheckingSession
+      || !user
+    ) {
+      return;
     }
-  }, [draft, evidenceHydrationStatus, isCheckingSession, path, user]);
 
-  function navigate(nextPath, options = {}) {
-    if (window.location.pathname !== nextPath) {
-      window.history[options.replace ? 'replaceState' : 'pushState']({}, '', nextPath);
+    if (
+      path === '/reports/details'
+      && !draft.reportType
+    ) {
+      navigate(
+        '/reports/type',
+        {
+          replace: true,
+        },
+      );
+    } else if (
+      (
+        path === '/reports/evidence'
+        || path === '/reports/review'
+      )
+      && !hasCompleteCommunityReportDetails(
+        draft,
+      )
+    ) {
+      navigate(
+        draft.reportType
+          ? '/reports/details'
+          : '/reports/type',
+        {
+          replace: true,
+        },
+      );
+    } else if (
+      path === '/reports/review'
+      && draft.evidenceRestoreRequired
+      && evidenceHydrationStatus !== 'loading'
+      && evidenceHydrationStatus !== 'idle'
+    ) {
+      navigate(
+        '/reports/evidence',
+        {
+          replace: true,
+        },
+      );
+    }
+  }, [
+    draft,
+    evidenceHydrationStatus,
+    isCheckingSession,
+    path,
+    user,
+  ]);
+
+  function navigate(
+    nextPath,
+    options = {},
+  ) {
+    if (
+      window.location.pathname
+      !== nextPath
+    ) {
+      window.history[
+        options.replace
+          ? 'replaceState'
+          : 'pushState'
+      ](
+        {},
+        '',
+        nextPath,
+      );
+
       setPath(nextPath);
     }
-    setMessage(options.message ?? '');
+
+    setMessage(
+      options.message ?? '',
+    );
   }
 
-  if (isCheckingSession || (user && (path === '/login' || path === '/register' || path === '/')) || (!user && path !== '/login' && path !== '/register')) {
-    return <main className="session-loading" aria-live="polite"><span className="loading-mark" />Checking your WildGuard session…</main>;
+  const isPublicPath =
+    path === '/login'
+    || path === '/register'
+    || path === '/register-ranger';
+
+  if (
+    isCheckingSession
+    || (
+      user
+      && (
+        path === '/login'
+        || path === '/register'
+        || path === '/register-ranger'
+        || path === '/'
+      )
+    )
+    || (
+      !user
+      && !isPublicPath
+    )
+  ) {
+    return (
+      <main
+        className="session-loading"
+        aria-live="polite"
+      >
+        <span className="loading-mark" />
+
+        Checking your WildGuard session…
+      </main>
+    );
   }
-  if (user?.role === 'PARK_MANAGER') return <ConservationReportsPage navigate={navigate} />;
-  if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
-  if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
-  if (user && path === '/reports/evidence') return <ReportEvidencePage navigate={navigate} />;
-  if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;
-  if (user && path === '/reports/confirmation') return <ReportConfirmationPage navigate={navigate} />;
-  if (user) return <MemberLandingPage navigate={navigate} />;
-  if (path === '/register') return <RegisterPage navigate={navigate} />;
-  return <LoginPage navigate={navigate} successMessage={message} />;
+
+  if (
+    user?.role === 'PARK_MANAGER'
+  ) {
+    return (
+      <ConservationReportsPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user
+    && path === '/reports/type'
+  ) {
+    return (
+      <ReportTypePage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user
+    && path === '/reports/details'
+  ) {
+    return (
+      <ReportDetailsPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user
+    && path === '/reports/evidence'
+  ) {
+    return (
+      <ReportEvidencePage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user
+    && path === '/reports/review'
+  ) {
+    return (
+      <ReviewReportPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user
+    && path === '/reports/confirmation'
+  ) {
+    return (
+      <ReportConfirmationPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (user) {
+    return (
+      <MemberLandingPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    path === '/register-ranger'
+  ) {
+    return (
+      <RangerRegisterPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    path === '/register'
+  ) {
+    return (
+      <RegisterPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  return (
+    <LoginPage
+      navigate={navigate}
+      successMessage={message}
+    />
+  );
 }
