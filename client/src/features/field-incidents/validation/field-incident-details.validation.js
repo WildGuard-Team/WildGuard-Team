@@ -10,7 +10,7 @@ export function parseCoordinates(value) {
       .split(',')
       .map((part) => part.trim());
   
-    if (parts.length !== 2) {
+    if (parts.length !== 2 || parts.some((part) => !part)) {
       return null;
     }
   

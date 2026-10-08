@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 
 import {
   validateFieldIncidentEvidence,
+  uploadFieldIncidentEvidence,
 } from './field-incident-evidence.service.js';
+import { createFieldIncident } from './create-field-incident.service.js';
 
 function createFile({
   mimetype = 'image/jpeg',
@@ -18,6 +20,126 @@ function createFile({
     originalname,
   };
 }
+
+function createCloudinaryBatch({ failAt, uploadError, failedDeletion } = {}) {
+  const calls = { uploads: [], deletions: [] };
+  const cloudinary = {
+    uploader: {
+      upload_stream(options, callback) {
+        const attempt = calls.uploads.push(options);
+        return {
+          on() { return this; },
+          end() {
+            if (attempt === failAt) {
+              callback(uploadError);
+              return;
+            }
+
+            callback(null, {
+              public_id: `wildguard/batch-${attempt}`,
+              secure_url: `https://example.com/batch-${attempt}`,
+              resource_type: options.resource_type,
+              bytes: 1024,
+            });
+          },
+        };
+      },
+      async destroy(publicId, options) {
+        calls.deletions.push({ publicId, options });
+        if (publicId === failedDeletion) {
+          throw new Error('Cloudinary cleanup failed');
+        }
+        return { result: 'ok' };
+      },
+    },
+  };
+  return { cloudinary, calls };
+}
+
+test('deletes the first upload when the second upload fails and rethrows the original error', async () => {
+  const uploadError = new Error('Second upload failed');
+  const { cloudinary, calls } = createCloudinaryBatch({ failAt: 2, uploadError });
+
+  await assert.rejects(
+    () => uploadFieldIncidentEvidence([createFile(), createFile()], cloudinary),
+    (error) => error === uploadError,
+  );
+
+  assert.equal(calls.uploads.length, 2);
+  assert.deepEqual(calls.deletions, [{
+    publicId: 'wildguard/batch-1',
+    options: { resource_type: 'image' },
+  }]);
+});
+
+test('attempts every partial-batch deletion even when cleanup fails', async () => {
+  const uploadError = new Error('Third upload failed');
+  const { cloudinary, calls } = createCloudinaryBatch({
+    failAt: 3,
+    uploadError,
+    failedDeletion: 'wildguard/batch-1',
+  });
+  const files = [createFile(), createFile({ mimetype: 'video/mp4' }), createFile()];
+
+  await assert.rejects(
+    () => uploadFieldIncidentEvidence(files, cloudinary),
+    (error) => error === uploadError,
+  );
+
+  assert.deepEqual(calls.deletions, [
+    { publicId: 'wildguard/batch-1', options: { resource_type: 'image' } },
+    { publicId: 'wildguard/batch-2', options: { resource_type: 'video' } },
+  ]);
+});
+
+test('does not delete evidence after a complete successful upload batch', async () => {
+  const { cloudinary, calls } = createCloudinaryBatch();
+  const evidence = await uploadFieldIncidentEvidence([createFile(), createFile()], cloudinary);
+
+  assert.equal(evidence.length, 2);
+  assert.equal(evidence[0].publicId, 'wildguard/batch-1');
+  assert.equal(evidence[1].publicId, 'wildguard/batch-2');
+  assert.deepEqual(calls.deletions, []);
+});
+
+test('does not attempt cleanup when the first upload fails', async () => {
+  const uploadError = new Error('First upload failed');
+  const { cloudinary, calls } = createCloudinaryBatch({ failAt: 1, uploadError });
+
+  await assert.rejects(
+    () => uploadFieldIncidentEvidence([createFile()], cloudinary),
+    (error) => error === uploadError,
+  );
+
+  assert.deepEqual(calls.deletions, []);
+});
+
+test('partial upload cleanup preserves the submission HTTP error and skips persistence', async () => {
+  const { cloudinary, calls } = createCloudinaryBatch({
+    failAt: 2,
+    uploadError: new Error('Second upload failed'),
+  });
+  let createCalls = 0;
+  const repository = {
+    async findByClientIncidentId() { return null; },
+    async create() { createCalls += 1; },
+  };
+
+  await assert.rejects(
+    () => createFieldIncident(
+      { clientIncidentId: 'partial-upload' },
+      { id: 'ranger-user-001' },
+      repository,
+      [createFile(), createFile()],
+      cloudinary,
+      'test',
+    ),
+    { status: 503, message: 'Evidence upload is temporarily unavailable.' },
+  );
+
+  assert.equal(createCalls, 0);
+  assert.equal(calls.deletions.length, 1);
+});
 
 test(
   'accepts valid JPEG evidence',

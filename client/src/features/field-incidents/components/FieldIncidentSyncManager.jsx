@@ -15,6 +15,8 @@ import {
     syncPendingFieldIncidents,
   } from '../services/field-incident-sync.service.js';
   
+  import { FIELD_INCIDENT_PENDING_SYNC } from '../config/field-incident.constants.js';
+
   export default function FieldIncidentSyncManager() {
     const {
       user,
@@ -80,7 +82,7 @@ import {
            */
           if (
             submittedIncident?.status
-              === 'PENDING_SYNC'
+              === FIELD_INCIDENT_PENDING_SYNC
             && submittedIncident.clientIncidentId
           ) {
             const synchronizedIncident =

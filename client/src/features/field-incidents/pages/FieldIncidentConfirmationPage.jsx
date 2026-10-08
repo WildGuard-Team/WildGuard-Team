@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { FIELD_INCIDENT_PENDING_SYNC } from '../config/field-incident.constants.js';
+
 import RangerLayout
   from '../components/RangerLayout.jsx';
 
@@ -13,20 +16,19 @@ export default function FieldIncidentConfirmationPage({
     resetDraft,
   } = useFieldIncidentDraft();
 
-  if (!submittedIncident) {
-    navigate(
-      '/ranger',
-      {
-        replace: true,
-      },
-    );
+  useEffect(() => {
+    if (!submittedIncident) {
+      navigate('/ranger', { replace: true });
+    }
+  }, [navigate, submittedIncident]);
 
+  if (!submittedIncident) {
     return null;
   }
 
   const isPendingSync =
     submittedIncident.status
-    === 'PENDING_SYNC';
+    === FIELD_INCIDENT_PENDING_SYNC;
 
   function reportAnother() {
     resetDraft();
