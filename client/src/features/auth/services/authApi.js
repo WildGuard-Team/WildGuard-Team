@@ -54,3 +54,16 @@ export function getCurrentMember() {
 export function logoutMember() {
   return request('/logout', { method: 'POST' });
 }
+
+export function getPendingRangers() {
+  return request('/rangers/pending', {
+    method: 'GET',
+  });
+}
+
+export function updateRangerApproval(userId, status) {
+  return request(`/rangers/${userId}/approval`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}

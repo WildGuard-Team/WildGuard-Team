@@ -6,6 +6,7 @@ import { useAuth } from './context/useAuth.js';
 import LoginPage from './features/auth/pages/LoginPage.jsx';
 import RegisterPage from './features/auth/pages/RegisterPage.jsx';
 import RangerRegisterPage from './features/auth/pages/RangerRegisterPage.jsx';
+import PendingRangersPage from './features/auth/pages/PendingRangersPage.jsx';
 
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
 
@@ -88,7 +89,7 @@ function AppRoutes() {
       });
     } else if (
       user?.role === 'PARK_MANAGER'
-      && path !== '/manager/reports'
+      && !path.startsWith('/manager/')
     ) {
       navigate(
         '/manager/reports',
@@ -237,9 +238,22 @@ function AppRoutes() {
         aria-live="polite"
       >
         <span className="loading-mark" />
-
         Checking your WildGuard session…
       </main>
+    );
+  }
+
+  /*
+   * Park Manager routes
+   */
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/rangers'
+  ) {
+    return (
+      <PendingRangersPage
+        navigate={navigate}
+      />
     );
   }
 
@@ -253,6 +267,9 @@ function AppRoutes() {
     );
   }
 
+  /*
+   * Community Member report routes
+   */
   if (
     user
     && path === '/reports/type'
@@ -308,6 +325,9 @@ function AppRoutes() {
     );
   }
 
+  /*
+   * Authenticated non-manager users
+   */
   if (user) {
     return (
       <MemberLandingPage
@@ -316,6 +336,9 @@ function AppRoutes() {
     );
   }
 
+  /*
+   * Public registration routes
+   */
   if (
     path === '/register-ranger'
   ) {
