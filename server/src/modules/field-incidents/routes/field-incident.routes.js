@@ -11,6 +11,10 @@ import {
   } from '../middleware/require-park-ranger.middleware.js';
   
   import {
+    parseFieldIncidentEvidence,
+  } from '../middleware/field-incident-evidence.middleware.js';
+  
+  import {
     createFieldIncidentController,
   } from '../controllers/create-field-incident.controller.js';
   
@@ -19,23 +23,35 @@ import {
     users,
     {
       jwtSecret,
+      cloudinary,
+      nodeEnv,
     },
   ) {
-    const router = Router();
+    const router =
+      Router();
   
     const submitFieldIncident =
       createFieldIncidentController(
         fieldIncidents,
+        {
+          cloudinary,
+          nodeEnv,
+        },
       );
   
     router.post(
       '/',
+  
       requireAuthentication(
         jwtSecret,
       ),
+  
       requireParkRanger(
         users,
       ),
+  
+      parseFieldIncidentEvidence,
+  
       (req, res, next) =>
         Promise.resolve(
           submitFieldIncident(

@@ -86,7 +86,8 @@ export function createApp({
 
   nodeEnv = 'test',
 
-  users = createUserRepository(),
+  users =
+    createUserRepository(),
 
   communityReports =
     createCommunityReportRepository(),
@@ -123,24 +124,36 @@ export function createApp({
   cloudinaryApiKey,
   cloudinaryApiSecret,
 }) {
-  const app = express();
+  const app =
+    express();
 
-  app.disable('x-powered-by');
+  app.disable(
+    'x-powered-by',
+  );
 
-  if (nodeEnv === 'production') {
-    app.set('trust proxy', 1);
+  if (
+    nodeEnv === 'production'
+  ) {
+    app.set(
+      'trust proxy',
+      1,
+    );
   }
 
   app.use(
     cors({
-      origin: clientOrigin,
-      credentials: true,
+      origin:
+        clientOrigin,
+
+      credentials:
+        true,
     }),
   );
 
   app.use(
     express.json({
-      limit: '100kb',
+      limit:
+        '100kb',
     }),
   );
 
@@ -184,7 +197,8 @@ export function createApp({
               : 'disconnected',
 
           timestamp:
-            new Date().toISOString(),
+            new Date()
+              .toISOString(),
         });
     },
   );
@@ -194,6 +208,7 @@ export function createApp({
    */
   app.use(
     '/api/auth',
+
     createAuthRouter(
       users,
       {
@@ -264,6 +279,11 @@ export function createApp({
       users,
       {
         jwtSecret,
+
+        cloudinary:
+          configuredCloudinary,
+
+        nodeEnv,
       },
     ),
   );
@@ -309,9 +329,11 @@ export function createApp({
   );
 
   /*
-   * Fallbacks
+   * Fallback handlers
    */
-  app.use(notFound);
+  app.use(
+    notFound,
+  );
 
   app.use(
     errorHandler,
