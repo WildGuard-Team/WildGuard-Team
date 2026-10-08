@@ -1,16 +1,20 @@
+// @vitest-environment node
+// Mechanical Vitest port of the four pre-existing native Node contracts.
 import assert from 'node:assert/strict';
-import test from 'node:test';
-import { prepareReportSubmission, submitReport, ReportNetworkError, getMyReport, ReportDetailsError } from '../src/features/community-reports/services/report.service.js';
-import { restorePendingSubmission } from '../src/features/community-reports/services/pending-reports.indexeddb.js';
+import { afterEach, test, vi } from 'vitest';
+import { prepareReportSubmission, submitReport, ReportNetworkError, getMyReport, ReportDetailsError } from '../../src/features/community-reports/services/report.service.js';
+import { restorePendingSubmission } from '../../src/features/community-reports/services/pending-reports.indexeddb.js';
 
-test('submission keeps its id, UTC instant and evidence metadata through offline restoration', async (t) => {
+afterEach(() => vi.restoreAllMocks());
+
+test('submission keeps its id, UTC instant and evidence metadata through offline restoration', async () => {
   const file = new File(['evidence'], 'photo.png', { type: 'image/png', lastModified: 123 });
   const submission = prepareReportSubmission({ clientSubmissionId: 'same-id', reportType: 'WILDLIFE_SIGHTING', description: 'An elephant was seen.', incidentDateTime: '2026-01-01T10:00', location: { source: 'MANUAL', coordinates: { latitude: 7, longitude: 80 }, manualLocation: 'Forest' }, evidence: [file] });
   const restored = restorePendingSubmission({ ...submission, evidence: [{ blob: file, name: file.name, type: file.type, lastModified: file.lastModified }] });
   assert.equal(restored.incidentDateTime, submission.incidentDateTime);
   assert.equal(restored.evidence[0].name, file.name);
   assert.equal(await restored.evidence[0].text(), 'evidence');
-  t.mock.method(globalThis, 'fetch', async (url, options) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
     assert.equal(url, '/api/reports');
     assert.equal(options.credentials, 'include');
     assert.equal(options.body.get('clientSubmissionId'), 'same-id');
@@ -21,22 +25,22 @@ test('submission keeps its id, UTC instant and evidence metadata through offline
   assert.equal((await submitReport(restored)).referenceNumber, 'WG-test');
 });
 
-test('only network failures qualify for local saving; validation and server errors do not', async (t) => {
+test('only network failures qualify for local saving; validation and server errors do not', async () => {
   const submission = { clientSubmissionId: 'same-id', evidence: [] };
-  const mock = t.mock.method(globalThis, 'fetch', async () => { throw new TypeError('Failed to fetch'); });
+  const mock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => { throw new TypeError('Failed to fetch'); });
   await assert.rejects(submitReport(submission), ReportNetworkError);
   for (const status of [400, 401, 403, 413, 500, 503]) {
-    mock.mock.mockImplementation(async () => Response.json({ error: { message: 'Invalid report' } }, { status }));
+    mock.mockImplementation(async () => Response.json({ error: { message: 'Invalid report' } }, { status }));
     await assert.rejects(submitReport(submission), (error) => !(error instanceof ReportNetworkError));
   }
-  mock.mock.mockImplementation(async () => Response.json({ report: { referenceNumber: 'WG-new' } }, { status: 201 }));
+  mock.mockImplementation(async () => Response.json({ report: { referenceNumber: 'WG-new' } }, { status: 201 }));
   assert.equal((await submitReport(submission)).referenceNumber, 'WG-new');
 });
 
-test('single report requests preserve the authenticated cookie and abort signal, with safely encoded IDs', async (t) => {
+test('single report requests preserve the authenticated cookie and abort signal, with safely encoded IDs', async () => {
   const controller = new AbortController();
   const report = { _id: '507f1f77bcf86cd799439011', description: 'Complete report description.' };
-  t.mock.method(globalThis, 'fetch', async (url, options) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
     assert.equal(url, '/api/reports/my-reports/invalid%2Fid%3FreporterId%3Dother');
     assert.equal(options.credentials, 'include');
     assert.equal(options.cache, 'no-store');
@@ -46,14 +50,14 @@ test('single report requests preserve the authenticated cookie and abort signal,
   assert.deepEqual(await getMyReport('invalid/id?reporterId=other', controller.signal), report);
 });
 
-test('single report errors distinguish invalid and missing reports without exposing server messages', async (t) => {
-  const fetchMock = t.mock.method(globalThis, 'fetch', async () => Response.json({ error: { message: 'private database detail' } }, { status: 404 }));
+test('single report errors distinguish invalid and missing reports without exposing server messages', async () => {
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => Response.json({ error: { message: 'private database detail' } }, { status: 404 }));
   for (const status of [400, 401, 403, 404, 500]) {
-    fetchMock.mock.mockImplementation(async () => Response.json({ error: { message: 'private database detail' } }, { status }));
+    fetchMock.mockImplementation(async () => Response.json({ error: { message: 'private database detail' } }, { status }));
     await assert.rejects(getMyReport('507f1f77bcf86cd799439011'), (error) => error instanceof ReportDetailsError && error.status === status && !error.message.includes('private database'));
   }
-  fetchMock.mock.mockImplementation(async () => Response.json({ reports: [] }));
+  fetchMock.mockImplementation(async () => Response.json({ reports: [] }));
   await assert.rejects(getMyReport('507f1f77bcf86cd799439011'), (error) => error instanceof ReportDetailsError && error.status === 502);
-  fetchMock.mock.mockImplementation(async () => { throw new DOMException('Cancelled', 'AbortError'); });
+  fetchMock.mockImplementation(async () => { throw new DOMException('Cancelled', 'AbortError'); });
   await assert.rejects(getMyReport('507f1f77bcf86cd799439011'), { name: 'AbortError' });
 });

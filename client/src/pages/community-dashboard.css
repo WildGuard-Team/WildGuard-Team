@@ -209,8 +209,6 @@
   align-items: center;
   justify-content: center;
   padding: 7px 12px;
-  color: #245b9e;
-  background: #e8f1ff;
   border-radius: 9px;
   font-size: .76rem;
   font-weight: 750;
@@ -219,8 +217,6 @@
   text-align: center;
 }
 
-.dashboard-status-pill--approved { color: #227445; background: #e4f5e9; }
-.dashboard-status-pill--rejected { color: #a43b38; background: #fde9e8; }
 .dashboard-recent-row__chevron { color: #071426; }
 
 .dashboard-recent-loading { display: grid; gap: 18px; padding: 18px 28px; }

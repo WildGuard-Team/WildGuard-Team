@@ -1,0 +1,22 @@
+.report-status-badge {
+  --status-background: #e8f1ff;
+  --status-color: #245b9e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 9px 13px;
+  border-radius: 7px;
+  background: var(--status-background);
+  color: var(--status-color);
+  font-size: .73rem;
+  font-weight: 750;
+  letter-spacing: .065em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.report-status-badge--approved { --status-background: #e4f5e9; --status-color: #227445; }
+.report-status-badge--rejected { --status-background: #fde9e8; --status-color: #a43b38; }
+.report-status-badge--offline_pending { --status-background: #fff2d7; --status-color: #85580b; }
+.report-status-badge--compact { padding: 5px 9px; font-size: .66rem; border-radius: 5px; }
+.report-status-badge--compact.report-status-badge--under_review { --status-background: #e6f0f3; --status-color: #416876; }

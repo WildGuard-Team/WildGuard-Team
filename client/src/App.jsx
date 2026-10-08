@@ -13,6 +13,7 @@ import ReportEvidencePage from './features/community-reports/pages/ReportEvidenc
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
+import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
 
 export default function App() {
   return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
@@ -59,6 +60,8 @@ function AppRoutes() {
   }
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
   if (user && path === '/reports/my-reports') return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
+  const reportDetailsMatch = path.match(/^\/reports\/my-reports\/([^/]+)\/?$/);
+  if (user && reportDetailsMatch) return <SubmittedReportDetailsPage key={`${user.id}:${reportDetailsMatch[1]}`} reportId={reportDetailsMatch[1]} navigate={navigate} />;
   if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
   if (user && path === '/reports/evidence') return <ReportEvidencePage navigate={navigate} />;
   if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;

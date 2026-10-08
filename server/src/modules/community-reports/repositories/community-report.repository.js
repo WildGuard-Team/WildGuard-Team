@@ -2,6 +2,11 @@ import { CommunityReport } from '../models/community-report.model.js';
 
 export function createCommunityReportRepository(model = CommunityReport) {
   return {
+    findByIdAndReporter(reportId, reporterId) {
+      return model.findOne({ _id: reportId, reporterId })
+        .select('_id referenceNumber reportType description location status createdAt incidentDateTime evidence')
+        .lean();
+    },
     findByReporter(reporterId, status) {
       const filter = { reporterId };
       if (status === 'under_review') {

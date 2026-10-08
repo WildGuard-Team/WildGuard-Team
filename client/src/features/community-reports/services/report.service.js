@@ -78,3 +78,25 @@ export async function getMyReports(status, signal) {
   if (!Array.isArray(payload?.reports)) throw new Error('Unable to load submitted reports. Please try again.');
   return payload.reports;
 }
+
+export class ReportDetailsError extends Error {
+  constructor(status) {
+    const messages = {
+      400: 'This report link is invalid. Please open a report from My Reports.',
+      401: 'Your session has expired. Please sign in again.',
+      403: 'This report is not available to your account.',
+      404: 'This report could not be found. It may no longer be available to your account.',
+    };
+    super(messages[status] ?? 'Unable to load this report right now. Please try again.');
+    this.name = 'ReportDetailsError';
+    this.status = status;
+  }
+}
+
+export async function getMyReport(reportId, signal) {
+  const response = await fetch(`${apiBaseUrl}/reports/my-reports/${encodeURIComponent(reportId)}`, { credentials: 'include', cache: 'no-store', signal });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new ReportDetailsError(response.status);
+  if (!payload?.report || typeof payload.report._id !== 'string') throw new ReportDetailsError(502);
+  return payload.report;
+}

@@ -38,7 +38,7 @@ function MapViewport({ coordinates }) {
   return null;
 }
 
-export default function LocationMap({ coordinates, onMapSelect, onMarkerDrag }) {
+export default function LocationMap({ coordinates, onMapSelect, onMarkerDrag, readOnly = false }) {
   const hasSelectedLocation = hasValidCoordinates(coordinates);
   const markerHandlers = {
     dragend(event) {
@@ -46,13 +46,13 @@ export default function LocationMap({ coordinates, onMapSelect, onMarkerDrag }) 
       onMarkerDrag({ latitude: next.lat, longitude: next.lng });
     },
   };
-  return <section className="location-map-region" aria-label="Interactive location map">
-    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : sriLankaCenter)} zoom={hasSelectedLocation ? 13 : 7} scrollWheelZoom className="location-map">
+  return <section className="location-map-region" aria-label={readOnly ? 'Report location map' : 'Interactive location map'}>
+    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : sriLankaCenter)} zoom={hasSelectedLocation ? 13 : 7} scrollWheelZoom={!readOnly} className="location-map">
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <MapSelection onMapSelect={onMapSelect} />
+      {!readOnly && <MapSelection onMapSelect={onMapSelect} />}
       <MapViewport coordinates={coordinates} />
-      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable eventHandlers={markerHandlers}>
-        <Tooltip direction="top" offset={[0, -36]}>Selected location</Tooltip>
+      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers}>
+        <Tooltip direction="top" offset={[0, -36]}>{readOnly ? 'Report location' : 'Selected location'}</Tooltip>
       </Marker>}
     </MapContainer>
   </section>;

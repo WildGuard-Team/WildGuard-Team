@@ -1,20 +1,12 @@
 import { useAuth } from '../context/useAuth.js';
 import CommunityLayout from '../features/community-reports/components/CommunityLayout.jsx';
 import CommunityIcon from '../features/community-reports/components/CommunityIcon.jsx';
+import ReportStatusBadge from '../features/community-reports/components/ReportStatusBadge.jsx';
 import { useReportDraft } from '../features/community-reports/context/useReportDraft.js';
 import { useDashboardReports } from '../features/community-reports/hooks/useDashboardReports.js';
 import { reportTypeLabel } from '../features/community-reports/utils/report-options.js';
+import { getReportStatus } from '../features/community-reports/utils/report-status.js';
 import './community-dashboard.css';
-
-const reportStatusLabels = {
-  under_review: 'UNDER REVIEW',
-  approved: 'APPROVED',
-  rejected: 'REJECTED',
-};
-
-function reportStatus(report) {
-  return report?.status === 'approved' || report?.status === 'rejected' ? report.status : 'under_review';
-}
 
 function firstName(fullName) {
   return String(fullName ?? '').trim().split(/\s+/)[0] || 'there';
@@ -59,7 +51,7 @@ export default function MemberLandingPage({ navigate }) {
   const { user } = useAuth();
   const { resetDraft } = useReportDraft();
   const { reports, loading, error, retry } = useDashboardReports(user?.id);
-  const statusCount = (status) => reports.filter((report) => reportStatus(report) === status).length;
+  const statusCount = (status) => reports.filter((report) => getReportStatus(report.status) === status).length;
   const recentReports = [...reports]
     .sort((a, b) => Date.parse(b.createdAt ?? '') - Date.parse(a.createdAt ?? ''))
     .slice(0, 2);
@@ -90,7 +82,7 @@ export default function MemberLandingPage({ navigate }) {
             <h2 id="recent-reports-title">Recent reports</h2>
             <button type="button" className="dashboard-view-all" onClick={() => navigate('/reports/my-reports')}>View all reports <CommunityIcon name="chevron" size={19} /></button>
           </header>
-          {loading ? <RecentReportsLoading /> : error ? <DashboardError retry={retry} /> : recentReports.length ? <div className="dashboard-recent-list">{recentReports.map((report) => <RecentReportRow key={report._id} report={report} onClick={() => navigate('/reports/my-reports')} />)}</div> : <DashboardEmptyState onStartReport={startReport} />}
+          {loading ? <RecentReportsLoading /> : error ? <DashboardError retry={retry} /> : recentReports.length ? <div className="dashboard-recent-list">{recentReports.map((report) => <RecentReportRow key={report._id} report={report} onClick={() => navigate(`/reports/my-reports/${encodeURIComponent(report._id)}`)} />)}</div> : <DashboardEmptyState onStartReport={startReport} />}
         </section>
       </section>
     </CommunityLayout>
@@ -123,14 +115,13 @@ function DashboardEmptyState({ onStartReport }) {
 }
 
 function RecentReportRow({ report, onClick }) {
-  const status = reportStatus(report);
-  return <button type="button" className="dashboard-recent-row" onClick={onClick} aria-label={`View ${reportTypeLabel(report.reportType)} in My Reports`}>
+  return <button type="button" className="dashboard-recent-row" onClick={onClick} aria-label={`View details for ${reportTypeLabel(report.reportType)}`}>
     <span className="dashboard-recent-row__icon"><CommunityIcon name={iconForReportType(report.reportType)} size={32} /></span>
     <span className="dashboard-recent-row__content">
       <strong>{reportTypeLabel(report.reportType)}</strong>
       <span className="dashboard-recent-row__metadata"><span className="dashboard-recent-row__location"><CommunityIcon name="pin" size={18} /><span title={reportLocation(report)}>{reportLocation(report)}</span></span><span className="dashboard-recent-row__divider" aria-hidden="true">•</span><span className="dashboard-recent-row__time">{submittedTime(report.createdAt)}</span></span>
     </span>
-    <span className={`dashboard-status-pill dashboard-status-pill--${status}`}>{reportStatusLabels[status]}</span>
+    <ReportStatusBadge status={report.status} className="dashboard-status-pill" />
     <CommunityIcon name="chevron" size={22} className="dashboard-recent-row__chevron" />
   </button>;
 }

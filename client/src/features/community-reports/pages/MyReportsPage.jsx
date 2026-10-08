@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../../context/useAuth.js';
 import CommunityLayout from '../components/CommunityLayout.jsx';
 import CommunityIcon from '../components/CommunityIcon.jsx';
+import ReportStatusBadge from '../components/ReportStatusBadge.jsx';
 import { getMyReports, submitReport } from '../services/report.service.js';
 import { deletePendingReport, getPendingReports, restorePendingSubmission } from '../services/pending-reports.indexeddb.js';
 import { reportTypeLabel } from '../utils/report-options.js';
 import './my-reports.css';
 
 const filters = [['all', 'All Reports'], ['offline_pending', 'Pending'], ['under_review', 'Under Review'], ['approved', 'Approved'], ['rejected', 'Rejected']];
-const labels = { offline_pending: 'SAVED OFFLINE', under_review: 'UNDER REVIEW', approved: 'APPROVED', rejected: 'REJECTED' };
 const empty = { all: 'You have no reports yet.', offline_pending: 'No reports are waiting to be submitted.', under_review: 'You have no reports under review.', approved: 'You have no approved reports yet.', rejected: 'You have no rejected reports.' };
 
 export default function MyReportsPage({ navigate, message = '' }) {
@@ -77,25 +77,26 @@ export default function MyReportsPage({ navigate, message = '' }) {
       {!online && <p className="my-reports__notice">You’re offline. Reports saved on this device are available; submitted reports will load when connected.</p>}
       {data.error && <p className="my-reports__error" role="alert">{data.error} <button type="button" onClick={reload}>Try again</button></p>}
       <div className="my-reports__results" aria-busy={data.loading}>
-        {data.loading ? <p className="my-reports__empty" role="status">Loading reports…</p> : data.reports.length ? <div className="my-reports__grid">{data.reports.map((report) => <ReportCard key={report._id ?? report.clientSubmissionId} report={report} sending={sending.has(report.clientSubmissionId)} onRetry={() => retry(report)} />)}</div> : !data.error && <div className="my-reports__empty"><CommunityIcon name="folder" size={36} /><p>{!online && filter !== 'offline_pending' ? 'Connect to view submitted reports, or select Pending.' : empty[filter]}</p></div>}
+        {data.loading ? <p className="my-reports__empty" role="status">Loading reports…</p> : data.reports.length ? <div className="my-reports__grid">{data.reports.map((report) => <ReportCard key={report._id ?? report.clientSubmissionId} report={report} sending={sending.has(report.clientSubmissionId)} onRetry={() => retry(report)} onViewDetails={() => navigate(`/reports/my-reports/${encodeURIComponent(report._id)}`)} />)}</div> : !data.error && <div className="my-reports__empty"><CommunityIcon name="folder" size={36} /><p>{!online && filter !== 'offline_pending' ? 'Connect to view submitted reports, or select Pending.' : empty[filter]}</p></div>}
       </div>
     </section>
   </CommunityLayout>;
 }
 
-function ReportCard({ report, sending, onRetry }) {
+function ReportCard({ report, sending, onRetry, onViewDetails }) {
   const pending = report.status === 'offline_pending';
   const coordinates = report.location?.coordinates;
   const location = report.location?.displayName || report.location?.manualLocation || (coordinates ? `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}` : 'Location not available');
   const date = new Date(report.savedAt ?? report.createdAt);
   return <article className="my-report-card">
-    <span className={`my-report-card__status status-${report.status}`}>{labels[report.status]}</span>
+    <ReportStatusBadge status={report.status} compact className="my-report-card__status" />
     <h2>{reportTypeLabel(report.reportType)}</h2>
     <p className="my-report-card__description" title={report.description}>{report.description}</p>
     <p className="my-report-card__detail"><CommunityIcon name="pin" size={17} /><span>{location}</span></p>
     <p className="my-report-card__detail"><CommunityIcon name="calendar" size={17} /><span>{pending ? 'Saved' : 'Submitted'} {Number.isFinite(date.getTime()) ? date.toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' }) : 'date unavailable'}</span></p>
     {report.referenceNumber && <p className="my-report-card__reference">{report.referenceNumber}</p>}
     {pending && <footer><small>Waiting for an internet connection</small><button type="button" className="primary-button" disabled={sending} onClick={onRetry}><CommunityIcon name="refresh" size={17} />{sending ? 'Submitting…' : 'Retry submit'}</button></footer>}
+    {!pending && report._id && <footer><button type="button" className="my-report-card__view-details" onClick={onViewDetails}>View details <CommunityIcon name="chevron" size={17} /></button></footer>}
   </article>;
 }
 

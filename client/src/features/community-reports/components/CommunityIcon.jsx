@@ -1,4 +1,5 @@
 const paths = {
+  'arrow-left': 'M20 12H4m6-6-6 6 6 6',
   refresh: 'M20 7v5h-5M4 17v-5h5M6.1 6.1A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.9 5.9',
   calendar: 'M5 5h14a2 2 0 0 1 2 2v13H3V7a2 2 0 0 1 2-2Zm2-2v4m10-4v4M3 10h18M7 14h2m4 0h2m-8 3h2m4 0h2',
   document: 'M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h4',
