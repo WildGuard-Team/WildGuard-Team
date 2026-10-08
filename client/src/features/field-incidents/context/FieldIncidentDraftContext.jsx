@@ -7,17 +7,39 @@ import {
     FieldIncidentDraftContext,
   } from './field-incident-draft-context.js';
   
+  function getCurrentDate() {
+    return new Date()
+      .toISOString()
+      .slice(0, 10);
+  }
+  
+  function getCurrentTime() {
+    return new Date()
+      .toTimeString()
+      .slice(0, 5);
+  }
+  
   function createEmptyDraft() {
     return {
       incidentType: '',
-      description: '',
-      additionalNotes: '',
+  
+      incidentDate: getCurrentDate(),
+      incidentTime: getCurrentTime(),
+  
+      riskLevel: '',
+  
+      parkZone: '',
+      blockArea: '',
   
       location: {
         source: null,
         coordinates: null,
-        manualLocation: '',
+        manualCoordinates: '',
+        description: '',
       },
+  
+      description: '',
+      additionalNotes: '',
   
       evidence: [],
     };
@@ -44,6 +66,7 @@ import {
         updateLocation(changes) {
           setDraft((current) => ({
             ...current,
+  
             location: {
               ...current.location,
               ...changes,

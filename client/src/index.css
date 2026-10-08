@@ -241,3 +241,240 @@ body.community-page-active #root { height: 100%; min-height: 0; background: #eff
       min-height: 135px;
     }
   }
+
+  /* =========================================================
+   Park Ranger - Field Incident Details
+   ========================================================= */
+
+.field-incident-details-card {
+    max-width: 1050px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dce9e3;
+    border-radius: 10px;
+    box-shadow: 0 7px 18px rgba(24, 65, 53, 0.05);
+  }
+  
+  .field-incident-details-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px 18px;
+    padding: 28px;
+  }
+  
+  /* Field */
+  
+  .field-incident-field {
+    display: grid;
+    min-width: 0;
+    align-content: start;
+    gap: 7px;
+  }
+  
+  .field-incident-field > span,
+  .field-incident-location-field label > span {
+    color: #18382e;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+  
+  .field-incident-field em {
+    margin-left: 4px;
+    color: #72877f;
+    font-size: 0.76rem;
+    font-style: normal;
+    font-weight: 500;
+  }
+  
+  /* Inputs */
+  
+  .field-incident-field input,
+  .field-incident-field select,
+  .field-incident-field textarea,
+  .field-incident-location-field input {
+    width: 100%;
+    min-width: 0;
+    color: #17352b;
+    background: #fff;
+    border: 1px solid #c4d5ce;
+    border-radius: 7px;
+    outline: none;
+    font: inherit;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  
+  .field-incident-field input,
+  .field-incident-field select,
+  .field-incident-location-field input {
+    height: 47px;
+    padding: 10px 13px;
+  }
+  
+  .field-incident-field textarea {
+    min-height: 105px;
+    padding: 12px 14px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  
+  .field-incident-field input:focus,
+  .field-incident-field select:focus,
+  .field-incident-field textarea:focus,
+  .field-incident-location-field input:focus {
+    border-color: #087248;
+    box-shadow: 0 0 0 3px rgba(8, 114, 72, 0.12);
+  }
+  
+  .field-incident-field input[readonly] {
+    color: #426158;
+    background: #f3f7f5;
+    cursor: default;
+  }
+  
+  .field-incident-field input::placeholder,
+  .field-incident-field textarea::placeholder,
+  .field-incident-location-field input::placeholder {
+    color: #899991;
+  }
+  
+  /* Error text */
+  
+  .field-incident-field small,
+  .field-incident-error {
+    color: #a52f2f;
+    font-size: 0.77rem;
+    font-weight: 600;
+  }
+  
+  /* GPS section */
+  
+  .field-incident-location-field {
+    grid-column: span 2;
+    display: grid;
+    align-content: start;
+    gap: 7px;
+  }
+  
+  .field-incident-location-field label {
+    display: grid;
+    gap: 7px;
+  }
+  
+  .field-incident-gps-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+  
+  .field-incident-gps-row button {
+    min-width: 155px;
+    height: 47px;
+    padding: 9px 15px;
+    color: #087248;
+    background: #fff;
+    border: 1px solid #087248;
+    border-radius: 7px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  
+  .field-incident-gps-row button:hover:not(:disabled) {
+    color: #fff;
+    background: #087248;
+  }
+  
+  .field-incident-gps-row button:focus-visible {
+    outline: 3px solid rgba(8, 114, 72, 0.25);
+    outline-offset: 2px;
+  }
+  
+  .field-incident-gps-row button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+  
+  .field-location-message {
+    margin: 1px 0 0;
+    color: #39705d;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+  
+  /* Wide rows */
+  
+  .field-incident-wide {
+    grid-column: span 4;
+  }
+  
+  /* Make location description shorter */
+  
+  .field-incident-wide textarea[name="description"] {
+    min-height: 95px;
+  }
+  
+  /* Actions */
+  
+  .field-incident-details-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 18px 28px;
+    background: #fbfdfc;
+    border-top: 1px solid #e0ebe6;
+  }
+  
+  .field-incident-details-actions .secondary-button,
+  .field-incident-details-actions .primary-button {
+    width: auto;
+    min-width: 155px;
+    min-height: 47px;
+  }
+  
+  /* Tablet */
+  
+  @media (max-width: 1150px) {
+    .field-incident-details-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .field-incident-location-field,
+    .field-incident-wide {
+      grid-column: span 2;
+    }
+  }
+  
+  /* Mobile */
+  
+  @media (max-width: 620px) {
+    .field-incident-details-grid {
+      grid-template-columns: 1fr;
+      gap: 17px;
+      padding: 18px;
+    }
+  
+    .field-incident-location-field,
+    .field-incident-wide {
+      grid-column: auto;
+    }
+  
+    .field-incident-gps-row {
+      grid-template-columns: 1fr;
+    }
+  
+    .field-incident-gps-row button {
+      width: 100%;
+    }
+  
+    .field-incident-details-actions {
+      flex-direction: column-reverse;
+      padding: 16px 18px;
+    }
+  
+    .field-incident-details-actions .secondary-button,
+    .field-incident-details-actions .primary-button {
+      width: 100%;
+    }
+  }
