@@ -9,6 +9,7 @@ import {
 import {
   createListPendingRangersController,
 } from '../controllers/list-pending-rangers.controller.js';
+import { createListRangersController } from '../controllers/list-rangers.controller.js';
 import {
   createUpdateRangerApprovalController,
 } from '../controllers/update-ranger-approval.controller.js';
@@ -29,6 +30,7 @@ export function createAuthRouter(users, config) {
   createRegisterRangerController(users);
   const listPendingRangers =
   createListPendingRangersController(users);
+  const listRangers = createListRangersController(users);
   const updateRangerApproval =
   createUpdateRangerApprovalController(users);
 
@@ -45,6 +47,12 @@ const parkManagerOnly =
   );
   router.post('/login', handle(login));
   router.get('/me', requireAuthentication(config.jwtSecret), handle(currentUser));
+  router.get(
+    '/rangers',
+    requireAuthentication(config.jwtSecret),
+    parkManagerOnly,
+    handle(listRangers),
+  );
   router.get(
     '/rangers/pending',
     requireAuthentication(config.jwtSecret),

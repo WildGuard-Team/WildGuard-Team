@@ -20,6 +20,15 @@ export function createUserRepository(model = User) {
       return model.findById(id);
     },
 
+    findRangers() {
+      return model
+        .find({ role: PARK_RANGER })
+        .select(
+          'fullName email rangerId assignedPark approvalStatus createdAt',
+        )
+        .sort({ createdAt: -1 });
+    },
+
     findPendingRangers() {
       return model
         .find({

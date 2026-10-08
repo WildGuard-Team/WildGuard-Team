@@ -55,6 +55,10 @@ export function logoutMember() {
   return request('/logout', { method: 'POST' });
 }
 
+export function getRangers() {
+  return request('/rangers', { method: 'GET' });
+}
+
 export function getPendingRangers() {
   return request('/rangers/pending', {
     method: 'GET',
