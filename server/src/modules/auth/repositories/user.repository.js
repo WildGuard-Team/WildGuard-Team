@@ -31,5 +31,27 @@ export function createUserRepository(model = User) {
         )
         .sort({ createdAt: -1 });
     },
+
+    findRangerById(id) {
+      return model.findOne({
+        _id: id,
+        role: PARK_RANGER,
+      });
+    },
+    
+    updateRangerApprovalStatus(id, approvalStatus) {
+      return model.findOneAndUpdate(
+        {
+          _id: id,
+          role: PARK_RANGER,
+        },
+        {
+          $set: { approvalStatus },
+        },
+        {
+          new: true,
+        },
+      );
+    },
   };
 }

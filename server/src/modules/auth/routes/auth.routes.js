@@ -3,14 +3,15 @@ import { createCurrentUserController } from '../controllers/current-user.control
 import { createLoginController } from '../controllers/login.controller.js';
 import { createLogoutController } from '../controllers/logout.controller.js';
 import { createRegisterController } from '../controllers/register.controller.js';
-
 import {
   createRegisterRangerController,
 } from '../controllers/register-ranger.controller.js';
 import {
   createListPendingRangersController,
 } from '../controllers/list-pending-rangers.controller.js';
-
+import {
+  createUpdateRangerApprovalController,
+} from '../controllers/update-ranger-approval.controller.js';
 import {
   requireParkManager,
 } from '../middleware/require-park-manager.middleware.js';
@@ -28,6 +29,8 @@ export function createAuthRouter(users, config) {
   createRegisterRangerController(users);
   const listPendingRangers =
   createListPendingRangersController(users);
+  const updateRangerApproval =
+  createUpdateRangerApprovalController(users);
 
 const parkManagerOnly =
   requireParkManager(users);
@@ -47,6 +50,12 @@ const parkManagerOnly =
     requireAuthentication(config.jwtSecret),
     parkManagerOnly,
     handle(listPendingRangers),
+  );
+  router.patch(
+    '/rangers/:userId/approval',
+    requireAuthentication(config.jwtSecret),
+    parkManagerOnly,
+    handle(updateRangerApproval),
   );
   router.post('/logout', requireAuthentication(config.jwtSecret), handle(logout));
   return router;
