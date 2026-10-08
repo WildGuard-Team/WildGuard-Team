@@ -3,6 +3,18 @@ import { createCurrentUserController } from '../controllers/current-user.control
 import { createLoginController } from '../controllers/login.controller.js';
 import { createLogoutController } from '../controllers/logout.controller.js';
 import { createRegisterController } from '../controllers/register.controller.js';
+
+import {
+  createRegisterRangerController,
+} from '../controllers/register-ranger.controller.js';
+import {
+  createListPendingRangersController,
+} from '../controllers/list-pending-rangers.controller.js';
+
+import {
+  requireParkManager,
+} from '../middleware/require-park-manager.middleware.js';
+
 import { requireAuthentication } from '../middleware/authenticate.middleware.js';
 
 function handle(handler) {
@@ -12,13 +24,30 @@ function handle(handler) {
 export function createAuthRouter(users, config) {
   const router = Router();
   const register = createRegisterController(users);
+  const registerRanger =
+  createRegisterRangerController(users);
+  const listPendingRangers =
+  createListPendingRangersController(users);
+
+const parkManagerOnly =
+  requireParkManager(users);
   const login = createLoginController(users, config);
   const currentUser = createCurrentUserController(users);
   const logout = createLogoutController(config);
-
+  
   router.post('/register', handle(register));
+  router.post(
+    '/register-ranger',
+    handle(registerRanger),
+  );
   router.post('/login', handle(login));
   router.get('/me', requireAuthentication(config.jwtSecret), handle(currentUser));
+  router.get(
+    '/rangers/pending',
+    requireAuthentication(config.jwtSecret),
+    parkManagerOnly,
+    handle(listPendingRangers),
+  );
   router.post('/logout', requireAuthentication(config.jwtSecret), handle(logout));
   return router;
 }
