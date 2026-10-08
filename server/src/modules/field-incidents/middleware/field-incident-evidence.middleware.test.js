@@ -14,24 +14,27 @@ async function startTestServer() {
     '/upload',
     parseFieldIncidentEvidence,
     (req, res) => {
-      res.status(200).json({
-        files:
-          (req.files ?? []).map(
-            (file) => ({
-              fieldname:
-                file.fieldname,
+      res
+        .status(200)
+        .json({
+          files:
+            (req.files ?? [])
+              .map(
+                (file) => ({
+                  fieldname:
+                    file.fieldname,
 
-              originalname:
-                file.originalname,
+                  originalname:
+                    file.originalname,
 
-              mimetype:
-                file.mimetype,
+                  mimetype:
+                    file.mimetype,
 
-              size:
-                file.size,
-            }),
-          ),
-      });
+                  size:
+                    file.size,
+                }),
+              ),
+        });
     },
   );
 
@@ -42,6 +45,12 @@ async function startTestServer() {
       res,
       next,
     ) => {
+      /*
+       * Express error middleware requires
+       * four parameters.
+       */
+      void next;
+
       res
         .status(
           error.status
@@ -81,7 +90,10 @@ async function startTestServer() {
 
     async close() {
       await new Promise(
-        (resolve, reject) => {
+        (
+          resolve,
+          reject,
+        ) => {
           server.close(
             (error) => {
               if (error) {

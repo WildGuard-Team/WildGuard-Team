@@ -11,7 +11,9 @@ import {
     FIELD_INCIDENT_CLOUDINARY_FOLDER,
   } from '../config/field-incident-evidence.constants.js';
   
-  function resourceTypeFor(file) {
+  function resourceTypeFor(
+    file,
+  ) {
     if (
       FIELD_INCIDENT_IMAGE_TYPES.includes(
         file.mimetype,
@@ -63,7 +65,9 @@ import {
         }
   
         const resourceType =
-          resourceTypeFor(file);
+          resourceTypeFor(
+            file,
+          );
   
         if (
           resourceType === 'image'
@@ -98,29 +102,42 @@ import {
     options,
   ) {
     return new Promise(
-      (resolve, reject) => {
+      (
+        resolve,
+        reject,
+      ) => {
         const stream =
-          cloudinary.uploader.upload_stream(
-            options,
-            (error, result) => {
-              if (error) {
-                reject(error);
-                return;
-              }
+          cloudinary
+            .uploader
+            .upload_stream(
+              options,
+              (
+                error,
+                result,
+              ) => {
+                if (error) {
+                  reject(
+                    error,
+                  );
   
-              if (!result) {
-                reject(
-                  new Error(
-                    'Cloudinary returned no upload result.',
-                  ),
+                  return;
+                }
+  
+                if (!result) {
+                  reject(
+                    new Error(
+                      'Cloudinary returned no upload result.',
+                    ),
+                  );
+  
+                  return;
+                }
+  
+                resolve(
+                  result,
                 );
-  
-                return;
-              }
-  
-              resolve(result);
-            },
-          );
+              },
+            );
   
         stream.on(
           'error',
@@ -134,17 +151,40 @@ import {
     );
   }
   
-  function sanitizeOriginalName(name) {
-    const value =
+  function sanitizeOriginalName(
+    name,
+  ) {
+    const normalized =
       typeof name === 'string'
-        ? name
-          .normalize('NFKC')
-          .replace(
-            /[\\/\0-\x1f\x7f]/g,
-            '_',
+        ? name.normalize(
+            'NFKC',
           )
-          .trim()
         : '';
+  
+    const value =
+      Array
+        .from(
+          normalized,
+          (character) => {
+            const code =
+              character.charCodeAt(
+                0,
+              );
+  
+            if (
+              character === '\\'
+              || character === '/'
+              || code <= 31
+              || code === 127
+            ) {
+              return '_';
+            }
+  
+            return character;
+          },
+        )
+        .join('')
+        .trim();
   
     return (
       value || 'evidence'
@@ -187,11 +227,14 @@ import {
             resource_type:
               resourceType,
   
-            overwrite: false,
+            overwrite:
+              false,
   
-            unique_filename: true,
+            unique_filename:
+              true,
   
-            use_filename: false,
+            use_filename:
+              false,
           },
         );
   
@@ -237,13 +280,18 @@ import {
     evidence,
     cloudinary,
   ) {
-    for (const item of evidence) {
-      await cloudinary.uploader.destroy(
-        item.publicId,
-        {
-          resource_type:
-            item.resourceType,
-        },
-      );
+    for (
+      const item
+      of evidence
+    ) {
+      await cloudinary
+        .uploader
+        .destroy(
+          item.publicId,
+          {
+            resource_type:
+              item.resourceType,
+          },
+        );
     }
-}
+  }
