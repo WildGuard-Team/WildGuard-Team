@@ -478,3 +478,64 @@ body.community-page-active #root { height: 100%; min-height: 0; background: #eff
       width: 100%;
     }
   }
+
+  .field-incident-confirmation {
+    max-width: 760px;
+    margin: 70px auto;
+    padding: 48px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #dce8e2;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 70, 50, 0.08);
+  }
+  
+  .field-incident-confirmation-icon {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: #0b7a4b;
+    color: #fff;
+    font-size: 38px;
+    font-weight: 800;
+  }
+  
+  .field-incident-confirmation h1 {
+    margin: 0 0 12px;
+    color: #072b24;
+    font-size: 34px;
+  }
+  
+  .field-incident-confirmation > p {
+    margin: 0 0 32px;
+    color: #66756f;
+    font-size: 17px;
+  }
+  
+  .field-incident-reference {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border-radius: 12px;
+    background: #eef8f3;
+  }
+  
+  .field-incident-reference span {
+    color: #516760;
+    font-weight: 600;
+  }
+  
+  .field-incident-reference strong {
+    color: #07583c;
+    font-size: 25px;
+    letter-spacing: 0.5px;
+  }
+  
+  .field-incident-reference small {
+    color: #6b7b75;
+  }

@@ -14,15 +14,18 @@ import {
   function getCurrentDate() {
     const now = new Date();
   
-    const year = now.getFullYear();
+    const year =
+      now.getFullYear();
   
-    const month = String(
-      now.getMonth() + 1,
-    ).padStart(2, '0');
+    const month =
+      String(
+        now.getMonth() + 1,
+      ).padStart(2, '0');
   
-    const day = String(
-      now.getDate(),
-    ).padStart(2, '0');
+    const day =
+      String(
+        now.getDate(),
+      ).padStart(2, '0');
   
     return `${year}-${month}-${day}`;
   }
@@ -30,13 +33,15 @@ import {
   function getCurrentTime() {
     const now = new Date();
   
-    const hours = String(
-      now.getHours(),
-    ).padStart(2, '0');
+    const hours =
+      String(
+        now.getHours(),
+      ).padStart(2, '0');
   
-    const minutes = String(
-      now.getMinutes(),
-    ).padStart(2, '0');
+    const minutes =
+      String(
+        now.getMinutes(),
+      ).padStart(2, '0');
   
     return `${hours}:${minutes}`;
   }
@@ -45,8 +50,11 @@ import {
     return {
       incidentType: '',
   
-      incidentDate: getCurrentDate(),
-      incidentTime: getCurrentTime(),
+      incidentDate:
+        getCurrentDate(),
+  
+      incidentTime:
+        getCurrentTime(),
   
       riskLevel: '',
   
@@ -79,7 +87,9 @@ import {
       }
   
       const parsed =
-        JSON.parse(stored);
+        JSON.parse(
+          stored,
+        );
   
       return {
         ...createEmptyDraft(),
@@ -90,10 +100,6 @@ import {
           ...parsed.location,
         },
   
-        /*
-         * Files cannot be safely restored
-         * from normal sessionStorage.
-         */
         evidence: [],
       };
     } catch {
@@ -137,10 +143,7 @@ import {
         JSON.stringify(snapshot),
       );
     } catch {
-      /*
-       * Storage may be unavailable.
-       * Keep the in-memory draft usable.
-       */
+      // Keep the in-memory draft available.
     }
   }
   
@@ -157,9 +160,13 @@ import {
   export function FieldIncidentDraftProvider({
     children,
   }) {
-    const [draft, setDraft] = useState(
-      loadDraft,
-    );
+    const [draft, setDraft] =
+      useState(loadDraft);
+  
+    const [
+      submittedIncident,
+      setSubmittedIncident,
+    ] = useState(null);
   
     useEffect(() => {
       saveDraft(draft);
@@ -169,40 +176,65 @@ import {
       () => ({
         draft,
   
+        submittedIncident,
+  
+        setSubmittedIncident,
+  
         updateDraft(changes) {
-          setDraft((current) => ({
-            ...current,
-            ...changes,
-          }));
+          setDraft(
+            (current) => ({
+              ...current,
+              ...changes,
+            }),
+          );
         },
   
         updateLocation(changes) {
-          setDraft((current) => ({
-            ...current,
+          setDraft(
+            (current) => ({
+              ...current,
   
-            location: {
-              ...current.location,
-              ...changes,
-            },
-          }));
+              location: {
+                ...current.location,
+                ...changes,
+              },
+            }),
+          );
         },
   
         setEvidence(evidence) {
-          setDraft((current) => ({
-            ...current,
-            evidence,
-          }));
+          setDraft(
+            (current) => ({
+              ...current,
+              evidence,
+            }),
+          );
         },
   
-        resetDraft() {
+        clearDraft() {
           clearStoredDraft();
   
           setDraft(
             createEmptyDraft(),
           );
         },
+  
+        resetDraft() {
+          clearStoredDraft();
+  
+          setSubmittedIncident(
+            null,
+          );
+  
+          setDraft(
+            createEmptyDraft(),
+          );
+        },
       }),
-      [draft],
+      [
+        draft,
+        submittedIncident,
+      ],
     );
   
     return (
