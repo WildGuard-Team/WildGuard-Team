@@ -12,6 +12,7 @@ import {
   } from '../context/useFieldIncidentDraft.js';
   
   import {
+    FIELD_INCIDENT_SYNC_EVENT,
     syncPendingFieldIncidents,
   } from '../services/field-incident-sync.service.js';
   
@@ -30,6 +31,13 @@ import {
   
     const isSyncing =
       useRef(false);
+
+    const latestSubmittedIncident = useRef(submittedIncident);
+    const synchronizeCurrentOwner = useRef(null);
+
+    useEffect(() => {
+      latestSubmittedIncident.current = submittedIncident;
+    }, [submittedIncident]);
   
     useEffect(() => {
       if (
@@ -64,14 +72,16 @@ import {
           const result =
             await syncPendingFieldIncidents(
               user.id,
+              { shouldContinue: () => active },
             );
-  
-          if (
-            !active
-            || !result.syncedIncidents.length
-          ) {
-            return;
+
+          if (result.synced || result.failed) {
+            window.dispatchEvent(new CustomEvent(FIELD_INCIDENT_SYNC_EVENT, {
+              detail: { ownerId: user.id, syncedIncidents: result.syncedIncidents },
+            }));
           }
+
+          if (!active || !result.syncedIncidents.length) return;
   
           /*
            * If the Ranger is still looking at
@@ -80,16 +90,17 @@ import {
            * real submitted incident returned by
            * the backend.
            */
+          const confirmation = latestSubmittedIncident.current;
           if (
-            submittedIncident?.status
+            confirmation?.status
               === FIELD_INCIDENT_PENDING_SYNC
-            && submittedIncident.clientIncidentId
+            && confirmation.clientIncidentId
           ) {
             const synchronizedIncident =
               result.syncedIncidents.find(
                 (incident) =>
                   incident.clientIncidentId
-                  === submittedIncident.clientIncidentId,
+                  === confirmation.clientIncidentId,
               );
   
             if (
@@ -108,6 +119,9 @@ import {
         } finally {
           isSyncing.current =
             false;
+
+          // A new Ranger may have waited for the previous request to finish.
+          if (!active) synchronizeCurrentOwner.current?.();
         }
       }
   
@@ -115,6 +129,7 @@ import {
        * Try pending incidents when WildGuard
        * loads while already online.
        */
+      synchronizeCurrentOwner.current = synchronize;
       synchronize();
   
       /*
@@ -128,6 +143,10 @@ import {
   
       return () => {
         active = false;
+
+        if (synchronizeCurrentOwner.current === synchronize) {
+          synchronizeCurrentOwner.current = null;
+        }
   
         window.removeEventListener(
           'online',
@@ -137,9 +156,14 @@ import {
     }, [
       isCheckingSession,
       user,
-      submittedIncident,
       setSubmittedIncident,
     ]);
+
+    useEffect(() => {
+      if (submittedIncident?.status === FIELD_INCIDENT_PENDING_SYNC) {
+        synchronizeCurrentOwner.current?.();
+      }
+    }, [submittedIncident]);
   
     return null;
   }

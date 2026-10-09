@@ -17,6 +17,10 @@ import {
   import {
     createFieldIncidentController,
   } from '../controllers/create-field-incident.controller.js';
+
+  import {
+    listMyFieldIncidentsController,
+  } from '../controllers/list-my-field-incidents.controller.js';
   
   export function createFieldIncidentRouter(
     fieldIncidents,
@@ -29,6 +33,17 @@ import {
   ) {
     const router =
       Router();
+
+    const listMyIncidents =
+      listMyFieldIncidentsController(fieldIncidents);
+
+    router.get(
+      '/mine',
+      requireAuthentication(jwtSecret),
+      requireParkRanger(users),
+      (req, res, next) =>
+        Promise.resolve(listMyIncidents(req, res)).catch(next),
+    );
   
     const submitFieldIncident =
       createFieldIncidentController(

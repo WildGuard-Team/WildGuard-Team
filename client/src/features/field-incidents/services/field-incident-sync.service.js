@@ -9,10 +9,13 @@ import {
     markPendingFieldIncidentAttempt,
   } from './field-incident-offline-db.js';
   
+  export const FIELD_INCIDENT_SYNC_EVENT = 'wildguard:field-incidents-sync';
+
   export async function syncPendingFieldIncidents(
     ownerId,
+    { shouldContinue = () => true } = {},
   ) {
-    if (!ownerId) {
+    if (!ownerId || !shouldContinue()) {
       return {
         synced: 0,
         failed: 0,
@@ -45,6 +48,9 @@ import {
       const pendingIncident
       of pendingIncidents
     ) {
+      // Do not start another request after this Ranger signs out or changes.
+      if (!shouldContinue()) break;
+
       try {
         const incident =
           await submitFieldIncident(

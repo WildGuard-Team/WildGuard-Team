@@ -7,7 +7,7 @@ import CommunityIcon from '../../community-reports/components/CommunityIcon.jsx'
 const navigation = [
   ['dashboard', 'Dashboard', '/ranger'],
   ['report', 'Report Field Incident', '/ranger/incidents/new'],
-  ['folder', 'My Incidents'],
+  ['folder', 'My Incidents', '/ranger/incidents'],
   ['map', 'Map'],
   ['bell', 'Alerts'],
   ['settings', 'Settings'],

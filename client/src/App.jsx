@@ -11,6 +11,7 @@ import PendingRangersPage from './features/auth/pages/PendingRangersPage.jsx';
 import MemberLandingPage from './pages/MemberLandingPage.jsx';
 
 import RangerDashboardPage from './features/field-incidents/pages/RangerDashboardPage.jsx';
+import MyFieldIncidentsPage from './features/field-incidents/pages/MyFieldIncidentsPage.jsx';
 import FieldIncidentTypePage from './features/field-incidents/pages/FieldIncidentTypePage.jsx';
 import FieldIncidentDetailsPage from './features/field-incidents/pages/FieldIncidentDetailsPage.jsx';
 import FieldIncidentEvidencePage from './features/field-incidents/pages/FieldIncidentEvidencePage.jsx';
@@ -386,6 +387,10 @@ function AppRoutes() {
   /*
    * Park Ranger routes
    */
+  if (user?.role === 'PARK_RANGER' && path === '/ranger/incidents') {
+    return <MyFieldIncidentsPage navigate={navigate} />;
+  }
+
   if (
     user?.role === 'PARK_RANGER'
     && path === '/ranger/incidents/confirmation'

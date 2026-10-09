@@ -2,6 +2,36 @@ const apiBaseUrl =
   (import.meta.env?.VITE_API_BASE_URL ?? '/api')
     .replace(/\/+$/, '');
 
+export async function getMyFieldIncidents() {
+  let response;
+  try {
+    response = await fetch(`${apiBaseUrl}/field-incidents/mine`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+  } catch {
+    throw new FieldIncidentNetworkError('Unable to reach WildGuard.');
+  }
+
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Your session has expired. Please sign in again.');
+    }
+    if (response.status === 403) {
+      throw new Error('You do not have permission to view field incident history.');
+    }
+    if (response.status >= 500) {
+      throw new Error('WildGuard is temporarily unavailable. Please try again.');
+    }
+    throw new Error(payload?.error?.message ?? 'Unable to load your field incidents.');
+  }
+  if (!Array.isArray(payload?.incidents)) {
+    throw new Error('Unable to load your field incidents.');
+  }
+  return payload.incidents;
+}
+
 export class FieldIncidentNetworkError
   extends Error {
   constructor(message) {
