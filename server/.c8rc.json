@@ -1,0 +1,12 @@
+{
+  "all": true,
+  "include": ["src/modules/community-reports/**/*.js"],
+  "exclude": [],
+  "reporter": ["text", "json", "json-summary", "html", "lcov"],
+  "reports-dir": "../coverage/community-reports/backend",
+  "check-coverage": true,
+  "per-file": true,
+  "lines": 80,
+  "functions": 80,
+  "branches": 80
+}

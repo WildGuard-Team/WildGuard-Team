@@ -9,6 +9,10 @@ import { uploadEvidenceFiles, validateEvidenceFiles } from './evidence-upload.se
 import { deleteEvidenceAssets } from './evidence-delete.service.js';
 import { HttpError } from '../../../shared/http-error.js';
 
+// Coalesce concurrent uploads in this process; MongoDB remains the authority
+// for uniqueness across restarts and multiple server processes.
+const submissionsInFlight = new WeakMap();
+
 function isReferenceCollision(error) {
   return error?.code === 11000 && (
     error.keyPattern?.referenceNumber === 1
@@ -31,6 +35,28 @@ function toPublicCommunityReport(report) {
 }
 
 export async function createCommunityReport(input, reporterId, communityReports, files = [], cloudinary, nodeEnv = 'production') {
+  let inFlight = submissionsInFlight.get(communityReports);
+  if (!inFlight) {
+    inFlight = new Map();
+    submissionsInFlight.set(communityReports, inFlight);
+  }
+  const key = JSON.stringify([String(reporterId), input.clientSubmissionId]);
+  const pending = inFlight.get(key);
+  if (pending) return { ...await pending, duplicateRetry: true };
+
+  const submission = submitCommunityReport(input, reporterId, communityReports, files, cloudinary, nodeEnv);
+  inFlight.set(key, submission);
+  try {
+    return await submission;
+  } finally {
+    inFlight.delete(key);
+  }
+}
+
+async function submitCommunityReport(input, reporterId, communityReports, files, cloudinary, nodeEnv) {
+  const existing = await communityReports.findBySubmission(reporterId, input.clientSubmissionId);
+  if (existing) return { report: toPublicCommunityReport(existing), duplicateRetry: true };
+
   validateEvidenceFiles(files);
   const uploadedAssets = [];
   let evidence;
@@ -49,6 +75,7 @@ export async function createCommunityReport(input, reporterId, communityReports,
         const report = await communityReports.create({
           referenceNumber: createCommunityReportReferenceNumber(),
           reporterId,
+          clientSubmissionId: input.clientSubmissionId,
           reportType: input.reportType,
           description: input.description,
           incidentDateTime: input.incidentDateTime,
@@ -61,12 +88,19 @@ export async function createCommunityReport(input, reporterId, communityReports,
           evidence,
           source: COMMUNITY_REPORT_WEB_SOURCE,
         });
-        return toPublicCommunityReport(report);
+        return { report: toPublicCommunityReport(report) };
       } catch (error) {
+        if (error?.code === 11000) {
+          const existing = await communityReports.findBySubmission(reporterId, input.clientSubmissionId);
+          if (existing) {
+            await rollbackEvidence(uploadedAssets, cloudinary, nodeEnv, 'duplicate');
+            return { report: toPublicCommunityReport(existing), duplicateRetry: true };
+          }
+        }
         if (!isReferenceCollision(error)) throw error;
       }
     }
-  } catch (error) {
+  } catch {
     await rollbackEvidence(uploadedAssets, cloudinary, nodeEnv, 'persistence');
     throw new HttpError(500, 'The report could not be saved.');
   }
