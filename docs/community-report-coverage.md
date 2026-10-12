@@ -1,6 +1,6 @@
 # Community Report coverage
 
-Generated from real c8/Node and Vitest/V8 reports on 2026-10-08T19:55:27.211Z.
+Generated from real c8/Node and Vitest/V8 reports on 2026-10-09T10:12:11.925Z.
 
 Run from the repository root: `npm run coverage:community-reports`. Node >=22.12 and local MongoDB at 127.0.0.1:27017 are required. Tests create isolated test records and clean up their own owner IDs; they do not use the application database.
 
