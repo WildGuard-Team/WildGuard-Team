@@ -14,6 +14,7 @@ import ReviewReportPage from './features/community-reports/pages/ReviewReportPag
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
 import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
+import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 
 export default function App() {
   return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
@@ -33,7 +34,10 @@ function AppRoutes() {
 
   useEffect(() => {
     if (isCheckingSession) return;
-    if (user && (path === '/login' || path === '/register' || path === '/')) navigate('/member', { replace: true });
+    const homePath = user?.role === 'PARK_MANAGER' ? '/manager/reports' : '/member';
+    if (user && (path === '/login' || path === '/register' || path === '/')) navigate(homePath, { replace: true });
+    else if (user?.role === 'PARK_MANAGER' && path !== '/manager/reports') navigate('/manager/reports', { replace: true });
+    else if (user && user.role !== 'PARK_MANAGER' && path.startsWith('/manager/')) navigate('/member', { replace: true });
     if (!user && path !== '/login' && path !== '/register') navigate('/login', { replace: true });
   }, [isCheckingSession, path, user]);
 
@@ -58,6 +62,7 @@ function AppRoutes() {
   if (isCheckingSession || (user && (path === '/login' || path === '/register' || path === '/')) || (!user && path !== '/login' && path !== '/register')) {
     return <main className="session-loading" aria-live="polite"><span className="loading-mark" />Checking your WildGuard session…</main>;
   }
+  if (user?.role === 'PARK_MANAGER') return <ConservationReportsPage navigate={navigate} />;
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
   if (user && path === '/reports/my-reports') return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
   const reportDetailsMatch = path.match(/^\/reports\/my-reports\/([^/]+)\/?$/);
