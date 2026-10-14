@@ -40,7 +40,7 @@ export default function LoginPage({ navigate, successMessage }) {
     setIsLoading(true);
     try {
       const authenticatedUser = await login({ email: values.email.trim(), password: values.password });
-      navigate(authenticatedUser.role === 'PARK_MANAGER' ? '/manager/reports' : '/member');
+      navigate(authenticatedUser.role === 'PARK_MANAGER' ? '/manager/dashboard' : '/member');
     } catch (error) {
       setApiError(error.message);
     } finally {

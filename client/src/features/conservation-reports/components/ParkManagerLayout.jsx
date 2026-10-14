@@ -4,7 +4,7 @@ import FormAlert from '../../auth/components/FormAlert.jsx';
 import ManagerIcon from './ManagerIcon.jsx';
 
 const navigation = [
-  ['dashboard', 'Dashboard'],
+  ['dashboard', 'Dashboard', '/manager/dashboard'],
   ['reports', 'Conservation Reports', '/manager/reports'],
   ['history', 'Report History'],
   ['map', 'Park Map'],
@@ -44,7 +44,7 @@ export default function ParkManagerLayout({ children, navigate }) {
     <aside className={`manager-sidebar${open ? ' is-open' : ''}`} aria-label="Park Manager navigation">
       <div className="manager-brand"><img src="/logo.jpg" alt="WildGuard" /><span><strong>WildGuard</strong><small>Park Manager</small></span><button type="button" onClick={() => setOpen(false)} aria-label="Close navigation"><ManagerIcon name="close" /></button></div>
       <nav>{navigation.map(([icon, label, path]) => path
-        ? <button key={label} type="button" className="is-active" onClick={() => { navigate(path); setOpen(false); }}><ManagerIcon name={icon} /><span>{label}</span></button>
+        ? <button key={label} type="button" className={window.location.pathname === path ? 'is-active' : ''} aria-current={window.location.pathname === path ? 'page' : undefined} onClick={() => { navigate(path); setOpen(false); }}><ManagerIcon name={icon} /><span>{label}</span></button>
         : <span key={label} className="manager-nav-unavailable" aria-disabled="true"><ManagerIcon name={icon} /><span>{label}</span><small>Coming soon</small></span>)}</nav>
       <div className="manager-sidebar-footer"><FormAlert>{logoutError}</FormAlert><button type="button" onClick={signOut} disabled={isLoggingOut}><ManagerIcon name="logout" /><span>{isLoggingOut ? 'Logging out…' : 'Logout'}</span></button></div>
     </aside>
