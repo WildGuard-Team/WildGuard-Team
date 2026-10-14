@@ -8,6 +8,14 @@ export default [
   js.configs.recommended,
   { files: ['**/*.js'], languageOptions: { globals: globals.node } },
   {
+    files: ['client/test/unit/**/*.{js,jsx}', 'client/test/setup.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    rules: { 'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z]' }] },
+  },
+  {
     files: ['client/src/**/*.{js,jsx}'],
     languageOptions: {
       globals: globals.browser,

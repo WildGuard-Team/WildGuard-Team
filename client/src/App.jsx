@@ -12,6 +12,8 @@ import ReportDetailsPage from './features/community-reports/pages/ReportDetailsP
 import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
+import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
+import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 
 export default function App() {
@@ -62,6 +64,9 @@ function AppRoutes() {
   }
   if (user?.role === 'PARK_MANAGER') return <ConservationReportsPage navigate={navigate} />;
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
+  if (user && path === '/reports/my-reports') return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
+  const reportDetailsMatch = path.match(/^\/reports\/my-reports\/([^/]+)\/?$/);
+  if (user && reportDetailsMatch) return <SubmittedReportDetailsPage key={`${user.id}:${reportDetailsMatch[1]}`} reportId={reportDetailsMatch[1]} navigate={navigate} />;
   if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;
   if (user && path === '/reports/evidence') return <ReportEvidencePage navigate={navigate} />;
   if (user && path === '/reports/review') return <ReviewReportPage navigate={navigate} />;
