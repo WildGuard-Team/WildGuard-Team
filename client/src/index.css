@@ -130,3 +130,510 @@ body.community-page-active #root { height: 100%; min-height: 0; background: #eff
 .review-evidence { grid-column: 1 / -1; }.review-evidence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }.evidence-preview-card.is-compact .evidence-preview-media { height: 105px; }.evidence-preview-card.is-compact > p { font-size: .78rem; }.evidence-preview-card.is-compact > small { font-size: .72rem; }
 @media (max-width: 760px) { .evidence-panel { padding: 18px; }.evidence-preview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.evidence-actions { flex-wrap: wrap; }.evidence-actions > button { flex: 1 1 160px; }.review-evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 460px) { .evidence-panel { padding: 15px; }.evidence-drop-zone { min-height: 230px; }.evidence-preview-grid, .review-evidence-grid { grid-template-columns: 1fr; }.evidence-preview-media { height: 175px; }.evidence-actions { display: grid; grid-template-columns: 1fr; }.evidence-actions > button { width: 100%; }.evidence-skip { order: 3; } }
+
+/* Park Ranger - Field Incident Reporting */
+
+.field-incident-type-grid {
+    display: grid;
+    max-width: 1050px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #deebe5;
+    border-radius: 10px;
+    box-shadow: 0 7px 18px rgba(24, 65, 53, 0.05);
+  }
+  
+  .field-incident-type-card {
+    position: relative;
+    display: grid;
+    min-height: 165px;
+    align-content: start;
+    gap: 10px;
+    padding: 18px;
+    color: #15352b;
+    background: #fbfdfc;
+    border: 1px solid #d4e2dc;
+    border-radius: 9px;
+    text-align: left;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  
+  .field-incident-type-card:hover {
+    transform: translateY(-2px);
+    border-color: #72aa92;
+    box-shadow: 0 6px 16px rgba(8, 91, 60, 0.09);
+  }
+  
+  .field-incident-type-card.is-selected {
+    background: #edf9f3;
+    border-color: #087248;
+    box-shadow: 0 0 0 2px rgba(8, 114, 72, 0.14);
+  }
+  
+  .field-incident-type-icon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    color: #087248;
+    background: #e2f4eb;
+    border-radius: 9px;
+  }
+  
+  .field-incident-type-card strong {
+    padding-right: 25px;
+    font-size: 1rem;
+  }
+  
+  .field-incident-type-card small {
+    color: #65786f;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  
+  .field-incident-radio {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: grid;
+    width: 23px;
+    height: 23px;
+    place-items: center;
+    color: #fff;
+    background: #fff;
+    border: 2px solid #9aaba3;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+  
+  .field-incident-type-card.is-selected
+    .field-incident-radio {
+    background: #087248;
+    border-color: #087248;
+  }
+  
+  .field-incident-type-card:focus-visible {
+    outline: 3px solid rgba(8, 114, 72, 0.3);
+    outline-offset: 3px;
+  }
+  
+  @media (max-width: 1100px) {
+    .field-incident-type-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .field-incident-type-grid {
+      grid-template-columns: 1fr;
+      padding: 16px;
+    }
+  
+    .field-incident-type-card {
+      min-height: 135px;
+    }
+  }
+
+  /* =========================================================
+   Park Ranger - Field Incident Details
+   ========================================================= */
+
+.field-incident-details-card {
+    max-width: 1050px;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #dce9e3;
+    border-radius: 10px;
+    box-shadow: 0 7px 18px rgba(24, 65, 53, 0.05);
+  }
+  
+  .field-incident-details-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px 18px;
+    padding: 28px;
+  }
+  
+  /* Field */
+  
+  .field-incident-field {
+    display: grid;
+    min-width: 0;
+    align-content: start;
+    gap: 7px;
+  }
+  
+  .field-incident-field > span,
+  .field-incident-location-field label > span {
+    color: #18382e;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+  
+  .field-incident-field em {
+    margin-left: 4px;
+    color: #72877f;
+    font-size: 0.76rem;
+    font-style: normal;
+    font-weight: 500;
+  }
+  
+  /* Inputs */
+  
+  .field-incident-field input,
+  .field-incident-field select,
+  .field-incident-field textarea,
+  .field-incident-location-field input {
+    width: 100%;
+    min-width: 0;
+    color: #17352b;
+    background: #fff;
+    border: 1px solid #c4d5ce;
+    border-radius: 7px;
+    outline: none;
+    font: inherit;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  
+  .field-incident-field input,
+  .field-incident-field select,
+  .field-incident-location-field input {
+    height: 47px;
+    padding: 10px 13px;
+  }
+  
+  .field-incident-field textarea {
+    min-height: 105px;
+    padding: 12px 14px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  
+  .field-incident-field input:focus,
+  .field-incident-field select:focus,
+  .field-incident-field textarea:focus,
+  .field-incident-location-field input:focus {
+    border-color: #087248;
+    box-shadow: 0 0 0 3px rgba(8, 114, 72, 0.12);
+  }
+  
+  .field-incident-field input[readonly] {
+    color: #426158;
+    background: #f3f7f5;
+    cursor: default;
+  }
+  
+  .field-incident-field input::placeholder,
+  .field-incident-field textarea::placeholder,
+  .field-incident-location-field input::placeholder {
+    color: #899991;
+  }
+  
+  /* Error text */
+  
+  .field-incident-field small,
+  .field-incident-error {
+    color: #a52f2f;
+    font-size: 0.77rem;
+    font-weight: 600;
+  }
+  
+  /* GPS section */
+  
+  .field-incident-location-field {
+    grid-column: span 2;
+    display: grid;
+    align-content: start;
+    gap: 7px;
+  }
+  
+  .field-incident-location-field label {
+    display: grid;
+    gap: 7px;
+  }
+  
+  .field-incident-gps-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+  
+  .field-incident-gps-row button {
+    min-width: 155px;
+    height: 47px;
+    padding: 9px 15px;
+    color: #087248;
+    background: #fff;
+    border: 1px solid #087248;
+    border-radius: 7px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  
+  .field-incident-gps-row button:hover:not(:disabled) {
+    color: #fff;
+    background: #087248;
+  }
+  
+  .field-incident-gps-row button:focus-visible {
+    outline: 3px solid rgba(8, 114, 72, 0.25);
+    outline-offset: 2px;
+  }
+  
+  .field-incident-gps-row button:disabled {
+    opacity: 0.65;
+    cursor: wait;
+  }
+  
+  .field-location-message {
+    margin: 1px 0 0;
+    color: #39705d;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+  
+  /* Wide rows */
+  
+  .field-incident-wide {
+    grid-column: span 4;
+  }
+  
+  /* Make location description shorter */
+  
+  .field-incident-wide textarea[name="description"] {
+    min-height: 95px;
+  }
+  
+  /* Actions */
+  
+  .field-incident-details-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 18px 28px;
+    background: #fbfdfc;
+    border-top: 1px solid #e0ebe6;
+  }
+  
+  .field-incident-details-actions .secondary-button,
+  .field-incident-details-actions .primary-button {
+    width: auto;
+    min-width: 155px;
+    min-height: 47px;
+  }
+  
+  /* Tablet */
+  
+  @media (max-width: 1150px) {
+    .field-incident-details-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  
+    .field-incident-location-field,
+    .field-incident-wide {
+      grid-column: span 2;
+    }
+  }
+  
+  /* Mobile */
+  
+  @media (max-width: 620px) {
+    .field-incident-details-grid {
+      grid-template-columns: 1fr;
+      gap: 17px;
+      padding: 18px;
+    }
+  
+    .field-incident-location-field,
+    .field-incident-wide {
+      grid-column: auto;
+    }
+  
+    .field-incident-gps-row {
+      grid-template-columns: 1fr;
+    }
+  
+    .field-incident-gps-row button {
+      width: 100%;
+    }
+  
+    .field-incident-details-actions {
+      flex-direction: column-reverse;
+      padding: 16px 18px;
+    }
+  
+    .field-incident-details-actions .secondary-button,
+    .field-incident-details-actions .primary-button {
+      width: 100%;
+    }
+  }
+
+  .field-incident-confirmation {
+    max-width: 760px;
+    margin: 70px auto;
+    padding: 48px;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #dce8e2;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0, 70, 50, 0.08);
+  }
+  
+  .field-incident-confirmation-icon {
+    display: grid;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 22px;
+    place-items: center;
+    border-radius: 50%;
+    background: #0b7a4b;
+    color: #fff;
+    font-size: 38px;
+    font-weight: 800;
+  }
+  
+  .field-incident-confirmation h1 {
+    margin: 0 0 12px;
+    color: #072b24;
+    font-size: 34px;
+  }
+  
+  .field-incident-confirmation > p {
+    margin: 0 0 32px;
+    color: #66756f;
+    font-size: 17px;
+  }
+  
+  .field-incident-reference {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+    border-radius: 12px;
+    background: #eef8f3;
+  }
+  
+  .field-incident-reference span {
+    color: #516760;
+    font-weight: 600;
+  }
+  
+  .field-incident-reference strong {
+    color: #07583c;
+    font-size: 25px;
+    letter-spacing: 0.5px;
+  }
+  
+  .field-incident-reference small {
+    color: #6b7b75;
+  }
+  .field-incident-camera {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid #d9e7e1;
+    border-radius: 12px;
+    background: #f8fcfa;
+  }
+  
+  .field-incident-camera-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .field-incident-camera-heading h2 {
+    margin: 0 0 6px;
+    color: #082f28;
+    font-size: 18px;
+  }
+  
+  .field-incident-camera-heading p {
+    margin: 0;
+    color: #64748b;
+  }
+  
+  .field-incident-camera-open {
+    min-width: 150px;
+  }
+  
+  .field-incident-camera-preview {
+    display: none;
+    margin-top: 18px;
+  }
+  
+  .field-incident-camera-preview.is-active {
+    display: block;
+  }
+  
+  .field-incident-camera-preview video {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #071c18;
+  }
+  
+  .field-incident-camera-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  
+  .field-incident-camera-message {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  
+  .field-incident-camera-message.is-error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+  
+  .field-incident-camera-message.is-success {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+  }
+  
+  .field-incident-camera-limit {
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 720px) {
+    .field-incident-camera-heading {
+      align-items: stretch;
+      flex-direction: column;
+    }
+  
+    .field-incident-camera-open {
+      width: 100%;
+    }
+  
+    .field-incident-camera-actions {
+      flex-direction: column-reverse;
+    }
+  
+    .field-incident-camera-actions button {
+      width: 100%;
+    }
+  }

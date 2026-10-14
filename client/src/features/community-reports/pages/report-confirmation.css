@@ -112,3 +112,43 @@
   .report-confirmation__actions { flex-direction: column; margin-top: 24px; }
   .report-confirmation__actions > button { width: 100%; min-height: 54px; }
 }
+
+.ranger-approval-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ranger-approve-button,
+.ranger-reject-button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border-radius: 7px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ranger-approve-button {
+  color: #fff;
+  background: #08734e;
+  border: 1px solid #08734e;
+}
+
+.ranger-approve-button:hover:not(:disabled) {
+  background: #056541;
+}
+
+.ranger-reject-button {
+  color: #9b3535;
+  background: #fff;
+  border: 1px solid #dca5a5;
+}
+
+.ranger-reject-button:hover:not(:disabled) {
+  background: #fff0ef;
+}
+
+.ranger-approve-button:disabled,
+.ranger-reject-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}

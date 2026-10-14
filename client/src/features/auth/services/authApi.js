@@ -24,6 +24,25 @@ export function registerMember({ fullName, email, password }) {
   return request('/register', { method: 'POST', body: JSON.stringify({ fullName, email, password }) });
 }
 
+export function registerRanger({
+  fullName,
+  email,
+  password,
+  rangerId,
+  assignedPark,
+}) {
+  return request('/register-ranger', {
+    method: 'POST',
+    body: JSON.stringify({
+      fullName,
+      email,
+      password,
+      rangerId,
+      assignedPark,
+    }),
+  });
+}
+
 export function loginMember({ email, password }) {
   return request('/login', { method: 'POST', body: JSON.stringify({ email, password }) });
 }
@@ -34,4 +53,21 @@ export function getCurrentMember() {
 
 export function logoutMember() {
   return request('/logout', { method: 'POST' });
+}
+
+export function getRangers() {
+  return request('/rangers', { method: 'GET' });
+}
+
+export function getPendingRangers() {
+  return request('/rangers/pending', {
+    method: 'GET',
+  });
+}
+
+export function updateRangerApproval(userId, status) {
+  return request(`/rangers/${userId}/approval`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
 }
