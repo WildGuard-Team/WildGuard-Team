@@ -6,11 +6,9 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "node --test",
-    "test:community-reports": "node --test test/community-reports.test.js test/my-reports.test.js test/my-report-details.test.js test/community-report-validation.unit.test.js test/community-report-services.unit.test.js test/community-report-geocoding.unit.test.js test/community-report-endpoints.unit.test.js",
-    "coverage:community-reports": "c8 npm run test:community-reports",
     "seed:park-manager": "node src/modules/auth/scripts/seed-park-manager.js",
-    "seed:reporting-data": "node src/modules/conservation-reports/scripts/seed-reporting-data.js"
+    "seed:reporting-data": "node src/modules/conservation-reports/scripts/seed-reporting-data.js",
+    "test": "node --test"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,8 +20,5 @@
     "mongoose": "^8.19.1",
     "multer": "^2.4.0",
     "pdfkit": "^0.20.2"
-  },
-  "devDependencies": {
-    "c8": "^10.1.3"
   }
 }
