@@ -49,7 +49,6 @@ export default function ParkManagerDashboardPage({ navigate }) {
           <p>Transform protected-area records into decisions that support wildlife, patrol teams and neighbouring communities.</p>
           <div className="manager-dashboard-hero-actions">
             <button type="button" onClick={openReports}>Generate a report <ManagerIcon name="chevron" size={18} /></button>
-            <span><i /> Database-powered calculations</span>
           </div>
         </div>
         <div className="manager-dashboard-hero-caption">

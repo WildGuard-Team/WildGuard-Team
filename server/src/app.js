@@ -72,6 +72,7 @@ export function createApp({
   app.use('/api/conservation-reports', createConservationReportRouter(conservationReports, users, {
     jwtSecret, strategies: configuredReportStrategies,
     exporter: conservationReportExporter, pdfExporter: conservationReportPdfExporter,
+    geocoding: configuredGeocoding,
   }));
 
   app.use(notFound);

@@ -14,6 +14,8 @@ import ReviewReportPage from './features/community-reports/pages/ReviewReportPag
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 import ParkManagerDashboardPage from './features/conservation-reports/pages/ParkManagerDashboardPage.jsx';
+import ConservationReportHistoryPage from './features/conservation-reports/pages/ConservationReportHistoryPage.jsx';
+import ParkMapPage from './features/conservation-reports/pages/ParkMapPage.jsx';
 
 export default function App() {
   return <AuthProvider><ReportDraftProvider><AppRoutes /></ReportDraftProvider></AuthProvider>;
@@ -35,7 +37,7 @@ function AppRoutes() {
     if (isCheckingSession) return;
     const homePath = user?.role === 'PARK_MANAGER' ? '/manager/dashboard' : '/member';
     if (user && (path === '/login' || path === '/register' || path === '/')) navigate(homePath, { replace: true });
-    else if (user?.role === 'PARK_MANAGER' && !['/manager/dashboard', '/manager/reports'].includes(path)) navigate('/manager/dashboard', { replace: true });
+    else if (user?.role === 'PARK_MANAGER' && !['/manager/dashboard', '/manager/reports', '/manager/reports/history', '/manager/map'].includes(path)) navigate('/manager/dashboard', { replace: true });
     else if (user && user.role !== 'PARK_MANAGER' && path.startsWith('/manager/')) navigate('/member', { replace: true });
     if (!user && path !== '/login' && path !== '/register') navigate('/login', { replace: true });
   }, [isCheckingSession, path, user]);
@@ -51,9 +53,12 @@ function AppRoutes() {
   }, [draft, evidenceHydrationStatus, isCheckingSession, path, user]);
 
   function navigate(nextPath, options = {}) {
-    if (window.location.pathname !== nextPath) {
-      window.history[options.replace ? 'replaceState' : 'pushState']({}, '', nextPath);
-      setPath(nextPath);
+    const nextUrl = new URL(nextPath, window.location.origin);
+    const nextLocation = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    const currentLocation = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (currentLocation !== nextLocation) {
+      window.history[options.replace ? 'replaceState' : 'pushState']({}, '', nextLocation);
+      setPath(nextUrl.pathname);
     }
     setMessage(options.message ?? '');
   }
@@ -62,6 +67,8 @@ function AppRoutes() {
     return <main className="session-loading" aria-live="polite"><span className="loading-mark" />Checking your WildGuard session…</main>;
   }
   if (user?.role === 'PARK_MANAGER' && path === '/manager/dashboard') return <ParkManagerDashboardPage navigate={navigate} />;
+  if (user?.role === 'PARK_MANAGER' && path === '/manager/reports/history') return <ConservationReportHistoryPage navigate={navigate} />;
+  if (user?.role === 'PARK_MANAGER' && path === '/manager/map') return <ParkMapPage navigate={navigate} />;
   if (user?.role === 'PARK_MANAGER') return <ConservationReportsPage navigate={navigate} />;
   if (user && path === '/reports/type') return <ReportTypePage navigate={navigate} />;
   if (user && path === '/reports/details') return <ReportDetailsPage navigate={navigate} />;

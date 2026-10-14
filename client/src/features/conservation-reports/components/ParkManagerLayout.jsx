@@ -6,9 +6,8 @@ import ManagerIcon from './ManagerIcon.jsx';
 const navigation = [
   ['dashboard', 'Dashboard', '/manager/dashboard'],
   ['reports', 'Conservation Reports', '/manager/reports'],
-  ['history', 'Report History'],
-  ['map', 'Park Map'],
-  ['settings', 'Settings'],
+  ['history', 'Report History', '/manager/reports/history'],
+  ['map', 'Park Map', '/manager/map'],
 ];
 
 export default function ParkManagerLayout({ children, navigate }) {
