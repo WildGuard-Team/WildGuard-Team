@@ -9,6 +9,12 @@ import conflictImage from '../../../assets/manager-dashboard-reports/conflict-tr
 import wildlifeSightingImage from '../../../assets/community-report-categories/wildlife-sighting.jpg';
 import communityConflictImage from '../../../assets/community-report-categories/human-wildlife-conflict.jpg';
 import suspiciousActivityImage from '../../../assets/community-report-categories/suspicious-activity.jpg';
+import incidentHeroImage from '../../../assets/manager-dashboard-hero/incident-report-hero.jpg';
+import patrolHeroImage from '../../../assets/manager-dashboard-hero/patrol-coverage-hero.jpg';
+import conflictHeroImage from '../../../assets/manager-dashboard-hero/conflict-trends-hero.jpg';
+import wildlifeSightingHeroImage from '../../../assets/manager-dashboard-hero/wildlife-sighting-hero.jpg';
+import communityConflictHeroImage from '../../../assets/manager-dashboard-hero/human-wildlife-conflict-hero.jpg';
+import suspiciousActivityHeroImage from '../../../assets/manager-dashboard-hero/suspicious-activity-hero.jpg';
 import './conservation-reports.css';
 import './park-manager-dashboard.css';
 
@@ -21,6 +27,7 @@ const reportTypes = [
     heroTitle: 'Turn field observations into timely action.',
     heroDescription: 'Investigate incident patterns, severity and locations with evidence-backed analysis.',
     image: incidentImage,
+    heroImage: incidentHeroImage,
     accent: 'amber',
   },
   {
@@ -31,6 +38,7 @@ const reportTypes = [
     heroTitle: 'See where every patrol makes a difference.',
     heroDescription: 'Measure route completion, protected-zone coverage and operational reach across parks.',
     image: patrolImage,
+    heroImage: patrolHeroImage,
     accent: 'emerald',
   },
   {
@@ -41,6 +49,7 @@ const reportTypes = [
     heroTitle: 'Recognise conflict patterns before they escalate.',
     heroDescription: 'Track changing hotspots and recurring community–wildlife interactions over time.',
     image: conflictImage,
+    heroImage: conflictHeroImage,
     accent: 'blue',
   },
 ];
@@ -56,15 +65,29 @@ const communityReportTypes = [
   {
     value: 'WILDLIFE_SIGHTING', icon: 'paw', title: 'Wildlife Sighting',
     description: 'Review wildlife observations submitted by community members.', image: wildlifeSightingImage,
+    heroTitle: 'Bring every wildlife observation into view.',
+    heroDescription: 'Review community sightings and connect local observations with protected-area decisions.',
+    heroImage: wildlifeSightingHeroImage,
   },
   {
     value: 'HUMAN_WILDLIFE_CONFLICT', icon: 'users', title: 'Human–Wildlife Conflict',
     description: 'Assess reported interactions affecting people and wildlife.', image: communityConflictImage,
+    heroTitle: 'Respond to communities living alongside wildlife.',
+    heroDescription: 'Assess reported encounters quickly and support safer coexistence around protected areas.',
+    heroImage: communityConflictHeroImage,
   },
   {
     value: 'SUSPICIOUS_ACTIVITY', icon: 'shield', title: 'Suspicious Activity',
     description: 'Investigate possible threats, traps and illegal activities.', image: suspiciousActivityImage,
+    heroTitle: 'Turn community alerts into protective action.',
+    heroDescription: 'Review suspicious activity reports and identify potential threats before wildlife is harmed.',
+    heroImage: suspiciousActivityHeroImage,
   },
+];
+
+const heroSlides = [
+  ...reportTypes.map((report) => ({ ...report, source: 'conservation', iconFamily: 'manager' })),
+  ...communityReportTypes.map((report) => ({ ...report, source: 'community', iconFamily: 'community' })),
 ];
 
 export default function ParkManagerDashboardPage({ navigate }) {
@@ -72,12 +95,12 @@ export default function ParkManagerDashboardPage({ navigate }) {
   const firstName = user?.fullName?.trim().split(/\s+/)[0] || 'Manager';
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(false);
-  const currentSlide = reportTypes[activeSlide];
+  const currentSlide = heroSlides[activeSlide];
 
   useEffect(() => {
     if (carouselPaused || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
     const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % reportTypes.length);
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 6000);
     return () => window.clearInterval(timer);
   }, [carouselPaused]);
@@ -101,22 +124,22 @@ export default function ParkManagerDashboardPage({ navigate }) {
     <div className="manager-dashboard">
       <section className="manager-dashboard-hero" aria-roledescription="carousel" aria-label="Conservation report highlights" onMouseEnter={() => setCarouselPaused(true)} onMouseLeave={() => setCarouselPaused(false)} onFocusCapture={() => setCarouselPaused(true)} onBlurCapture={() => setCarouselPaused(false)}>
         <div className="manager-dashboard-hero-media" aria-hidden="true">
-          {reportTypes.map((report, index) => <img key={report.value} className={index === activeSlide ? 'is-active' : ''} src={report.image} alt="" />)}
+          {heroSlides.map((report, index) => <img key={report.value} className={index === activeSlide ? 'is-active' : ''} src={report.heroImage} alt="" />)}
         </div>
         <div className="manager-dashboard-hero-content" key={currentSlide.value}>
-          <span className="manager-dashboard-eyebrow">Welcome back, {firstName} · {currentSlide.title}</span>
-          <span className="manager-dashboard-hero-icon"><ManagerIcon name={currentSlide.icon} size={25} /></span>
+          <span className="manager-dashboard-eyebrow">Welcome back, {firstName} · {currentSlide.source === 'community' ? 'Community report' : 'Conservation report'} · {currentSlide.title}</span>
+          <span className="manager-dashboard-hero-icon">{currentSlide.iconFamily === 'community' ? <CommunityIcon name={currentSlide.icon} size={25} /> : <ManagerIcon name={currentSlide.icon} size={25} />}</span>
           <h1 id="manager-dashboard-title">{currentSlide.heroTitle}</h1>
           <p>{currentSlide.heroDescription}</p>
           <div className="manager-dashboard-hero-actions">
-            <button type="button" onClick={() => openReports(currentSlide.value)}>Generate {currentSlide.title.toLowerCase()} <ManagerIcon name="chevron" size={18} /></button>
-            <button type="button" className="manager-dashboard-community-action" onClick={openCommunityReports}>Review community reports <ManagerIcon name="chevron" size={18} /></button>
+            <button type="button" onClick={() => currentSlide.source === 'community' ? openCommunityReportType(currentSlide.value) : openReports(currentSlide.value)}>{currentSlide.source === 'community' ? `Review ${currentSlide.title.toLowerCase()} reports` : `Generate ${currentSlide.title.toLowerCase()}`} <ManagerIcon name="chevron" size={18} /></button>
+            <button type="button" className="manager-dashboard-community-action" onClick={currentSlide.source === 'community' ? openReports : openCommunityReports}>{currentSlide.source === 'community' ? 'Generate conservation reports' : 'Review community reports'} <ManagerIcon name="chevron" size={18} /></button>
           </div>
         </div>
         <div className="manager-dashboard-carousel-controls" aria-label="Choose dashboard highlight">
-          <button type="button" className="manager-dashboard-slide-arrow is-previous" onClick={() => setActiveSlide((activeSlide - 1 + reportTypes.length) % reportTypes.length)} aria-label="Previous highlight"><ManagerIcon name="chevron" size={18} /></button>
-          <div>{reportTypes.map((report, index) => <button key={report.value} type="button" className={index === activeSlide ? 'is-active' : ''} onClick={() => setActiveSlide(index)} aria-label={`Show ${report.title}`} aria-current={index === activeSlide ? 'true' : undefined} />)}</div>
-          <button type="button" className="manager-dashboard-slide-arrow" onClick={() => setActiveSlide((activeSlide + 1) % reportTypes.length)} aria-label="Next highlight"><ManagerIcon name="chevron" size={18} /></button>
+          <button type="button" className="manager-dashboard-slide-arrow is-previous" onClick={() => setActiveSlide((activeSlide - 1 + heroSlides.length) % heroSlides.length)} aria-label="Previous highlight"><ManagerIcon name="chevron" size={18} /></button>
+          <div>{heroSlides.map((report, index) => <button key={report.value} type="button" className={index === activeSlide ? 'is-active' : ''} onClick={() => setActiveSlide(index)} aria-label={`Show ${report.title}`} aria-current={index === activeSlide ? 'true' : undefined} />)}</div>
+          <button type="button" className="manager-dashboard-slide-arrow" onClick={() => setActiveSlide((activeSlide + 1) % heroSlides.length)} aria-label="Next highlight"><ManagerIcon name="chevron" size={18} /></button>
         </div>
       </section>
 
