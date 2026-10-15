@@ -324,6 +324,9 @@ export function createApp({
 
         pdfExporter:
           conservationReportPdfExporter,
+
+        geocoding:
+          configuredGeocoding,
       },
     ),
   );

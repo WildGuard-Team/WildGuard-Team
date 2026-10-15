@@ -46,6 +46,9 @@ import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx'
 import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
 
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
+import ParkManagerDashboardPage from './features/conservation-reports/pages/ParkManagerDashboardPage.jsx';
+import ConservationReportHistoryPage from './features/conservation-reports/pages/ConservationReportHistoryPage.jsx';
+import ParkMapPage from './features/conservation-reports/pages/ParkMapPage.jsx';
 
 export default function App() {
   return (
@@ -120,7 +123,7 @@ function AppRoutes() {
       user?.role === 'PARK_MANAGER'
     ) {
       homePath =
-        '/manager/reports';
+        '/manager/dashboard';
     } else if (
       user?.role === 'PARK_RANGER'
     ) {
@@ -302,9 +305,21 @@ function AppRoutes() {
     nextPath,
     options = {},
   ) {
+    const nextUrl =
+      new URL(
+        nextPath,
+        window.location.origin,
+      );
+
+    const nextLocation =
+      `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+
+    const currentLocation =
+      `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
     if (
-      window.location.pathname
-      !== nextPath
+      currentLocation
+      !== nextLocation
     ) {
       window.history[
         options.replace
@@ -313,11 +328,11 @@ function AppRoutes() {
       ](
         {},
         '',
-        nextPath,
+        nextLocation,
       );
 
       setPath(
-        nextPath,
+        nextUrl.pathname,
       );
     }
 
@@ -361,10 +376,42 @@ function AppRoutes() {
       </main>
     );
   }
-
   /*
    * Park Manager routes
    */
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/dashboard'
+  ) {
+    return (
+      <ParkManagerDashboardPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/reports/history'
+  ) {
+    return (
+      <ConservationReportHistoryPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/map'
+  ) {
+    return (
+      <ParkMapPage
+        navigate={navigate}
+      />
+    );
+  }
+
   if (
     user?.role === 'PARK_MANAGER'
     && path === '/manager/rangers'

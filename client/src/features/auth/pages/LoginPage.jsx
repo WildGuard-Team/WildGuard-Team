@@ -43,7 +43,7 @@ export default function LoginPage({ navigate, successMessage }) {
       let homePath = '/member';
 
       if (authenticatedUser.role === 'PARK_MANAGER') {
-        homePath = '/manager/reports';
+        homePath = '/manager/dashboard';
       } else if (authenticatedUser.role === 'PARK_RANGER') {
         homePath = '/ranger';
       }
