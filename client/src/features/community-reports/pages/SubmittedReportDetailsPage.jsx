@@ -40,6 +40,7 @@ export default function SubmittedReportDetailsPage({ reportId, navigate }) {
           </div>
           <aside className="report-details__aside" aria-label="Report status and progress">
             <section className="report-details__card"><h2>Report status</h2><ReportStatusBadge status={report.status} /><p className="report-details__status-description">{getReportStatusInfo(report.status).description}</p></section>
+            {report.status === 'rejected' && report.rejectionReason && <section className="report-details__card report-details__rejection"><h2><CommunityIcon name="report" size={21} />Why this report was rejected</h2><p>{report.rejectionReason}</p>{report.reviewedAt && <small>Reviewed {formatSubmittedDate(report.reviewedAt)}</small>}</section>}
             <section className="report-details__card"><h2>Report progress</h2><ReportProgressTimeline status={report.status} createdAt={report.createdAt} /></section>
           </aside>
         </div>
