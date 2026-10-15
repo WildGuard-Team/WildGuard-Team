@@ -5,6 +5,7 @@ import {
   COMMUNITY_REPORT_MANUAL_LOCATION_LIMITS,
   COMMUNITY_REPORT_WEB_SOURCE,
   COMMUNITY_REPORT_STATUSES,
+  COMMUNITY_REPORT_REJECTION_REASON_MAX_LENGTH,
 } from '../config/community-report.constants.js';
 
 const pointSchema = new mongoose.Schema({
@@ -45,6 +46,12 @@ const communityReportSchema = new mongoose.Schema({
   clientSubmissionId: { type: String, required: true, trim: true, maxlength: 100 },
   reportType: { type: String, required: true, enum: COMMUNITY_REPORT_TYPES },
   status: { type: String, required: true, enum: COMMUNITY_REPORT_STATUSES, default: 'under_review' },
+  rejectionReason: {
+    type: String, required: false, trim: true,
+    maxlength: COMMUNITY_REPORT_REJECTION_REASON_MAX_LENGTH,
+  },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, required: false, ref: 'User' },
+  reviewedAt: { type: Date, required: false },
   description: {
     type: String, required: true, trim: true,
     minlength: COMMUNITY_REPORT_DESCRIPTION_LIMITS.min,
@@ -62,6 +69,7 @@ const communityReportSchema = new mongoose.Schema({
 
 communityReportSchema.index({ 'location.point': '2dsphere' });
 communityReportSchema.index({ reporterId: 1, createdAt: -1, _id: -1 });
+communityReportSchema.index({ status: 1, createdAt: -1, _id: -1 });
 // Exclude legacy reports without a submission id so their existing data can coexist.
 communityReportSchema.index({ reporterId: 1, clientSubmissionId: 1 }, {
   unique: true,

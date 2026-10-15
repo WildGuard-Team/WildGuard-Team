@@ -34,3 +34,59 @@ export function validateLogin(values) {
   }
   return errors;
 }
+
+export function validateRangerRegistrationField(name, values) {
+  const commonError = validateRegistrationField(name, values);
+
+  if (
+    ['fullName', 'email', 'password', 'confirmPassword'].includes(name)
+  ) {
+    return commonError;
+  }
+
+  if (
+    name === 'rangerId'
+    && (
+      values.rangerId.trim().length < 3
+      || values.rangerId.trim().length > 50
+    )
+  ) {
+    return 'Ranger ID must be between 3 and 50 characters.';
+  }
+
+  if (
+    name === 'assignedPark'
+    && (
+      values.assignedPark.trim().length < 2
+      || values.assignedPark.trim().length > 100
+    )
+  ) {
+    return 'Assigned park must be between 2 and 100 characters.';
+  }
+
+  return undefined;
+}
+
+export function validateRangerRegistration(values) {
+  const errors = {};
+
+  const fields = [
+    'fullName',
+    'email',
+    'rangerId',
+    'assignedPark',
+    'password',
+    'confirmPassword',
+  ];
+
+  for (const name of fields) {
+    const error =
+      validateRangerRegistrationField(name, values);
+
+    if (error) {
+      errors[name] = error;
+    }
+  }
+
+  return errors;
+}

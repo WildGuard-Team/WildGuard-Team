@@ -23,6 +23,10 @@ export async function getMyReportDetails(reporterId, reportId, communityReports)
     reportType: report.reportType,
     description: report.description,
     status: report.status ?? 'under_review',
+    ...(report.status === 'rejected' && report.rejectionReason
+      ? { rejectionReason: report.rejectionReason }
+      : {}),
+    ...(report.reviewedAt ? { reviewedAt: report.reviewedAt } : {}),
     createdAt: report.createdAt ?? null,
     incidentDateTime: report.incidentDateTime ?? null,
     location: report.location ? toPublicLocation(report.location) : null,

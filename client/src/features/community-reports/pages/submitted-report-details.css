@@ -24,6 +24,7 @@
 .report-details__source { flex: 0 0 auto; padding: 4px 9px; color: #466257; background: #edf7f2; border-radius: 5px; font-size: .71rem; font-weight: 650; }
 .report-details .location-map { height: 205px; }
 .report-details__status-description { margin: 15px 0 0; color: #61766c; font-size: .85rem; line-height: 1.6; }
+.report-details__rejection { border-color: #f0c9c5; background: #fff9f8; }.report-details__rejection h2, .report-details__rejection h2 svg { color: #9b3535; }.report-details__rejection p { margin: 0; color: #713d3b; font-size: .85rem; line-height: 1.6; white-space: pre-wrap; }.report-details__rejection small { display: block; margin-top: 12px; color: #8b6a67; font-size: .72rem; }
 .report-details__state { display: grid; min-height: 230px; justify-items: center; align-content: center; gap: 15px; padding: 30px 24px; color: #61766c; background: #fff; border: 1px solid #e0e8e5; border-radius: 10px; text-align: center; }
 .report-details__state h1 { margin: 0; color: #18342b; font-size: 1.55rem; }
 .report-details__state p { max-width: 460px; margin: 0; font-size: .9rem; line-height: 1.5; }

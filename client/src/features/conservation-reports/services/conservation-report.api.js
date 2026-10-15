@@ -19,6 +19,17 @@ export function getGeneratedConservationReport(reportId) {
   return request(`/${encodeURIComponent(reportId)}`, { method: 'GET' });
 }
 
+export function getConservationReportHistory({ page = 1, limit = 10, reportType = '' } = {}) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (reportType) params.set('reportType', reportType);
+  return request(`/history?${params}`, { method: 'GET' });
+}
+
+export function searchParkLocations(query) {
+  const params = new URLSearchParams({ q: query });
+  return request(`/locations/search?${params}`, { method: 'GET' });
+}
+
 export async function exportGeneratedConservationReport(reportId) {
   return downloadReportFile(reportId, 'export', 'csv');
 }
