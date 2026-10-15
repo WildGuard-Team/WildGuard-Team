@@ -9,6 +9,10 @@ export async function getMyReports(reporterId, status, communityReports) {
     description: report.description,
     location: report.location ? toPublicLocation(report.location) : null,
     status: report.status ?? 'under_review',
+    ...(report.status === 'rejected' && report.rejectionReason
+      ? { rejectionReason: report.rejectionReason }
+      : {}),
+    ...(report.reviewedAt ? { reviewedAt: report.reviewedAt } : {}),
     createdAt: report.createdAt ?? report._id.getTimestamp(),
   }));
 }

@@ -44,7 +44,12 @@ import ReviewReportPage from './features/community-reports/pages/ReviewReportPag
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
 import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
+import ManagerCommunityReportsPage from './features/community-reports/pages/ManagerCommunityReportsPage.jsx';
+
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
+import ParkManagerDashboardPage from './features/conservation-reports/pages/ParkManagerDashboardPage.jsx';
+import ConservationReportHistoryPage from './features/conservation-reports/pages/ConservationReportHistoryPage.jsx';
+import ParkMapPage from './features/conservation-reports/pages/ParkMapPage.jsx';
 import IncidentReportsPage from './features/incident-management/pages/IncidentReportsPage.jsx';
 
 export default function App() {
@@ -120,7 +125,7 @@ function AppRoutes() {
       user?.role === 'PARK_MANAGER'
     ) {
       homePath =
-        '/manager/reports';
+        '/manager/dashboard';
     } else if (
       user?.role === 'PARK_RANGER'
     ) {
@@ -302,9 +307,21 @@ function AppRoutes() {
     nextPath,
     options = {},
   ) {
+    const nextUrl =
+      new URL(
+        nextPath,
+        window.location.origin,
+      );
+
+    const nextLocation =
+      `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+
+    const currentLocation =
+      `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
     if (
-      window.location.pathname
-      !== nextPath
+      currentLocation
+      !== nextLocation
     ) {
       window.history[
         options.replace
@@ -313,11 +330,11 @@ function AppRoutes() {
       ](
         {},
         '',
-        nextPath,
+        nextLocation,
       );
 
       setPath(
-        nextPath,
+        nextUrl.pathname,
       );
     }
 
@@ -367,6 +384,50 @@ function AppRoutes() {
    */
   if (user?.role === 'PARK_MANAGER' && path === '/manager/incidents') {
     return <IncidentReportsPage navigate={navigate} />;
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/dashboard'
+  ) {
+    return (
+      <ParkManagerDashboardPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/community-reports'
+  ) {
+    return (
+      <ManagerCommunityReportsPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/reports/history'
+  ) {
+    return (
+      <ConservationReportHistoryPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/map'
+  ) {
+    return (
+      <ParkMapPage
+        navigate={navigate}
+      />
+    );
   }
 
   if (
@@ -466,12 +527,25 @@ function AppRoutes() {
   /*
    * Community Member routes
    */
-  if (user?.role === 'COMMUNITY_MEMBER' && path === '/reports/my-reports') {
-    return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
+  if (
+    user?.role === 'COMMUNITY_MEMBER'
+    && path === '/reports/my-reports'
+  ) {
+    return (
+      <MyReportsPage
+        key={user.id}
+        navigate={navigate}
+        message={message}
+      />
+    );
   }
 
   const reportDetailsMatch = path.match(/^\/reports\/my-reports\/([^/]+)\/?$/);
-  if (user?.role === 'COMMUNITY_MEMBER' && reportDetailsMatch) {
+
+  if (
+    user?.role === 'COMMUNITY_MEMBER'
+    && reportDetailsMatch
+  ) {
     return (
       <SubmittedReportDetailsPage
         key={`${user.id}:${reportDetailsMatch[1]}`}
