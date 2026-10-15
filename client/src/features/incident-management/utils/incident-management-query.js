@@ -1,6 +1,7 @@
-export function createIncidentManagementQuery() {
+export function createIncidentManagementQuery(search = globalThis.window?.location.search ?? '') {
+  const incidentType = new URLSearchParams(search).get('incidentType') ?? '';
   return {
-    search: '', incidentType: '', riskLevel: '', parkZone: '',
+    search: '', incidentType, riskLevel: '', parkZone: '',
     startDate: '', endDate: '', status: '', page: 1, pageSize: 25, sort: 'newest',
   };
 }

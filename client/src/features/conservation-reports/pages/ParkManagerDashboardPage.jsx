@@ -15,6 +15,14 @@ import conflictHeroImage from '../../../assets/manager-dashboard-hero/conflict-t
 import wildlifeSightingHeroImage from '../../../assets/manager-dashboard-hero/wildlife-sighting-hero.jpg';
 import communityConflictHeroImage from '../../../assets/manager-dashboard-hero/human-wildlife-conflict-hero.jpg';
 import suspiciousActivityHeroImage from '../../../assets/manager-dashboard-hero/suspicious-activity-hero.jpg';
+import wildlifeIncidentImage from '../../../assets/incident-types/wildlife-sighting.png';
+import poachingIncidentImage from '../../../assets/incident-types/poaching-snare.png';
+import injuredAnimalIncidentImage from '../../../assets/incident-types/injured-animal.png';
+import animalCarcassIncidentImage from '../../../assets/incident-types/animal-carcass.png';
+import illegalLoggingIncidentImage from '../../../assets/incident-types/illegal-logging.png';
+import illegalCampsiteIncidentImage from '../../../assets/incident-types/illegal-campsite.png';
+import wildlifeConflictIncidentImage from '../../../assets/incident-types/wildlife-conflict.png';
+import otherIncidentImage from '../../../assets/incident-types/other-incident.jpg';
 import './conservation-reports.css';
 import './park-manager-dashboard.css';
 
@@ -85,6 +93,17 @@ const communityReportTypes = [
   },
 ];
 
+const incidentReportTypes = [
+  { value: 'WILDLIFE_SIGHTING', icon: 'paw', title: 'Wildlife Sighting', description: 'Review notable wildlife observations recorded during patrol.', image: wildlifeIncidentImage },
+  { value: 'POACHING', icon: 'shield', title: 'Poaching / Snare', description: 'Monitor suspected poaching, traps, snares and hunting activity.', image: poachingIncidentImage },
+  { value: 'INJURED_ANIMAL', icon: 'report', title: 'Injured Animal', description: 'Find reports of injured or distressed wild animals.', image: injuredAnimalIncidentImage },
+  { value: 'ANIMAL_CARCASS', icon: 'report', title: 'Animal Carcass', description: 'Review discovered carcasses requiring investigation.', image: animalCarcassIncidentImage },
+  { value: 'ILLEGAL_LOGGING', icon: 'shield', title: 'Illegal Logging', description: 'Track illegal tree cutting and forest destruction reports.', image: illegalLoggingIncidentImage },
+  { value: 'ILLEGAL_CAMPSITE', icon: 'map', title: 'Illegal Campsite', description: 'Review unauthorized campsites found in protected areas.', image: illegalCampsiteIncidentImage },
+  { value: 'WILDLIFE_CONFLICT', icon: 'users', title: 'Wildlife Conflict', description: 'Monitor human–wildlife conflict observed by rangers.', image: wildlifeConflictIncidentImage },
+  { value: 'OTHER', icon: 'report', title: 'Other Incident', description: 'Review other field incidents requiring manager attention.', image: otherIncidentImage },
+];
+
 const heroSlides = [
   ...reportTypes.map((report) => ({ ...report, source: 'conservation', iconFamily: 'manager' })),
   ...communityReportTypes.map((report) => ({ ...report, source: 'community', iconFamily: 'community' })),
@@ -114,6 +133,11 @@ export default function ParkManagerDashboardPage({ navigate }) {
 
   function openCommunityReports() {
     navigate('/manager/community-reports');
+  }
+
+  function openIncidentReports(incidentType = '') {
+    const query = incidentType ? `?incidentType=${encodeURIComponent(incidentType)}` : '';
+    navigate(`/manager/incidents${query}`);
   }
 
   function openCommunityReportType(reportType) {
@@ -153,6 +177,20 @@ export default function ParkManagerDashboardPage({ navigate }) {
             <span className="manager-dashboard-report-icon"><ManagerIcon name={report.icon} size={25} /></span>
             <span><strong>{report.title}</strong><small>{report.description}</small></span>
             <span className="manager-dashboard-card-arrow"><ManagerIcon name="chevron" size={18} /></span>
+          </button>)}
+        </div>
+      </section>
+
+      <section className="manager-dashboard-section manager-dashboard-incident-section" aria-labelledby="incident-report-tools-title">
+        <div className="manager-dashboard-section-heading">
+          <div><span>Incident reports</span><h2 id="incident-report-tools-title">Monitor incidents reported by rangers</h2></div>
+          <button type="button" onClick={() => openIncidentReports()}>View all incidents <ManagerIcon name="chevron" size={17} /></button>
+        </div>
+        <div className="manager-dashboard-incident-grid">
+          {incidentReportTypes.map((incident) => <button key={incident.value} type="button" style={{ '--incident-image': `url(${incident.image})` }} onClick={() => openIncidentReports(incident.value)}>
+            <span className="manager-dashboard-incident-icon"><CommunityIcon name={incident.icon} size={25} /></span>
+            <span><strong>{incident.title}</strong><small>{incident.description}</small></span>
+            <span className="manager-dashboard-incident-link">View incidents <ManagerIcon name="chevron" size={16} /></span>
           </button>)}
         </div>
       </section>
