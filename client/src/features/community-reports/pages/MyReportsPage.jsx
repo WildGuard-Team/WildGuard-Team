@@ -99,4 +99,3 @@ function ReportCard({ report, sending, onRetry, onViewDetails }) {
     {!pending && report._id && <footer><button type="button" className="my-report-card__view-details" onClick={onViewDetails}>View details <CommunityIcon name="chevron" size={17} /></button></footer>}
   </article>;
 }
-

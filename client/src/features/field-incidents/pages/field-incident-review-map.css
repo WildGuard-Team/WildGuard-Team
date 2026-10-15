@@ -1,0 +1,21 @@
+.review-list .field-incident-review-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-column: 1 / -1;
+  justify-content: stretch;
+  align-items: stretch;
+  min-width: 0;
+  gap: 14px;
+}
+
+.field-incident-review-map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.field-incident-review-map-heading button {
+  min-height: 32px;
+}

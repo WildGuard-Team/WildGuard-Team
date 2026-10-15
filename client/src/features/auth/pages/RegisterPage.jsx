@@ -73,7 +73,27 @@ export default function RegisterPage({ navigate }) {
         </div>
         <SubmitButton isLoading={isLoading}>Create account</SubmitButton>
       </form>
-      <p className="form-switch">Already have an account? <button type="button" onClick={() => navigate('/login')}>Sign in</button></p>
+      <div className="form-switch">
+        <p>
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+          >
+            Sign in
+          </button>
+        </p>
+
+        <p>
+          Are you a Park Ranger?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/register-ranger')}
+          >
+            Register as Ranger
+          </button>
+        </p>
+      </div>
     </AuthShell>
   );
 }
