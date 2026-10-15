@@ -3,7 +3,7 @@ import ParkManagerLayout from '../components/ParkManagerLayout.jsx';
 import ReportFilterForm from '../components/ReportFilterForm.jsx';
 import ReportResults from '../components/ReportResults.jsx';
 import ReportTypeSelector from '../components/ReportTypeSelector.jsx';
-import { PATROL_ROUTES } from '../config/report-options.js';
+import { PATROL_ROUTES, REPORT_TYPES } from '../config/report-options.js';
 import {
   generateConservationReport, getConservationReportOptions, getGeneratedConservationReport,
 } from '../services/conservation-report.api.js';
@@ -101,9 +101,11 @@ export default function ConservationReportsPage({ navigate }) {
 function createInitialForm() {
   const end = new Date();
   const start = new Date(end);
+  const requestedType = new URLSearchParams(window.location.search).get('type');
+  const reportType = REPORT_TYPES.some((type) => type.value === requestedType) ? requestedType : '';
   start.setUTCDate(start.getUTCDate() - 89);
   return {
-    reportType: '', startDate: toDateInput(start), endDate: toDateInput(end),
+    reportType, startDate: toDateInput(start), endDate: toDateInput(end),
     park: '', location: '', incidentType: '', severity: '', routeSourceId: '', status: '', conflictType: '',
   };
 }
