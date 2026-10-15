@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEmptyDraft } from '../utils/field-incident-draft.js';
+import { formatFieldIncidentCoordinates } from '../utils/field-incident-location.js';
 import { clearStoredDraft, loadDraft, saveDraft } from './field-incident-draft-storage.js';
 
 function installStorage(t, storage) {
@@ -60,6 +61,40 @@ test('loading an old GPS draft reconciles edited manual text before direct revie
   assert.equal(restored.clientIncidentId, draft.clientIncidentId);
   assert.equal(restored.location.source, 'MANUAL');
   assert.deepEqual(restored.location.coordinates, { latitude: 8.25, longitude: 81.75 });
+});
+
+test('map coordinates retain full precision across form navigation and session reloads', (t) => {
+  useStorage(t);
+  const draft = createEmptyDraft();
+  const coordinates = { latitude: 6.37298123456, longitude: 81.51234789123 };
+  draft.location = {
+    source: 'MANUAL', coordinates,
+    manualCoordinates: formatFieldIncidentCoordinates(coordinates),
+    description: 'Near the field patrol route',
+  };
+  saveDraft(draft);
+  const restored = loadDraft();
+  assert.deepEqual(restored.location, draft.location);
+
+  saveDraft({ ...restored, blockArea: 'Block 2' });
+  assert.deepEqual(loadDraft().location.coordinates, coordinates);
+
+  saveDraft({ ...restored, location: { ...restored.location, coordinates: null, manualCoordinates: '' } });
+  const cleared = loadDraft();
+  assert.equal(cleared.location.coordinates, null);
+  assert.equal(cleared.location.manualCoordinates, '');
+  assert.equal(cleared.location.description, draft.location.description);
+});
+
+test('stored API coordinates without manual input hydrate for editing', (t) => {
+  const values = useStorage(t);
+  const coordinates = { latitude: 6.37298123456, longitude: 81.51234789123 };
+  values.set('wildguard.fieldIncidentDraft.v1', JSON.stringify({
+    location: { source: 'GPS', coordinates, description: 'Saved field incident' },
+  }));
+  const restored = loadDraft();
+  assert.deepEqual(restored.location.coordinates, coordinates);
+  assert.equal(restored.location.manualCoordinates, formatFieldIncidentCoordinates(coordinates));
 });
 
 test('clearing persisted draft removes the original storage key', (t) => {

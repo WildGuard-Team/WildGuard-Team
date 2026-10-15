@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import EvidencePreviewCard from '../../community-reports/components/EvidencePreviewCard.jsx';
 import { FIELD_INCIDENT_PENDING_SYNC } from '../config/field-incident.constants.js';
 import { fieldIncidentTypeLabel } from '../utils/field-incident-options.js';
-import { formatFieldIncidentCoordinates } from '../utils/field-incident-location.js';
+import { formatFieldIncidentCoordinates, hasValidFieldIncidentCoordinates } from '../utils/field-incident-location.js';
 import { formatFieldIncidentDateTime } from '../utils/field-incident-format.js';
 import FieldIncidentStatusBadge, { FieldIncidentRiskBadge } from './FieldIncidentStatusBadge.jsx';
+import IncidentLocationMap from './IncidentLocationMap.jsx';
 
 function LocalBlobPreview({ file, name }) {
   const mediaRef = useRef(null);
@@ -71,7 +72,7 @@ export default function FieldIncidentDetailsModal({ incident, onClose }) {
 
   const pending = incident.status === FIELD_INCIDENT_PENDING_SYNC;
   const coordinates = incident.location?.coordinates;
-  const hasCoordinates = Number.isFinite(coordinates?.latitude) && Number.isFinite(coordinates?.longitude);
+  const hasCoordinates = hasValidFieldIncidentCoordinates(coordinates);
 
   return (
     <dialog ref={dialogRef} className="field-incident-details-modal"
@@ -105,6 +106,16 @@ export default function FieldIncidentDetailsModal({ incident, onClose }) {
         <section className="field-incident-details-section">
           <h3>Location Description</h3>
           <p>{incident.location?.description || 'Not provided'}</p>
+        </section>
+        <section className="field-incident-details-section" aria-labelledby="field-incident-location-title">
+          <h3 id="field-incident-location-title">Incident Location</h3>
+          <IncidentLocationMap
+            latitude={coordinates?.latitude}
+            longitude={coordinates?.longitude}
+            readOnly
+            variant="details"
+            showGoogleMapsLink
+          />
         </section>
         <section className="field-incident-details-section">
           <h3>Incident Description</h3>

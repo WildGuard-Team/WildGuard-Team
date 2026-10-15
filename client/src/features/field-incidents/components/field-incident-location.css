@@ -1,0 +1,154 @@
+.field-incident-map-section {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+
+.field-incident-map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.field-incident-map-heading h2 {
+  margin: 0;
+  color: #18382e;
+  font-size: 0.9rem;
+}
+
+.field-incident-clear-location {
+  min-height: 44px;
+  padding: 8px 14px;
+  color: #087248;
+  background: #fff;
+  border: 1px solid #c4d5ce;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.field-incident-clear-location:hover:not(:disabled) {
+  background: #f0f8f4;
+  border-color: #087248;
+}
+
+.field-incident-clear-location:focus-visible {
+  outline: 3px solid rgba(8, 114, 72, 0.25);
+  outline-offset: 2px;
+}
+
+.field-incident-clear-location:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.field-incident-map-instruction,
+.field-incident-map-coordinates {
+  margin: 0;
+  color: #527064;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.field-incident-map-coordinates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  color: #246044;
+  font-variant-numeric: tabular-nums;
+}
+
+.incident-location-map {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+
+.incident-location-map-empty {
+  padding: 16px;
+  color: #527064;
+  background: #f4f8f5;
+  border: 1px dashed #c9dcd0;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.incident-location-map-empty p {
+  margin: 0;
+}
+
+.incident-location-google-maps {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 14px;
+  color: #087248;
+  background: #fff;
+  border: 1px solid #c4d5ce;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.incident-location-google-maps:hover {
+  background: #f0f8f4;
+  border-color: #087248;
+}
+
+.incident-location-google-maps:focus-visible {
+  outline: 3px solid rgba(8, 114, 72, 0.25);
+  outline-offset: 2px;
+}
+
+.field-incident-map {
+  isolation: isolate;
+  border-radius: 10px;
+}
+
+.field-incident-map .location-map {
+  width: 100%;
+  height: 300px;
+}
+
+.incident-location-map--picker .location-map {
+  height: 380px;
+}
+
+.incident-location-map--details .location-map {
+  height: 280px;
+}
+
+.field-incident-map .leaflet-container .wildguard-location-marker {
+  /* Keep the pin tip at Leaflet's selected coordinate despite the shared image reset. */
+  margin: -44px 0 0 -18px !important;
+}
+
+.field-incident-map .location-map-status {
+  margin: 0;
+  padding: 10px 12px;
+  color: #39705d;
+  background: #f3f8f5;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.field-incident-map .location-map-status.is-error {
+  color: #8b4c17;
+  background: #fff8ee;
+}
+
+@media (max-width: 620px) {
+  .incident-location-map--picker .location-map {
+    height: 320px;
+  }
+}

@@ -1,6 +1,10 @@
 import { FieldIncidentNetworkError, submitFieldIncident } from './field-incident.service.js';
 import { savePendingFieldIncident } from './field-incident-offline-db.js';
 import { FIELD_INCIDENT_PENDING_SYNC } from '../config/field-incident.constants.js';
+import {
+  getFieldIncidentCoordinatesError,
+  reconcileFieldIncidentLocation,
+} from '../utils/field-incident-location.js';
 
 const browserIsOnline = () => typeof navigator === 'undefined' || navigator.onLine !== false;
 
@@ -29,11 +33,15 @@ export async function submitOrQueueFieldIncident(
   { draft, ownerId },
   { submit = submitFieldIncident, savePending = savePendingFieldIncident, isOnline = browserIsOnline } = {},
 ) {
-  if (!isOnline()) return queueIncident(draft, ownerId, savePending);
+  const coordinateError = getFieldIncidentCoordinatesError(draft.location);
+  if (coordinateError) throw new Error(coordinateError);
+  const location = draft.location && reconcileFieldIncidentLocation(draft.location);
+  const submissionDraft = location && location !== draft.location ? { ...draft, location } : draft;
+  if (!isOnline()) return queueIncident(submissionDraft, ownerId, savePending);
   try {
-    return { type: 'ONLINE_SUBMITTED', incident: await submit(draft) };
+    return { type: 'ONLINE_SUBMITTED', incident: await submit(submissionDraft) };
   } catch (error) {
     if (!(error instanceof FieldIncidentNetworkError)) throw error;
-    return queueIncident(draft, ownerId, savePending);
+    return queueIncident(submissionDraft, ownerId, savePending);
   }
 }

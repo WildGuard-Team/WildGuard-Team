@@ -1,3 +1,8 @@
+import {
+  getFieldIncidentCoordinatesError,
+  reconcileFieldIncidentLocation,
+} from '../utils/field-incident-location.js';
+
 const apiBaseUrl =
   (import.meta.env?.VITE_API_BASE_URL ?? '/api')
     .replace(/\/+$/, '');
@@ -67,8 +72,11 @@ function createIncidentDateTime(
 function createRequestBody(
   draft,
 ) {
+  const coordinateError = getFieldIncidentCoordinatesError(draft.location);
+  if (coordinateError) throw new Error(coordinateError);
+  const location = reconcileFieldIncidentLocation(draft.location);
   const source =
-    draft.location.source
+    location.source
     || 'MANUAL';
 
   return {
@@ -97,10 +105,10 @@ function createRequestBody(
       source,
 
       coordinates:
-        draft.location.coordinates,
+        location.coordinates,
 
       description:
-        draft.location.description.trim(),
+        location.description.trim(),
     },
 
     description:
