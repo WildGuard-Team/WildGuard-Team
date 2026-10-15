@@ -1,3 +1,15 @@
+export function hasValidFieldIncidentCoordinates(coordinates) {
+  return coordinates !== null
+    && typeof coordinates === 'object'
+    && !Array.isArray(coordinates)
+    && Number.isFinite(coordinates.latitude)
+    && Number.isFinite(coordinates.longitude)
+    && coordinates.latitude >= -90
+    && coordinates.latitude <= 90
+    && coordinates.longitude >= -180
+    && coordinates.longitude <= 180;
+}
+
 export function parseCoordinates(value) {
     if (
       typeof value !== 'string'
@@ -17,14 +29,7 @@ export function parseCoordinates(value) {
     const latitude = Number(parts[0]);
     const longitude = Number(parts[1]);
   
-    if (
-      !Number.isFinite(latitude)
-      || !Number.isFinite(longitude)
-      || latitude < -90
-      || latitude > 90
-      || longitude < -180
-      || longitude > 180
-    ) {
+    if (!hasValidFieldIncidentCoordinates({ latitude, longitude })) {
       return null;
     }
   
@@ -33,6 +38,18 @@ export function parseCoordinates(value) {
       longitude,
     };
   }
+
+export function getFieldIncidentCoordinatesError(location) {
+  const invalidCoordinates = location?.coordinates != null
+    && !hasValidFieldIncidentCoordinates(location.coordinates);
+  const invalidManualInput = typeof location?.manualCoordinates === 'string'
+    && location.manualCoordinates.trim()
+    && !parseCoordinates(location.manualCoordinates);
+
+  return invalidCoordinates || invalidManualInput
+    ? 'Enter valid GPS coordinates: latitude -90 to 90 and longitude -180 to 180.'
+    : null;
+}
   
   export function validateFieldIncidentDetails(
     draft,
@@ -69,13 +86,16 @@ export function parseCoordinates(value) {
         'Block or area is required.';
     }
   
+    const coordinateError = getFieldIncidentCoordinatesError(draft.location);
     const hasGps =
-      draft.location.coordinates
+      hasValidFieldIncidentCoordinates(draft.location.coordinates)
       || parseCoordinates(
         draft.location.manualCoordinates,
       );
   
-    if (
+    if (coordinateError) {
+      errors.location = coordinateError;
+    } else if (
       !hasGps
       && !draft.location.description.trim()
     ) {

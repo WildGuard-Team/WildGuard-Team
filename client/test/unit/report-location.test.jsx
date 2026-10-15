@@ -9,16 +9,33 @@ import SelectedLocation from '../../src/features/community-reports/components/Se
 import ReportProgress from '../../src/features/community-reports/components/ReportProgress.jsx';
 import { searchLocations } from '../../src/features/community-reports/services/locationApi.js';
 
-const mapMock = vi.hoisted(() => ({ map: { invalidateSize: vi.fn(), setView: vi.fn(), getZoom: vi.fn(() => 7) }, events: null, container: null, marker: null }));
+const mapMock = vi.hoisted(() => ({
+  map: {
+    invalidateSize: vi.fn(), setView: vi.fn(), getZoom: vi.fn(() => 7), getContainer: vi.fn(),
+    scrollWheelZoom: { enable: vi.fn(), disable: vi.fn() },
+  },
+  events: null, container: null, marker: null,
+}));
 vi.mock('leaflet', () => ({ default: { icon: vi.fn((options) => options) } }));
 vi.mock('react-leaflet', () => ({
-  MapContainer: ({ children, ...props }) => { mapMock.container = props; return <div data-testid="map">{children}</div>; },
+  MapContainer: ({ children, ...props }) => {
+    mapMock.container = props;
+    return <div data-testid="map" ref={(element) => {
+      if (!element) return;
+      Object.defineProperties(element, { clientWidth: { value: 700, configurable: true }, clientHeight: { value: 350, configurable: true } });
+      mapMock.map.getContainer.mockReturnValue(element);
+    }}>{children}</div>;
+  },
   Marker: ({ children, ...props }) => { mapMock.marker = props; return <div data-testid="marker">{children}</div>; },
   TileLayer: () => <div data-testid="tile-layer" />, Tooltip: ({ children }) => <span>{children}</span>,
   useMap: () => mapMock.map, useMapEvents: (events) => { mapMock.events = events; },
 }));
 vi.mock('../../src/features/community-reports/services/locationApi.js', () => ({ searchLocations: vi.fn() }));
 beforeEach(() => { vi.clearAllMocks(); mapMock.events = null; mapMock.marker = null; Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined }); });
+
+function mapLatLng(lat, lng) {
+  return { lat, lng, wrap: () => ({ lat, lng: ((lng + 180) % 360 + 360) % 360 - 180 }) };
+}
 
 describe('current location hook', () => {
   it('handles unsupported browsers without a pending request', async () => {
@@ -102,7 +119,7 @@ describe('editable and read-only map contracts', () => {
     const select = vi.fn(); render(<LocationMap coordinates={null} onMapSelect={select} onMarkerDrag={vi.fn()} />);
     expect(mapMock.container.center).toEqual([7.8731, 80.7718]); expect(mapMock.container.zoom).toBe(7);
     expect(mapMock.container.scrollWheelZoom).toBe(true); expect(screen.queryByTestId('marker')).toBeNull();
-    act(() => mapMock.events.click({ latlng: { lat: 8, lng: 81 } })); expect(select).toHaveBeenCalledWith({ latitude: 8, longitude: 81 });
+    act(() => mapMock.events.click({ latlng: mapLatLng(8, 81) })); expect(select).toHaveBeenCalledWith({ latitude: 8, longitude: 81 });
     await waitFor(() => expect(mapMock.map.invalidateSize).toHaveBeenCalled()); expect(mapMock.map.setView).not.toHaveBeenCalled();
   });
   it('renders and updates an editable marker, keeps existing zoom, and reports dragged coordinates', async () => {
@@ -110,7 +127,7 @@ describe('editable and read-only map contracts', () => {
     const view = render(<LocationMap coordinates={{ latitude: 7, longitude: 80 }} onMapSelect={vi.fn()} onMarkerDrag={drag} />);
     expect(mapMock.marker.position).toEqual([7, 80]); expect(mapMock.marker.draggable).toBe(true);
     expect(mapMock.map.setView).toHaveBeenCalledWith([7, 80], 15);
-    act(() => mapMock.marker.eventHandlers.dragend({ target: { getLatLng: () => ({ lat: 9, lng: 82 }) } }));
+    act(() => mapMock.marker.eventHandlers.dragend({ target: { getLatLng: () => mapLatLng(9, 82) } }));
     expect(drag).toHaveBeenCalledWith({ latitude: 9, longitude: 82 });
     view.rerender(<LocationMap coordinates={{ latitude: 8, longitude: 81 }} onMapSelect={vi.fn()} onMarkerDrag={drag} />);
     expect(mapMock.map.setView).toHaveBeenLastCalledWith([8, 81], 13);
@@ -124,6 +141,32 @@ describe('editable and read-only map contracts', () => {
     expect(screen.getByRole('region', { name: 'Report location map' })).toBeTruthy();
     expect(mapMock.container.scrollWheelZoom).toBe(false); expect(mapMock.marker.draggable).toBe(false);
     expect(mapMock.marker.eventHandlers).toBeUndefined(); expect(mapMock.events).toBeNull(); expect(screen.getByText('Report location')).toBeTruthy();
+    expect(mapMock.map.scrollWheelZoom.disable).toHaveBeenCalled();
+  });
+  it('keeps clicked and dragged longitudes valid when a ranger pans to another copy of the world', () => {
+    const select = vi.fn(); const drag = vi.fn();
+    render(<LocationMap coordinates={{ latitude: 7, longitude: 80 }} onMapSelect={select} onMarkerDrag={drag} />);
+    act(() => mapMock.events.click({ latlng: mapLatLng(8, 441) }));
+    expect(select).toHaveBeenCalledWith({ latitude: 8, longitude: 81 });
+    act(() => mapMock.marker.eventHandlers.dragend({ target: { getLatLng: () => mapLatLng(9, -278) } }));
+    expect(drag).toHaveBeenCalledWith({ latitude: 9, longitude: 82 });
+  });
+  it('retains ranger defaults and read-only labels while refreshing a map when its dialog opens', async () => {
+    const { container } = render(<dialog><LocationMap coordinates={{ latitude: 6.3725, longitude: 81.5169 }}
+      defaultCenter={{ latitude: 6.3725, longitude: 81.5169 }} defaultZoom={10} className="field-incident-map"
+      readOnly locationLabel="Incident location" /></dialog>);
+    expect(container.querySelector('[role="region"]').getAttribute('aria-label')).toBe('Incident location map');
+    expect(screen.getByText('Incident location')).toBeTruthy();
+    expect(container.querySelector('.field-incident-map')).toBeTruthy();
+    await waitFor(() => expect(mapMock.map.invalidateSize).toHaveBeenCalled());
+    mapMock.map.invalidateSize.mockClear();
+    act(() => container.querySelector('dialog').setAttribute('open', ''));
+    await waitFor(() => expect(mapMock.map.invalidateSize).toHaveBeenCalledWith({ pan: true, animate: false, debounceMoveend: true }));
+  });
+  it('uses configured ranger center and zoom when optional coordinates are empty', () => {
+    render(<LocationMap coordinates={null} defaultCenter={{ latitude: 6.3725, longitude: 81.5169 }} defaultZoom={10} />);
+    expect(mapMock.container.center).toEqual([6.3725, 81.5169]); expect(mapMock.container.zoom).toBe(10);
+    expect(mapMock.map.scrollWheelZoom.enable).toHaveBeenCalled();
   });
   it('selected location prioritizes readable text and displays missing/manual/coordinate fallbacks plus warnings', () => {
     const view = render(<SelectedLocation location={{ source: null, coordinates: null }} error="Pick a location" warning="Lookup failed" />);

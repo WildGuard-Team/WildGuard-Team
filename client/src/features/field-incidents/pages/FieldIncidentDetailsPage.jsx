@@ -4,7 +4,10 @@ import FieldIncidentDetailsForm from '../components/FieldIncidentDetailsForm.jsx
 import FieldIncidentLocationFields from '../components/FieldIncidentLocationFields.jsx';
 import RangerLayout from '../components/RangerLayout.jsx';
 import { useFieldIncidentDraft } from '../context/useFieldIncidentDraft.js';
-import { reconcileFieldIncidentLocation } from '../utils/field-incident-location.js';
+import {
+  getFieldIncidentCoordinatesError,
+  reconcileFieldIncidentLocation,
+} from '../utils/field-incident-location.js';
 import { validateFieldIncidentDetails } from '../validation/field-incident-details.validation.js';
 
 export default function FieldIncidentDetailsPage({ navigate }) {
@@ -25,6 +28,8 @@ export default function FieldIncidentDetailsPage({ navigate }) {
   function continueToEvidence() {
     const nextLocation = reconcileFieldIncidentLocation(draft.location);
     const nextErrors = validateFieldIncidentDetails({ ...draft, location: nextLocation });
+    const coordinateError = getFieldIncidentCoordinatesError(draft.location);
+    if (coordinateError) nextErrors.location = coordinateError;
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length) return;

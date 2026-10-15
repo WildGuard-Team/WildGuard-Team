@@ -1,11 +1,16 @@
 import {
     FieldIncident,
   } from '../models/field-incident.model.js';
+  import { queryManagementIncidents } from './management-incident.repository.js';
   
   export function createFieldIncidentRepository(
     model = FieldIncident,
   ) {
     return {
+      listForManagement(manager, query) {
+        return queryManagementIncidents(model, manager, query);
+      },
+
       async create(incident) {
         await model.init();
   

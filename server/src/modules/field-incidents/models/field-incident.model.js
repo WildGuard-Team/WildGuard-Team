@@ -17,6 +17,16 @@ const pointSchema = new mongoose.Schema(
     coordinates: {
       type: [Number],
       required: true,
+      validate: {
+        validator: (coordinates) => coordinates.length === 2
+          && Number.isFinite(coordinates[0])
+          && Number.isFinite(coordinates[1])
+          && coordinates[0] >= -180
+          && coordinates[0] <= 180
+          && coordinates[1] >= -90
+          && coordinates[1] <= 90,
+        message: 'Location coordinates are invalid.',
+      },
     },
   },
   {

@@ -342,6 +342,37 @@ test(
   },
 );
 
+test('rejects missing or coercible nonnumeric coordinate values', () => {
+  for (const coordinateName of ['latitude', 'longitude']) {
+    for (const value of [undefined, null, '', '  ', false, true, [], [0], {}, NaN, Infinity]) {
+      const body = createValidBody();
+      body.location.coordinates[coordinateName] = value;
+
+      assert.throws(() => validateCreateFieldIncident(body), {
+        status: 400,
+        message: 'Location coordinates are invalid.',
+      }, `${coordinateName}: ${String(value)}`);
+    }
+  }
+});
+
+test('accepts zero, boundary coordinates, and numeric coordinate text', () => {
+  for (const coordinates of [
+    { latitude: 0, longitude: 0 },
+    { latitude: -90, longitude: -180 },
+    { latitude: 90, longitude: 180 },
+    { latitude: '6.3725', longitude: '81.5185' },
+  ]) {
+    const body = createValidBody();
+    body.location.coordinates = coordinates;
+
+    assert.deepEqual(validateCreateFieldIncident(body).location.coordinates, {
+      latitude: Number(coordinates.latitude),
+      longitude: Number(coordinates.longitude),
+    });
+  }
+});
+
 test(
   'accepts manual location without coordinates when description exists',
   () => {

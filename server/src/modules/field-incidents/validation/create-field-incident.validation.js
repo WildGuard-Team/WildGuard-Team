@@ -118,6 +118,21 @@ import {
       );
     }
   
+    // Do not coerce empty values, booleans, or arrays into a valid zero.
+    const isCoordinateValue = (coordinate) =>
+      typeof coordinate === 'number'
+      || (typeof coordinate === 'string' && coordinate.trim() !== '');
+
+    if (
+      !isCoordinateValue(value.latitude)
+      || !isCoordinateValue(value.longitude)
+    ) {
+      throw new HttpError(
+        400,
+        'Location coordinates are invalid.',
+      );
+    }
+
     const latitude =
       Number(
         value.latitude,

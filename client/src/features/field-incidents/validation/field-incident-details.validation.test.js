@@ -26,7 +26,7 @@ test('coordinate ranges and invalid numeric values remain rejected', () => {
   }
 });
 
-test('an incomplete coordinate input requires the existing location description fallback', () => {
+test('blank GPS remains optional while nonempty invalid input requires a valid pair or clearing', () => {
   const draft = {
     incidentType: 'ILLEGAL_LOGGING',
     incidentDate: '2026-10-08',
@@ -34,7 +34,7 @@ test('an incomplete coordinate input requires the existing location description 
     riskLevel: 'LOW',
     parkZone: 'Yala National Park',
     blockArea: 'Block 1',
-    location: { coordinates: null, manualCoordinates: '7,', description: '' },
+    location: { coordinates: null, manualCoordinates: '', description: '' },
     description: 'Observed an incident during patrol.',
     additionalNotes: '',
   };
@@ -47,4 +47,23 @@ test('an incomplete coordinate input requires the existing location description 
     ...draft,
     location: { ...draft.location, description: 'Near the northern park gate' },
   }), {});
+
+  for (const manualCoordinates of ['7,', '91,181', 'invalid', '7,80,1']) {
+    assert.equal(validateFieldIncidentDetails({
+      ...draft,
+      location: { coordinates: null, manualCoordinates, description: 'Near the northern park gate' },
+    }).location, 'Enter valid GPS coordinates: latitude -90 to 90 and longitude -180 to 180.');
+  }
+
+  for (const coordinates of [
+    { latitude: 91, longitude: 80 },
+    { latitude: 7, longitude: NaN },
+    { latitude: '7', longitude: 80 },
+    { latitude: 7 },
+  ]) {
+    assert.equal(validateFieldIncidentDetails({
+      ...draft,
+      location: { coordinates, manualCoordinates: '', description: 'Near the northern park gate' },
+    }).location, 'Enter valid GPS coordinates: latitude -90 to 90 and longitude -180 to 180.');
+  }
 });

@@ -13,7 +13,10 @@ export function loadDraft() {
       ...emptyDraft,
       ...parsed,
       clientIncidentId: parsed.clientIncidentId || emptyDraft.clientIncidentId,
-      location: reconcileFieldIncidentLocation({ ...emptyDraft.location, ...parsed.location }),
+      location: {
+        ...emptyDraft.location,
+        ...reconcileFieldIncidentLocation(parsed.location ?? emptyDraft.location),
+      },
       // Session storage cannot restore Files; the offline queue retains them in IndexedDB.
       evidence: [],
     };

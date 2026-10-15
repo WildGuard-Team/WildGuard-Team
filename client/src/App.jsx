@@ -50,6 +50,7 @@ import ConservationReportsPage from './features/conservation-reports/pages/Conse
 import ParkManagerDashboardPage from './features/conservation-reports/pages/ParkManagerDashboardPage.jsx';
 import ConservationReportHistoryPage from './features/conservation-reports/pages/ConservationReportHistoryPage.jsx';
 import ParkMapPage from './features/conservation-reports/pages/ParkMapPage.jsx';
+import IncidentReportsPage from './features/incident-management/pages/IncidentReportsPage.jsx';
 
 export default function App() {
   return (
@@ -377,9 +378,14 @@ function AppRoutes() {
       </main>
     );
   }
+
   /*
    * Park Manager routes
    */
+  if (user?.role === 'PARK_MANAGER' && path === '/manager/incidents') {
+    return <IncidentReportsPage navigate={navigate} />;
+  }
+
   if (
     user?.role === 'PARK_MANAGER'
     && path === '/manager/dashboard'

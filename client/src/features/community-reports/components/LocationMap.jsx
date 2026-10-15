@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -20,40 +20,116 @@ function coordinatesToPosition(coordinates) {
 }
 
 function hasValidCoordinates(coordinates) {
-  return Number.isFinite(coordinates?.latitude) && Number.isFinite(coordinates?.longitude);
+  return Number.isFinite(coordinates?.latitude) && Math.abs(coordinates.latitude) <= 90
+    && Number.isFinite(coordinates?.longitude) && Math.abs(coordinates.longitude) <= 180;
+}
+
+function selectedCoordinates(latlng) {
+  // A panned map can show another copy of the world; keep saved longitude in range.
+  const wrapped = latlng.wrap();
+  return { latitude: wrapped.lat, longitude: wrapped.lng };
 }
 
 function MapSelection({ onMapSelect }) {
-  useMapEvents({ click: (event) => onMapSelect({ latitude: event.latlng.lat, longitude: event.latlng.lng }) });
+  useMapEvents({ click: (event) => onMapSelect(selectedCoordinates(event.latlng)) });
   return null;
 }
 
-function MapViewport({ coordinates }) {
+function MapViewport({ coordinates, readOnly }) {
   const map = useMap();
   useEffect(() => {
-    const timer = setTimeout(() => map.invalidateSize(), 0);
+    const container = map.getContainer();
+    const dialog = container.closest('dialog');
+    let resizeFrame;
+    function refreshSize() {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        // A dialog can mount its map before showModal() makes its size available.
+        if (container.clientWidth && container.clientHeight) {
+          map.invalidateSize({ pan: true, animate: false, debounceMoveend: true });
+        }
+      });
+    }
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(refreshSize);
+    observer?.observe(container);
+    const dialogObserver = dialog && typeof MutationObserver !== 'undefined'
+      ? new MutationObserver(refreshSize) : null;
+    dialogObserver?.observe(dialog, { attributes: true, attributeFilter: ['open'] });
+    window.addEventListener('resize', refreshSize);
+    document.addEventListener('visibilitychange', refreshSize);
+    refreshSize();
+    return () => {
+      cancelAnimationFrame(resizeFrame);
+      observer?.disconnect();
+      dialogObserver?.disconnect();
+      window.removeEventListener('resize', refreshSize);
+      document.removeEventListener('visibilitychange', refreshSize);
+    };
+  }, [map]);
+  useEffect(() => {
     if (hasValidCoordinates(coordinates)) map.setView(coordinatesToPosition(coordinates), Math.max(map.getZoom(), 13));
-    return () => clearTimeout(timer);
   }, [coordinates, map]);
+  useEffect(() => {
+    if (readOnly) map.scrollWheelZoom.disable();
+    else map.scrollWheelZoom.enable();
+  }, [map, readOnly]);
   return null;
 }
 
-export default function LocationMap({ coordinates, onMapSelect, onMarkerDrag, readOnly = false }) {
+export default function LocationMap({
+  coordinates,
+  onMapSelect,
+  onMarkerDrag,
+  defaultCenter = sriLankaCenter,
+  defaultZoom = 7,
+  className = '',
+  showTileStatus = false,
+  readOnly = false,
+  locationLabel = 'Report location',
+}) {
+  const [tileStatus, setTileStatus] = useState('loading');
+  const tileFailed = useRef(false);
   const hasSelectedLocation = hasValidCoordinates(coordinates);
-  const markerHandlers = {
-    dragend(event) {
-      const next = event.target.getLatLng();
-      onMarkerDrag({ latitude: next.lat, longitude: next.lng });
+  useEffect(() => {
+    if (!showTileStatus || tileStatus !== 'loading') return;
+    const timer = setTimeout(() => setTileStatus('error'), 15000);
+    return () => clearTimeout(timer);
+  }, [showTileStatus, tileStatus]);
+  const tileHandlers = {
+    loading() {
+      tileFailed.current = false;
+      setTileStatus('loading');
+    },
+    tileerror() {
+      tileFailed.current = true;
+      setTileStatus('error');
+    },
+    load() {
+      setTileStatus(tileFailed.current ? 'error' : 'ready');
     },
   };
-  return <section className="location-map-region" aria-label={readOnly ? 'Report location map' : 'Interactive location map'}>
-    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : sriLankaCenter)} zoom={hasSelectedLocation ? 13 : 7} scrollWheelZoom={!readOnly} className="location-map">
-      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+  const markerHandlers = {
+    dragend(event) {
+      if (!readOnly) onMarkerDrag?.(selectedCoordinates(event.target.getLatLng()));
+    },
+  };
+  return <div className={`location-map-region ${className}`} role="region" aria-label={readOnly ? `${locationLabel} map` : 'Interactive location map'}>
+    {showTileStatus && tileStatus !== 'ready' && (
+      <p className={`location-map-status${tileStatus === 'error' ? ' is-error' : ''}`} role="status">
+        {tileStatus === 'error'
+          ? readOnly
+            ? 'Some map tiles could not load. Check your connection. The incident coordinates are shown below.'
+            : 'Some map tiles could not load. Check your connection or enter GPS coordinates above. Your selected location is kept.'
+          : readOnly ? 'Loading incident location map…' : 'Loading map…'}
+      </p>
+    )}
+    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : defaultCenter)} zoom={hasSelectedLocation ? 13 : defaultZoom} scrollWheelZoom={!readOnly} zoomControl className="location-map">
+      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} eventHandlers={tileHandlers} />
       {!readOnly && <MapSelection onMapSelect={onMapSelect} />}
-      <MapViewport coordinates={coordinates} />
-      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers}>
-        <Tooltip direction="top" offset={[0, -36]}>{readOnly ? 'Report location' : 'Selected location'}</Tooltip>
+      <MapViewport coordinates={coordinates} readOnly={readOnly} />
+      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} keyboard={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers} title={readOnly ? locationLabel : 'Selected incident location. Drag to adjust.'} alt={readOnly ? locationLabel : 'Selected incident location'} autoPan={!readOnly}>
+        <Tooltip direction="top" offset={[0, -36]}>{readOnly ? locationLabel : 'Selected location'}</Tooltip>
       </Marker>}
     </MapContainer>
-  </section>;
+  </div>;
 }

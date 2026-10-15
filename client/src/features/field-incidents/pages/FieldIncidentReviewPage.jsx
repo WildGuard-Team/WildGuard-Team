@@ -4,10 +4,12 @@ import FormAlert from '../../auth/components/FormAlert.jsx';
 import EvidencePreviewCard from '../../community-reports/components/EvidencePreviewCard.jsx';
 import RangerLayout from '../components/RangerLayout.jsx';
 import FieldIncidentReviewCard from '../components/FieldIncidentReviewCard.jsx';
+import IncidentLocationMap from '../components/IncidentLocationMap.jsx';
 import { useFieldIncidentDraft } from '../context/useFieldIncidentDraft.js';
 import { fieldIncidentTypeLabel } from '../utils/field-incident-options.js';
 import { formatFieldIncidentCoordinates } from '../utils/field-incident-location.js';
 import { submitOrQueueFieldIncident } from '../services/field-incident-submission.service.js';
+import './field-incident-review-map.css';
 
 function formatRiskLevel(value) {
   return value ? value.charAt(0) + value.slice(1).toLowerCase() : 'Not provided';
@@ -72,6 +74,19 @@ export default function FieldIncidentReviewPage({ navigate }) {
             onEdit={() => navigate('/ranger/incidents/details')}>
             <p>{draft.description}</p>
           </FieldIncidentReviewCard>
+          <section className="field-incident-review-map" aria-labelledby="incident-review-map-title">
+            <div className="field-incident-review-map-heading">
+              <h2 id="incident-review-map-title">Incident Location Map</h2>
+              <button type="button" disabled={isSubmitting}
+                onClick={() => navigate('/ranger/incidents/details')}>Edit Location</button>
+            </div>
+            <IncidentLocationMap
+              latitude={draft.location.coordinates?.latitude}
+              longitude={draft.location.coordinates?.longitude}
+              readOnly
+              variant="review"
+            />
+          </section>
           {draft.additionalNotes && (
             <FieldIncidentReviewCard label="Additional Notes" disabled={isSubmitting}
               onEdit={() => navigate('/ranger/incidents/details')}>
