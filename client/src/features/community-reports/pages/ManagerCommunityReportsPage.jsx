@@ -29,11 +29,18 @@ const categories = [
   { value: 'SUSPICIOUS_ACTIVITY', title: 'Suspicious Activity', image: suspiciousImage, description: 'Potential threats, traps or illegal activity.' },
 ];
 
-const initialFilters = { status: '', reportType: '', search: '', startDate: '', endDate: '' };
+function createInitialFilters() {
+  const requestedType = new URLSearchParams(window.location.search).get('reportType');
+  return {
+    status: '',
+    reportType: categories.some((category) => category.value === requestedType) ? requestedType : '',
+    search: '', startDate: '', endDate: '',
+  };
+}
 
 export default function ManagerCommunityReportsPage({ navigate }) {
-  const [filters, setFilters] = useState(initialFilters);
-  const [draftFilters, setDraftFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState(createInitialFilters);
+  const [draftFilters, setDraftFilters] = useState(createInitialFilters);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -91,8 +98,9 @@ export default function ManagerCommunityReportsPage({ navigate }) {
   function clearFilters() {
     setLoading(true);
     setError('');
-    setDraftFilters(initialFilters);
-    setFilters(initialFilters);
+    const cleared = { status: '', reportType: '', search: '', startDate: '', endDate: '' };
+    setDraftFilters(cleared);
+    setFilters(cleared);
   }
 
   async function openReport(reportId) {
