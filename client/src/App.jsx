@@ -44,6 +44,7 @@ import ReviewReportPage from './features/community-reports/pages/ReviewReportPag
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
+import IncidentReportsPage from './features/incident-management/pages/IncidentReportsPage.jsx';
 
 export default function App() {
   return (
@@ -363,6 +364,10 @@ function AppRoutes() {
   /*
    * Park Manager routes
    */
+  if (user?.role === 'PARK_MANAGER' && path === '/manager/incidents') {
+    return <IncidentReportsPage navigate={navigate} />;
+  }
+
   if (
     user?.role === 'PARK_MANAGER'
     && path === '/manager/rangers'

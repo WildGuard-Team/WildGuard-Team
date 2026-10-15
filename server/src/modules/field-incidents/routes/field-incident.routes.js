@@ -21,6 +21,8 @@ import {
   import {
     listMyFieldIncidentsController,
   } from '../controllers/list-my-field-incidents.controller.js';
+  import { requireParkManager } from '../../auth/middleware/require-park-manager.middleware.js';
+  import { listManagementIncidentsController } from '../controllers/list-management-incidents.controller.js';
   
   export function createFieldIncidentRouter(
     fieldIncidents,
@@ -33,6 +35,14 @@ import {
   ) {
     const router =
       Router();
+
+    const listManagement = listManagementIncidentsController(fieldIncidents);
+    router.get(
+      '/management',
+      requireAuthentication(jwtSecret),
+      requireParkManager(users),
+      (req, res, next) => Promise.resolve(listManagement(req, res)).catch(next),
+    );
 
     const listMyIncidents =
       listMyFieldIncidentsController(fieldIncidents);

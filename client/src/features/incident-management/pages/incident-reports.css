@@ -1,0 +1,48 @@
+.incident-management .im-statistics { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+.incident-management .im-statistic-medium strong { color: #8c650a; }
+.incident-management .im-statistic-high strong { color: #ab332c; }
+.incident-management .im-statistics-note { margin: 9px 2px 18px; color: #647b72; font-size: .76rem; }
+.incident-management .im-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.incident-management .im-section-heading h2 { margin: 0; font-size: 1.04rem; }
+.incident-management .im-small-button { min-height: 36px; padding: 7px 12px; font-size: .78rem; }
+.incident-management .im-filter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.incident-management .im-search { grid-column: span 2; }
+.incident-management .im-records { margin-top: 20px; }
+.incident-management .im-table-scroll table { min-width: 1120px; }
+.incident-management .im-table-scroll td { max-width: 230px; overflow-wrap: anywhere; line-height: 1.5; }
+.incident-management .im-reference { color: #155e43; font-weight: 750; }
+.incident-management .field-incidents-view-button { min-width: 58px; white-space: nowrap; }
+.incident-management .im-table-scroll:focus-visible { outline: 3px solid #76b79a; outline-offset: -3px; }
+.incident-management .im-table-status { display: flex; min-height: 150px; align-items: center; justify-content: center; gap: 10px; margin: 0; padding: 30px 22px; color: #62796f; text-align: center; font-size: .85rem; }
+.incident-management .im-table-status .cr-button-spinner { border-color: #c7e2d5; border-top-color: #08734e; }
+.incident-management .im-empty { flex-direction: column; gap: 9px; }
+.incident-management .im-empty h3 { margin: 0; color: #2b4a3d; font-size: 1rem; }
+.incident-management .im-empty p { max-width: 530px; margin: 0; line-height: 1.6; }
+.incident-management .im-empty button { margin-top: 7px; }
+.incident-management .im-load-error { flex-direction: row; align-items: center; justify-content: space-between; gap: 15px; margin: 18px 0 0; }
+.incident-management .im-load-error p { margin: 5px 0 0; line-height: 1.5; }
+.incident-management .im-load-error button { flex-shrink: 0; }
+.incident-management .im-pagination { display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap; padding: 16px 18px; border-top: 1px solid #e1ebe6; color: #597064; font-size: .76rem; }
+.incident-management .im-page-size { display: flex; align-items: center; gap: 9px; }
+.incident-management .im-page-size select { min-height: 35px; padding: 6px 9px; color: #285d44; background: #fff; border: 1px solid #c6dacd; border-radius: 6px; }
+.incident-management .im-pagination nav { display: flex; align-items: center; gap: 12px; }
+.incident-management button:disabled, .incident-management select:disabled { opacity: .55; cursor: not-allowed; }
+.incident-management button:focus-visible, .incident-management select:focus-visible { outline: 3px solid #76b79a; outline-offset: 2px; }
+@media (max-width: 1120px) {
+  .incident-management .im-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .incident-management .im-pagination nav { margin-left: auto; }
+}
+@media (max-width: 600px) {
+  .incident-management .im-statistics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .incident-management .im-statistics article { padding: 15px; }
+  .incident-management .im-statistics article span { min-height: 28px; line-height: 1.4; }
+  .incident-management .im-filters { padding: 18px; }
+  .incident-management .im-filter-grid { gap: 13px 10px; }
+  .incident-management .im-search { grid-column: 1 / -1; }
+  .incident-management .im-refresh { width: 100%; }
+  .incident-management .im-load-error { align-items: flex-start; flex-direction: column; }
+  .incident-management .im-pagination { gap: 12px; padding: 14px; }
+  .incident-management .im-pagination nav { width: 100%; justify-content: space-between; margin: 0; }
+  .incident-management .im-page-range { margin-left: auto; }
+  .incident-management .cr-table-heading { align-items: flex-start; gap: 8px; flex-direction: column; }
+}

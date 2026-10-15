@@ -1,3 +1,5 @@
+import { ClipboardList } from 'lucide-react';
+
 const paths = {
   dashboard:
     'M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8Z',
@@ -64,6 +66,8 @@ export default function ManagerIcon({
   name,
   size = 22,
 }) {
+  if (name === 'incidents') return <ClipboardList size={size} aria-hidden="true" />;
+
   return (
     <svg
       width={size}
