@@ -5,7 +5,7 @@ import { HttpError } from '../../../shared/http-error.js';
 export function createCommunityReportController(communityReports, { cloudinary, nodeEnv }) {
   return async function submitReport(req, res) {
     const input = validateCreateCommunityReport(normalizeReportBody(req));
-    const result = await createCommunityReport(input, req.auth.userId, communityReports, req.files ?? [], cloudinary, nodeEnv);
+    const result = await createCommunityReport(input, req.auth.userId, { communityReports, files: req.files ?? [], cloudinary, nodeEnv });
     res.status(result.duplicateRetry ? 200 : 201).json(result);
   };
 }

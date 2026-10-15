@@ -34,7 +34,7 @@ function toPublicCommunityReport(report) {
   };
 }
 
-export async function createCommunityReport(input, reporterId, communityReports, files = [], cloudinary, nodeEnv = 'production') {
+export async function createCommunityReport(input, reporterId, { communityReports, files = [], cloudinary, nodeEnv = 'production' }) {
   let inFlight = submissionsInFlight.get(communityReports);
   if (!inFlight) {
     inFlight = new Map();

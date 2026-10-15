@@ -224,7 +224,7 @@ test('reference collisions still retry, and failed persistence rolls evidence ba
       return repository.create(report);
     },
   };
-  const result = await createCommunityReport(input, userIds[0], repo, files, cloudinary);
+  const result = await createCommunityReport(input, userIds[0], { communityReports: repo, files, cloudinary });
   assert.ok(result.report.id);
   assert.equal(attempts, 2);
   assert.equal(cloudinary.uploaded.length, 1);
@@ -236,7 +236,7 @@ test('reference collisions still retry, and failed persistence rolls evidence ba
     },
     create: (report) => repository.create(report),
   };
-  const duplicate = await createCommunityReport(input, userIds[0], lateDuplicateRepo, files, cloudinary);
+  const duplicate = await createCommunityReport(input, userIds[0], { communityReports: lateDuplicateRepo, files, cloudinary });
   assert.equal(duplicate.duplicateRetry, true);
   assert.deepEqual(duplicate.report, result.report);
   assert.deepEqual(cloudinary.deleted, [cloudinary.uploaded[1].public_id]);
@@ -244,7 +244,7 @@ test('reference collisions still retry, and failed persistence rolls evidence ba
     async findBySubmission() { return null; },
     async create() { throw { code: 11000, message: 'private database details' }; },
   };
-  await assert.rejects(createCommunityReport(input, userIds[0], failingRepo, files, cloudinary), {
+  await assert.rejects(createCommunityReport(input, userIds[0], { communityReports: failingRepo, files, cloudinary }), {
     status: 500, message: 'The report could not be saved.',
   });
   assert.deepEqual(cloudinary.deleted, cloudinary.uploaded.slice(1).map((asset) => asset.public_id));

@@ -85,7 +85,7 @@ test('evidence deletion attempts every asset and rejects partial cleanup failure
 test('new report creation passes owner, GeoJSON coordinates and server source without leaking private fields', async () => {
   let written;
   const repository = { async findBySubmission(reporterId, id) { assert.equal(reporterId, owner); assert.equal(id, 'submission-1'); return null; }, async create(data) { written = data; return stored(data); } };
-  const result = await createCommunityReport(input(), owner, repository);
+  const result = await createCommunityReport(input(), owner, { communityReports: repository });
   assert.equal(result.duplicateRetry, undefined);
   assert.equal(written.reporterId, owner);
   assert.equal(written.source, 'WEB');
@@ -102,7 +102,7 @@ test('persisted retry is owner-scoped, returns original legacy report, and skips
   const cloudinary = cloudinaryFake();
   const original = stored({ incidentDateTime: undefined, evidence: undefined });
   const repository = { async findBySubmission(reporterId, id) { assert.deepEqual([reporterId, id], [owner, 'submission-1']); return original; }, async create() { creates += 1; } };
-  const result = await createCommunityReport(input(), owner, repository, [file({ mimetype: 'unsupported' })], cloudinary);
+  const result = await createCommunityReport(input(), owner, { communityReports: repository, files: [file({ mimetype: 'unsupported' })], cloudinary });
   assert.equal(result.duplicateRetry, true);
   assert.equal(result.report.incidentDateTime, null);
   assert.deepEqual(result.report.evidence, []);
@@ -114,8 +114,8 @@ test('coalesced concurrent retries share one persistence attempt and a failed at
   let release, creates = 0;
   const gate = new Promise((resolve) => { release = resolve; });
   const repository = { async findBySubmission() { return null; }, async create(data) { creates += 1; await gate; return stored(data); } };
-  const first = createCommunityReport(input(), owner, repository);
-  const retry = createCommunityReport(input(), owner, repository);
+  const first = createCommunityReport(input(), owner, { communityReports: repository });
+  const retry = createCommunityReport(input(), owner, { communityReports: repository });
   release();
   const results = await Promise.all([first, retry]);
   assert.equal(creates, 1);
@@ -123,16 +123,16 @@ test('coalesced concurrent retries share one persistence attempt and a failed at
   assert.deepEqual(results[0].report, results[1].report);
   let fail = true;
   const retryable = { async findBySubmission() { return null; }, async create(data) { if (fail) throw new Error('db unavailable'); return stored(data); } };
-  await assert.rejects(createCommunityReport(input(), owner, retryable), { status: 500 });
+  await assert.rejects(createCommunityReport(input(), owner, { communityReports: retryable }), { status: 500 });
   fail = false;
-  assert.ok((await createCommunityReport(input(), owner, retryable)).report.id);
+  assert.ok((await createCommunityReport(input(), owner, { communityReports: retryable })).report.id);
 });
 
 test('reference collisions exhaust the bounded retry budget and clean uploaded evidence once', async () => {
   let attempts = 0;
   const cloudinary = cloudinaryFake();
   const repository = { async findBySubmission() { return null; }, async create() { attempts += 1; throw { code: 11000, keyValue: { referenceNumber: 'collision' } }; } };
-  await assert.rejects(createCommunityReport(input(), owner, repository, [file()], cloudinary), { status: 500, message: 'The report could not be saved.' });
+  await assert.rejects(createCommunityReport(input(), owner, { communityReports: repository, files: [file()], cloudinary }), { status: 500, message: 'The report could not be saved.' });
   assert.equal(attempts, 5);
   assert.deepEqual(cloudinary.deleted.map(({ publicId }) => publicId), ['asset-0']);
 });
@@ -141,18 +141,18 @@ test('partial upload failure rolls back completed assets and hides provider erro
   const cloudinary = cloudinaryFake({ results: [{ public_id: 'first', secure_url: 'https://example.test/image.png', resource_type: 'image', bytes: 3 }, new Error('private credentials')] });
   let writes = 0;
   const repository = { async findBySubmission() { return null; }, async create() { writes += 1; } };
-  await assert.rejects(createCommunityReport(input(), owner, repository, [file(), file()], cloudinary), { status: 503, message: 'Evidence upload is temporarily unavailable.' });
+  await assert.rejects(createCommunityReport(input(), owner, { communityReports: repository, files: [file(), file()], cloudinary }), { status: 503, message: 'Evidence upload is temporarily unavailable.' });
   assert.equal(writes, 0);
   assert.deepEqual(cloudinary.deleted.map(({ publicId }) => publicId), ['first']);
 });
 
 test('an explicit upload HttpError is retained and persistence rollback failures do not replace the safe response', async (t) => {
   const repository = { async findBySubmission() { return null; }, async create() { throw new Error('private database details'); } };
-  await assert.rejects(createCommunityReport(input(), owner, repository, [file()], cloudinaryFake({ results: [new HttpError(429, 'Upload temporarily rate limited.')] })), { status: 429, message: 'Upload temporarily rate limited.' });
+  await assert.rejects(createCommunityReport(input(), owner, { communityReports: repository, files: [file()], cloudinary: cloudinaryFake({ results: [new HttpError(429, 'Upload temporarily rate limited.')] }) }), { status: 429, message: 'Upload temporarily rate limited.' });
   const warnings = [];
   t.mock.method(console, 'warn', (...args) => warnings.push(args));
   const cloudinary = cloudinaryFake({ failDestroy: true });
-  await assert.rejects(createCommunityReport(input(), owner, repository, [file()], cloudinary, 'development'), { status: 500, message: 'The report could not be saved.' });
+  await assert.rejects(createCommunityReport(input(), owner, { communityReports: repository, files: [file()], cloudinary, nodeEnv: 'development' }), { status: 500, message: 'The report could not be saved.' });
   assert.equal(cloudinary.deleted.length, 1);
   assert.equal(warnings[0][1].operation, 'persistence');
 });
