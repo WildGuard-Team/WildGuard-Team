@@ -76,13 +76,10 @@ test("Alert service - creates alert when risk is detected", async () => {
   assert.equal(result._id, "alert-1");
 
   assert.equal(createdData.readingId, "reading-1");
-
   assert.equal(createdData.analysisId, "analysis-1");
-
   assert.equal(createdData.sensorId, "GPS-001");
 
   assert.equal(createdData.type, "HIGH_RISK_ZONE_ENTRY");
-
   assert.equal(createdData.severity, "HIGH");
 
   assert.equal(createdData.message, "Sensor entered high-risk zone.");
@@ -93,12 +90,49 @@ test("Alert service - creates alert when risk is detected", async () => {
   });
 
   assert.equal(createdData.status, "ACTIVE");
-
   assert.equal(createdData.resolvedAt, null);
-
   assert.equal(createdData.deliveryStatus, "PENDING");
-
   assert.equal(createdData.recipient, "RANGER_MANAGER");
+});
+
+test("Alert service - creates LOW severity GPS alert", async () => {
+  const repository = createRepository();
+
+  const service = new AlertService(repository);
+
+  const result = await service.createFromRisk(
+    createRiskInput({
+      riskResult: {
+        riskDetected: true,
+        level: "LOW",
+        type: "LOW_RISK_ZONE_ENTRY",
+        message: "Sensor entered risk zone: Low Risk Monitoring Zone",
+      },
+    }),
+  );
+
+  assert.equal(result.sensorId, "GPS-001");
+  assert.equal(result.type, "LOW_RISK_ZONE_ENTRY");
+  assert.equal(result.severity, "LOW");
+  assert.equal(result.status, "ACTIVE");
+});
+
+test("Alert service - creates MEDIUM severity GPS alert", async () => {
+  const service = new AlertService(createRepository());
+
+  const result = await service.createFromRisk(
+    createRiskInput({
+      riskResult: {
+        riskDetected: true,
+        level: "MEDIUM",
+        type: "MEDIUM_RISK_ZONE_ENTRY",
+        message: "Sensor entered risk zone: Medium Risk Buffer Zone",
+      },
+    }),
+  );
+
+  assert.equal(result.type, "MEDIUM_RISK_ZONE_ENTRY");
+  assert.equal(result.severity, "MEDIUM");
 });
 
 test("Alert service - does not create alert when no risk is detected", async () => {
@@ -127,7 +161,7 @@ test("Alert service - does not create alert when no risk is detected", async () 
   assert.equal(createCalled, false);
 });
 
-test("Alert service - creates alert using camera risk information", async () => {
+test("Alert service - creates alert using camera elephant risk information", async () => {
   const repository = createRepository();
 
   const service = new AlertService(repository);
@@ -143,20 +177,16 @@ test("Alert service - creates alert using camera risk information", async () => 
       riskResult: {
         riskDetected: true,
         level: "HIGH",
-        type: "HUMAN_DETECTED",
-        message: "High-confidence human detection recorded by camera trap.",
+        type: "ELEPHANT_DETECTED",
+        message: "Elephant detected by camera trap.",
       },
     }),
   );
 
   assert.equal(result.sensorId, "CAM-001");
-
-  assert.equal(result.type, "HUMAN_DETECTED");
-
+  assert.equal(result.type, "ELEPHANT_DETECTED");
   assert.equal(result.severity, "HIGH");
-
   assert.equal(result.deliveryStatus, "PENDING");
-
   assert.equal(result.status, "ACTIVE");
 });
 
@@ -179,9 +209,7 @@ test("Alert service - resolves active alerts for sensor", async () => {
   const result = await service.resolveSensorAlerts("GPS-001");
 
   assert.equal(resolvedSensorId, "GPS-001");
-
   assert.equal(result.acknowledged, true);
-
   assert.equal(result.modifiedCount, 2);
 });
 

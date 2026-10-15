@@ -242,35 +242,39 @@ export default function SimulateReadingPage() {
               </div>
             )}
 
-            <label className="monitoring-form-field">
-              <span>Latitude</span>
+            {selectedSensor?.type === "GPS_COLLAR" && (
+              <>
+                <label className="monitoring-form-field">
+                  <span>Latitude</span>
 
-              <input
-                type="number"
-                step="any"
-                min="-90"
-                max="90"
-                name="latitude"
-                value={form.latitude}
-                onChange={handleChange}
-                required
-              />
-            </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="-90"
+                    max="90"
+                    name="latitude"
+                    value={form.latitude}
+                    onChange={handleChange}
+                    required
+                  />
+                </label>
 
-            <label className="monitoring-form-field">
-              <span>Longitude</span>
+                <label className="monitoring-form-field">
+                  <span>Longitude</span>
 
-              <input
-                type="number"
-                step="any"
-                min="-180"
-                max="180"
-                name="longitude"
-                value={form.longitude}
-                onChange={handleChange}
-                required
-              />
-            </label>
+                  <input
+                    type="number"
+                    step="any"
+                    min="-180"
+                    max="180"
+                    name="longitude"
+                    value={form.longitude}
+                    onChange={handleChange}
+                    required
+                  />
+                </label>
+              </>
+            )}
 
             <SensorFields
               sensor={selectedSensor}

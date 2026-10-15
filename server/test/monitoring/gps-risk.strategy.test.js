@@ -18,7 +18,7 @@ function createZone(overrides = {}) {
   };
 }
 
-test("GPS risk analysis - detects coordinate inside risk zone", () => {
+test("GPS risk analysis - detects coordinate inside HIGH risk zone", () => {
   const strategy = new GpsRiskStrategy();
 
   const result = strategy.analyze({
@@ -32,10 +32,12 @@ test("GPS risk analysis - detects coordinate inside risk zone", () => {
   assert.equal(result.riskDetected, true);
   assert.equal(result.level, "HIGH");
   assert.equal(result.type, "HIGH_RISK_ZONE_ENTRY");
+
   assert.equal(
     result.message,
     "Sensor entered risk zone: Village Boundary Zone",
   );
+
   assert.equal(result.zoneId, "zone-001");
   assert.equal(result.distanceMeters, 0);
 
@@ -45,29 +47,37 @@ test("GPS risk analysis - detects coordinate inside risk zone", () => {
   });
 });
 
-test("GPS risk analysis - returns no risk outside configured zones", () => {
+test("GPS risk analysis - detects LOW risk zone", () => {
   const strategy = new GpsRiskStrategy();
 
   const result = strategy.analyze({
     location: {
-      latitude: 7.0001,
-      longitude: 76.00001,
+      latitude: 7.35,
+      longitude: 80.55,
     },
-    riskZones: [createZone()],
+
+    riskZones: [
+      createZone({
+        _id: "low-zone",
+        name: "Low Risk Monitoring Zone",
+        center: {
+          latitude: 7.35,
+          longitude: 80.55,
+        },
+        radiusMeters: 1200,
+        severity: "LOW",
+      }),
+    ],
   });
 
-  assert.deepEqual(result, {
-    riskDetected: false,
-    level: "NONE",
-    type: null,
-    message: "GPS reading is outside configured risk zones.",
-    zoneId: null,
-    distanceMeters: null,
-    metadata: {},
-  });
+  assert.equal(result.riskDetected, true);
+  assert.equal(result.level, "LOW");
+  assert.equal(result.type, "LOW_RISK_ZONE_ENTRY");
+  assert.equal(result.zoneId, "low-zone");
+  assert.equal(result.distanceMeters, 0);
 });
 
-test("GPS risk analysis - uses risk-zone severity", () => {
+test("GPS risk analysis - detects MEDIUM risk zone", () => {
   const strategy = new GpsRiskStrategy();
 
   const result = strategy.analyze({
@@ -75,6 +85,7 @@ test("GPS risk analysis - uses risk-zone severity", () => {
       latitude: 7.4,
       longitude: 80.7,
     },
+
     riskZones: [
       createZone({
         _id: "medium-zone",
@@ -91,7 +102,62 @@ test("GPS risk analysis - uses risk-zone severity", () => {
 
   assert.equal(result.riskDetected, true);
   assert.equal(result.level, "MEDIUM");
+  assert.equal(result.type, "MEDIUM_RISK_ZONE_ENTRY");
   assert.equal(result.zoneId, "medium-zone");
+  assert.equal(result.distanceMeters, 0);
+});
+
+test("GPS risk analysis - detects CRITICAL risk zone", () => {
+  const strategy = new GpsRiskStrategy();
+
+  const result = strategy.analyze({
+    location: {
+      latitude: 7.5,
+      longitude: 80.8,
+    },
+
+    riskZones: [
+      createZone({
+        _id: "critical-zone",
+        name: "Critical Human Wildlife Conflict Zone",
+        center: {
+          latitude: 7.5,
+          longitude: 80.8,
+        },
+        radiusMeters: 1000,
+        severity: "CRITICAL",
+      }),
+    ],
+  });
+
+  assert.equal(result.riskDetected, true);
+  assert.equal(result.level, "CRITICAL");
+  assert.equal(result.type, "CRITICAL_RISK_ZONE_ENTRY");
+  assert.equal(result.zoneId, "critical-zone");
+  assert.equal(result.distanceMeters, 0);
+});
+
+test("GPS risk analysis - returns no risk outside configured zones", () => {
+  const strategy = new GpsRiskStrategy();
+
+  const result = strategy.analyze({
+    location: {
+      latitude: 7.0001,
+      longitude: 76.00001,
+    },
+
+    riskZones: [createZone()],
+  });
+
+  assert.deepEqual(result, {
+    riskDetected: false,
+    level: "NONE",
+    type: null,
+    message: "GPS reading is outside configured risk zones.",
+    zoneId: null,
+    distanceMeters: null,
+    metadata: {},
+  });
 });
 
 test("GPS risk analysis - chooses nearest matching risk zone", () => {
@@ -102,6 +168,7 @@ test("GPS risk analysis - chooses nearest matching risk zone", () => {
       latitude: 7.2906,
       longitude: 80.6337,
     },
+
     riskZones: [
       createZone({
         _id: "far-zone",
@@ -130,6 +197,7 @@ test("GPS risk analysis - chooses nearest matching risk zone", () => {
   assert.equal(result.riskDetected, true);
   assert.equal(result.zoneId, "nearest-zone");
   assert.equal(result.level, "CRITICAL");
+  assert.equal(result.type, "CRITICAL_RISK_ZONE_ENTRY");
   assert.equal(result.distanceMeters, 0);
 });
 
@@ -146,4 +214,5 @@ test("GPS risk analysis - returns safe result when risk-zone list is empty", () 
 
   assert.equal(result.riskDetected, false);
   assert.equal(result.level, "NONE");
+  assert.equal(result.type, null);
 });

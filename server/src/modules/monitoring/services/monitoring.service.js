@@ -209,6 +209,8 @@ export class MonitoringService {
   }
 
   async createAndDeliverAlert(sensor, reading, analysis, riskResult, location) {
+    // Sensor is currently outside all configured risk zones.
+    // Resolve any previous active alert for this sensor.
     if (!riskResult.riskDetected) {
       await this.alerts.resolveSensorAlerts(sensor.sensorId);
 
@@ -216,6 +218,8 @@ export class MonitoringService {
 
       return null;
     }
+
+    await this.alerts.resolveSensorAlerts(sensor.sensorId);
 
     const alert = await this.alerts.createFromRisk({
       sensor,

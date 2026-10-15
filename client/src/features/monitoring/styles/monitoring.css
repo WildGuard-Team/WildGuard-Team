@@ -2135,3 +2135,52 @@ body.monitoring-page-active {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.simulation-risk {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.simulation-risk strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.simulation-risk p {
+  margin: 0 0 6px;
+}
+
+.simulation-risk small {
+  display: block;
+  margin-top: 3px;
+}
+
+/* LOW */
+.simulation-risk--low {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+/* MEDIUM */
+.simulation-risk--medium {
+  color: #854d0e;
+  background: #fefce8;
+  border-color: #fde047;
+}
+
+/* HIGH */
+.simulation-risk--high {
+  color: #9a3412;
+  background: #fff7ed;
+  border-color: #fb923c;
+}
+
+/* CRITICAL */
+.simulation-risk--critical {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #f87171;
+}

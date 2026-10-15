@@ -119,6 +119,7 @@ export default function MonitoringDashboard({ navigate }) {
       location: alert.location,
       title: alert.sensorId,
       description: alert.message,
+      severity: alert.severity,
       risk: true,
     }));
 
@@ -204,7 +205,7 @@ export default function MonitoringDashboard({ navigate }) {
         >
           <MonitoringMap
             locations={mapLocations}
-            zones={zones}
+            zones={[]}
             height={430}
             zoom={11}
           />

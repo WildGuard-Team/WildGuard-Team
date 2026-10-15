@@ -19,13 +19,16 @@ function createInput(overrides = {}) {
   return {
     sensorId: "gps-001",
     timestamp: "2026-10-09T09:00:00.000Z",
+
     location: {
       latitude: 7.2906,
       longitude: 80.6337,
     },
+
     values: {
       batteryLevel: 85,
     },
+
     ...overrides,
   };
 }
@@ -39,10 +42,13 @@ function createDependencies(overrides = {}) {
     noAlert: [],
     alertCreated: [],
     failed: [],
+
     createdReadings: [],
     createdAnalyses: [],
+
     resolvedSensors: [],
     deliveredAlerts: [],
+
     markProcessed: [],
     markFailed: [],
     updatedSensors: [],
@@ -134,13 +140,21 @@ function createDependencies(overrides = {}) {
     alerts: {
       resolveSensorAlerts: async (sensorId) => {
         calls.resolvedSensors.push(sensorId);
+
+        return {
+          acknowledged: true,
+          modifiedCount: 1,
+        };
       },
 
-      createFromRisk: async () => ({
+      createFromRisk: async ({ sensor: riskSensor, riskResult, location }) => ({
         _id: "alert-1",
-        sensorId: "GPS-001",
-        severity: "HIGH",
+        sensorId: riskSensor.sensorId,
+        severity: riskResult.level,
+        type: riskResult.type,
+        location,
         deliveryStatus: "PENDING",
+        status: "ACTIVE",
       }),
     },
 
@@ -204,6 +218,7 @@ function createDependencies(overrides = {}) {
 
   return {
     calls,
+
     dependencies: {
       ...dependencies,
       ...overrides,
@@ -219,7 +234,6 @@ test("Monitoring service - stores and processes valid safe reading", async () =>
   const result = await service.processReading(createInput());
 
   assert.equal(calls.createdReadings.length, 1);
-
   assert.equal(calls.createdAnalyses.length, 1);
 
   assert.deepEqual(calls.markProcessed, ["reading-1"]);
@@ -227,7 +241,6 @@ test("Monitoring service - stores and processes valid safe reading", async () =>
   assert.equal(calls.updatedSensors.length, 1);
 
   assert.equal(result.reading.processingStatus, "PROCESSED");
-
   assert.equal(result.alert, null);
 });
 
@@ -255,8 +268,8 @@ test("Monitoring service - logs each valid processing stage", async () => {
   assert.equal(calls.received.length, 1);
   assert.equal(calls.validated.length, 1);
   assert.equal(calls.analyzed.length, 1);
-  assert.equal(calls.noAlert.length, 1);
 
+  assert.equal(calls.noAlert.length, 1);
   assert.equal(calls.alertCreated.length, 0);
 });
 
@@ -268,11 +281,53 @@ test("Monitoring service - resolves active alerts when reading becomes safe", as
   await service.processReading(createInput());
 
   assert.deepEqual(calls.resolvedSensors, ["GPS-001"]);
-
   assert.equal(calls.noAlert.length, 1);
 });
 
-test("Monitoring service - creates and delivers alert when risk is detected", async () => {
+test("Monitoring service - resolves previous alert before creating new risk alert", async () => {
+  const riskResult = {
+    riskDetected: true,
+    level: "MEDIUM",
+    type: "MEDIUM_RISK_ZONE_ENTRY",
+    message: "Sensor entered risk zone: Medium Risk Buffer Zone",
+    zoneId: "medium-zone",
+    distanceMeters: 0,
+
+    metadata: {
+      zoneName: "Medium Risk Buffer Zone",
+    },
+  };
+
+  const { dependencies, calls } = createDependencies({
+    riskAnalyzer: {
+      analyze: async () => riskResult,
+    },
+  });
+
+  const service = new MonitoringService(dependencies);
+
+  const result = await service.processReading(createInput());
+
+  // previous active alert must be resolved first
+  assert.deepEqual(calls.resolvedSensors, ["GPS-001"]);
+
+  // new risk analysis stored
+  assert.equal(calls.createdAnalyses.length, 1);
+  assert.equal(calls.createdAnalyses[0].riskDetected, true);
+  assert.equal(calls.createdAnalyses[0].riskLevel, "MEDIUM");
+
+  // new alert created and delivered
+  assert.equal(calls.alertCreated.length, 1);
+  assert.equal(calls.deliveredAlerts.length, 1);
+
+  assert.equal(result.alert.severity, "MEDIUM");
+  assert.equal(result.alert.type, "MEDIUM_RISK_ZONE_ENTRY");
+  assert.equal(result.alert.deliveryStatus, "DELIVERED");
+
+  assert.equal(calls.noAlert.length, 0);
+});
+
+test("Monitoring service - creates and delivers HIGH alert when risk is detected", async () => {
   const riskResult = {
     riskDetected: true,
     level: "HIGH",
@@ -280,6 +335,7 @@ test("Monitoring service - creates and delivers alert when risk is detected", as
     message: "Sensor entered risk zone.",
     zoneId: "zone-1",
     distanceMeters: 100,
+
     metadata: {
       zoneName: "Risk Zone",
     },
@@ -295,19 +351,85 @@ test("Monitoring service - creates and delivers alert when risk is detected", as
 
   const result = await service.processReading(createInput());
 
+  assert.deepEqual(calls.resolvedSensors, ["GPS-001"]);
+
   assert.equal(calls.createdAnalyses.length, 1);
-
   assert.equal(calls.createdAnalyses[0].riskDetected, true);
-
   assert.equal(calls.createdAnalyses[0].riskLevel, "HIGH");
 
   assert.equal(calls.alertCreated.length, 1);
-
   assert.equal(calls.deliveredAlerts.length, 1);
 
   assert.equal(result.alert.deliveryStatus, "DELIVERED");
 
   assert.equal(calls.noAlert.length, 0);
+});
+
+test("Monitoring service - creates camera elephant alert", async () => {
+  const cameraSensor = createSensor({
+    sensorId: "CAM-001",
+    type: "CAMERA_TRAP",
+  });
+
+  const riskResult = {
+    riskDetected: true,
+    level: "HIGH",
+    type: "ELEPHANT_DETECTED",
+    message: "Elephant detected by camera trap.",
+    zoneId: null,
+    distanceMeters: null,
+
+    metadata: {
+      detection: "ELEPHANT",
+      confidence: 0.9,
+    },
+  };
+
+  const { dependencies, calls } = createDependencies({
+    sensors: {
+      findBySensorId: async () => cameraSensor,
+
+      updateLatestReading: async (sensorId, location, timestamp) => {
+        calls.updatedSensors.push({
+          sensorId,
+          location,
+          timestamp,
+        });
+
+        return {
+          ...cameraSensor,
+          location,
+          lastSeenAt: timestamp,
+        };
+      },
+    },
+
+    riskAnalyzer: {
+      analyze: async () => riskResult,
+    },
+  });
+
+  const service = new MonitoringService(dependencies);
+
+  const result = await service.processReading(
+    createInput({
+      sensorId: "CAM-001",
+
+      values: {
+        detection: "ELEPHANT",
+        confidence: 0.9,
+      },
+    }),
+  );
+
+  assert.deepEqual(calls.resolvedSensors, ["CAM-001"]);
+
+  assert.equal(calls.createdAnalyses[0].riskLevel, "HIGH");
+  assert.equal(calls.createdAnalyses[0].riskType, "ELEPHANT_DETECTED");
+
+  assert.equal(result.alert.sensorId, "CAM-001");
+  assert.equal(result.alert.type, "ELEPHANT_DETECTED");
+  assert.equal(result.alert.deliveryStatus, "DELIVERED");
 });
 
 test("Monitoring service - stores rejected reading when validation fails", async () => {
@@ -374,7 +496,6 @@ test("Monitoring service - rejected unknown sensor uses null sensor type", async
   );
 
   assert.equal(result.sensor, null);
-
   assert.equal(calls.createdReadings[0].sensorType, null);
 
   assert.deepEqual(calls.createdReadings[0].rejectionReasons, [
@@ -410,9 +531,7 @@ test("Monitoring service - missing sensor ID is logged as null", async () => {
   );
 
   assert.equal(calls.received[0][0], null);
-
   assert.equal(calls.rejected[0][0], null);
-
   assert.equal(calls.createdReadings[0].sensorId, "UNKNOWN");
 });
 
@@ -507,7 +626,6 @@ test("Monitoring service - marks reading failed and logs unexpected processing e
   assert.equal(calls.failed.length, 1);
 
   assert.equal(calls.failed[0][0], "GPS-001");
-
   assert.equal(calls.failed[0][1], "reading-1");
 });
 
@@ -535,9 +653,7 @@ test("Monitoring service - logs failure without marking reading when error happe
   });
 
   assert.equal(calls.markFailed.length, 0);
-
   assert.equal(calls.failed.length, 1);
-
   assert.equal(calls.failed[0][1], null);
 });
 

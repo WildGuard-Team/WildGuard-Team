@@ -34,7 +34,7 @@ export class GpsRiskStrategy {
       riskDetected: true,
       level: match.zone.severity ?? "HIGH",
 
-      type: "HIGH_RISK_ZONE_ENTRY",
+      type: `${match.zone.severity}_RISK_ZONE_ENTRY`,
 
       message: `Sensor entered risk zone: ${match.zone.name}`,
 

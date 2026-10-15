@@ -77,7 +77,9 @@ export default function SimulationResult({ result, zones = [] }) {
         <section
           className={
             analysis.riskDetected
-              ? "simulation-alert-created"
+              ? `simulation-risk simulation-risk--${String(
+                  analysis.riskLevel ?? "high",
+                ).toLowerCase()}`
               : "simulation-safe"
           }
         >

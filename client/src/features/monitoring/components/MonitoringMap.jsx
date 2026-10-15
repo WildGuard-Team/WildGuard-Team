@@ -15,14 +15,27 @@ import "leaflet/dist/leaflet.css";
 
 const DEFAULT_CENTER = [7.2906, 80.6337];
 
-function getZoneColor(severity) {
+function getSeverityColor(severity) {
   const colors = {
-    MEDIUM: "#d48c22",
-    HIGH: "#d74736",
-    CRITICAL: "#9f1f18",
+    LOW: "#65a30d", // green
+    MEDIUM: "#eab308", // yellow
+    HIGH: "#f97316", // orange
+    CRITICAL: "#dc2626", // red
   };
 
-  return colors[String(severity ?? "").toUpperCase()] ?? "#d74736";
+  return colors[String(severity ?? "").toUpperCase()] ?? "#16805b";
+}
+
+function getZoneColor(severity) {
+  return getSeverityColor(severity);
+}
+
+function getMarkerColor(item) {
+  if (!item.risk) {
+    return "#16805b";
+  }
+
+  return getSeverityColor(item.severity);
 }
 
 export default function MonitoringMap({
@@ -48,7 +61,6 @@ export default function MonitoringMap({
     : validLocations.length
       ? [
           validLocations[0].location.latitude,
-
           validLocations[0].location.longitude,
         ]
       : validZones.length
@@ -83,27 +95,32 @@ export default function MonitoringMap({
               pathOptions={{
                 color,
                 fillColor: color,
-
                 fillOpacity: 0.16,
-
                 weight: 2,
               }}
             >
               <Popup>
-                <strong>{zone.name}</strong>
+                <strong>Sensor: {item.title}</strong>
 
-                <p>Severity: {zone.severity}</p>
+                {item.severity && (
+                  <p>
+                    <strong>Risk Level:</strong> {item.severity}
+                  </p>
+                )}
 
-                <p>Radius: {zone.radiusMeters} m</p>
+                {item.description && <p>{item.description}</p>}
 
-                {zone.description && <small>{zone.description}</small>}
+                <small>
+                  Location: {formatCoordinate(item.location.latitude)},{" "}
+                  {formatCoordinate(item.location.longitude)}
+                </small>
               </Popup>
             </Circle>
           );
         })}
 
         {validLocations.map((item) => {
-          const color = item.risk ? "#d74736" : "#16805b";
+          const color = getMarkerColor(item);
 
           return (
             <CircleMarker
@@ -113,9 +130,7 @@ export default function MonitoringMap({
               pathOptions={{
                 color,
                 fillColor: color,
-
                 fillOpacity: 0.95,
-
                 weight: 3,
               }}
             >
@@ -123,6 +138,8 @@ export default function MonitoringMap({
                 <strong>{item.title}</strong>
 
                 {item.description && <p>{item.description}</p>}
+
+                {item.severity && <p>Severity: {item.severity}</p>}
 
                 <small>
                   {formatCoordinate(item.location.latitude)},{" "}
