@@ -1,11 +1,7 @@
 import { HttpError } from '../../../shared/http-error.js';
 import { COMMUNITY_REPORT_LOCATION_SEARCH_LIMITS } from '../config/community-report.constants.js';
 import { GeocodingUnavailableError } from '../integrations/geocoding.provider.js';
-
-function providerCoordinate(value, minimum, maximum) {
-  const number = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(number) && number >= minimum && number <= maximum ? number : null;
-}
+import { providerCoordinate } from '../utils/provider-coordinate.js';
 
 function mapSearchResult(result) {
   if (!result || typeof result !== 'object' || typeof result.display_name !== 'string') return null;

@@ -27,7 +27,7 @@ function sanitizeFields(value) {
 export function sanitizeRestoredDraft(value) {
   const fields = sanitizeFields(value);
   if (!fields || value.version !== 2 || typeof value.draftId !== 'string' || !value.draftId || typeof value.expiresAt !== 'string' || Date.parse(value.expiresAt) <= Date.now()) return null;
-  return { ...fields, draftId: value.draftId, evidence: [], evidenceRestoreRequired: value.hadEvidenceBeforeRefresh === true, wasRestored: true };
+  return { ...fields, draftId: value.draftId, clientSubmissionId: typeof value.clientSubmissionId === 'string' ? value.clientSubmissionId : undefined, evidence: [], evidenceRestoreRequired: value.hadEvidenceBeforeRefresh === true, wasRestored: true };
 }
 export function loadCommunityReportDraft() {
   const currentStorage = storage();
@@ -47,7 +47,7 @@ export function loadCommunityReportDraft() {
 export function saveCommunityReportDraft(draft) {
   const currentStorage = storage(); if (!currentStorage) return false;
   const now = new Date();
-  const snapshot = { version: 2, draftId: draft.draftId, reportType: draft.reportType, description: draft.description, incidentDateTime: draft.incidentDateTime, location: draft.location, hadEvidenceBeforeRefresh: draft.evidence.length > 0 || draft.evidenceRestoreRequired, savedAt: now.toISOString(), expiresAt: new Date(now.getTime() + expiryMs).toISOString() };
+  const snapshot = { version: 2, draftId: draft.draftId, clientSubmissionId: draft.clientSubmissionId, reportType: draft.reportType, description: draft.description, incidentDateTime: draft.incidentDateTime, location: draft.location, hadEvidenceBeforeRefresh: draft.evidence.length > 0 || draft.evidenceRestoreRequired, savedAt: now.toISOString(), expiresAt: new Date(now.getTime() + expiryMs).toISOString() };
   try { currentStorage.setItem(COMMUNITY_REPORT_DRAFT_STORAGE_KEY, JSON.stringify(snapshot)); return true; } catch { return false; }
 }
 export function clearCommunityReportDraft() { try { storage()?.removeItem(COMMUNITY_REPORT_DRAFT_STORAGE_KEY); storage()?.removeItem(legacyStorageKey); } catch { /* Ignore unavailable storage. */ } }

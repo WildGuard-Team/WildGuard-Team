@@ -8,7 +8,7 @@ const navigation = [
   ["dashboard", "Dashboard", "/member"],
   ["report", "Submit Report", "/reports/type"],
   ["map", "Map"],
-  ["folder", "My Reports"],
+  ["folder", "My Reports", "/reports/my-reports"],
   ["bell", "Alerts", "/alerts"],
   ["settings", "Settings"],
 ];
@@ -20,6 +20,7 @@ export default function CommunityLayout({
 }) {
   const { user, logout } = useAuth();
   const { resetDraft } = useReportDraft();
+
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -27,6 +28,7 @@ export default function CommunityLayout({
   useEffect(() => {
     document.documentElement.classList.add("community-page-active");
     document.body.classList.add("community-page-active");
+
     return () => {
       document.documentElement.classList.remove("community-page-active");
       document.body.classList.remove("community-page-active");
@@ -36,6 +38,7 @@ export default function CommunityLayout({
   async function signOut() {
     setIsLoggingOut(true);
     setError("");
+
     try {
       await logout();
       navigate("/login");
@@ -45,6 +48,7 @@ export default function CommunityLayout({
       setIsLoggingOut(false);
     }
   }
+
   return (
     <div className="community-app">
       <button
@@ -55,6 +59,7 @@ export default function CommunityLayout({
       >
         <CommunityIcon name="menu" />
       </button>
+
       <aside
         className={`community-sidebar${open ? " is-open" : ""}`}
         aria-label="Community navigation"
@@ -62,6 +67,7 @@ export default function CommunityLayout({
         <div className="sidebar-brand">
           <img src="/logo.jpg" alt="WildGuard" />
           <span>Community Member</span>
+
           <button
             type="button"
             onClick={() => setOpen(false)}
@@ -70,6 +76,7 @@ export default function CommunityLayout({
             <CommunityIcon name="close" />
           </button>
         </div>
+
         <nav>
           {navigation.map(([icon, label, path]) =>
             path ? (
@@ -78,7 +85,10 @@ export default function CommunityLayout({
                 className={active === icon ? "is-active" : ""}
                 type="button"
                 onClick={() => {
-                  if (path === "/reports/type") resetDraft();
+                  if (path === "/reports/type") {
+                    resetDraft();
+                  }
+
                   navigate(path);
                   setOpen(false);
                 }}
@@ -99,14 +109,17 @@ export default function CommunityLayout({
             ),
           )}
         </nav>
+
         <div className="sidebar-footer">
           <FormAlert>{error}</FormAlert>
+
           <button type="button" onClick={signOut} disabled={isLoggingOut}>
             <CommunityIcon name="logout" />
             <span>{isLoggingOut ? "Logging out…" : "Logout"}</span>
           </button>
         </div>
       </aside>
+
       {open && (
         <button
           type="button"
@@ -115,16 +128,21 @@ export default function CommunityLayout({
           onClick={() => setOpen(false)}
         />
       )}
+
       <div className="community-main">
         <header className="community-header">
           <span className="header-notification">
             <CommunityIcon name="bell" size={22} />
             <i />
           </span>
+
           <span className="header-avatar">{user.fullName.slice(0, 1)}</span>
+
           <span className="header-name">{user.fullName}</span>
+
           <CommunityIcon name="chevron" size={19} />
         </header>
+
         <main className="community-content">{children}</main>
       </div>
     </div>
