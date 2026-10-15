@@ -1,14 +1,17 @@
 export const REPORT_TYPES = Object.freeze([
   {
     value: 'INCIDENT_REPORT', title: 'Incident Report', icon: 'incident',
+    image: '/Freshly Cut Stump in Tropical Forest-3.png',
     description: 'Analyse incidents by type, location, severity and time.',
   },
   {
     value: 'PATROL_COVERAGE_REPORT', title: 'Patrol Coverage Report', icon: 'route',
+    image: '/Sunlit Tent in Forest Clearing-2.png',
     description: 'Measure patrol activity, route coverage and protected zones.',
   },
   {
     value: 'CONFLICT_TREND_REPORT', title: 'Conflict Trend Report', icon: 'trend',
+    image: '/Sri Lankan elephant crossing a forest road-2.png',
     description: 'Track human–wildlife conflict patterns and hotspots.',
   },
 ]);
