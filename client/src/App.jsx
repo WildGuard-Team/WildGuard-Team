@@ -42,7 +42,8 @@ import ReportDetailsPage from './features/community-reports/pages/ReportDetailsP
 import ReportEvidencePage from './features/community-reports/pages/ReportEvidencePage.jsx';
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
-
+import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
+import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 import IncidentReportsPage from './features/incident-management/pages/IncidentReportsPage.jsx';
 
@@ -465,6 +466,21 @@ function AppRoutes() {
   /*
    * Community Member routes
    */
+  if (user?.role === 'COMMUNITY_MEMBER' && path === '/reports/my-reports') {
+    return <MyReportsPage key={user.id} navigate={navigate} message={message} />;
+  }
+
+  const reportDetailsMatch = path.match(/^\/reports\/my-reports\/([^/]+)\/?$/);
+  if (user?.role === 'COMMUNITY_MEMBER' && reportDetailsMatch) {
+    return (
+      <SubmittedReportDetailsPage
+        key={`${user.id}:${reportDetailsMatch[1]}`}
+        reportId={reportDetailsMatch[1]}
+        navigate={navigate}
+      />
+    );
+  }
+
   if (
     user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/type'

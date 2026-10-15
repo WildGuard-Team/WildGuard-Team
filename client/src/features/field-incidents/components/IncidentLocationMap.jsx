@@ -39,6 +39,7 @@ export default function IncidentLocationMap({
         onMapSelect={selectLocation}
         onMarkerDrag={selectLocation}
         readOnly={readOnly}
+        locationLabel="Incident location"
         defaultCenter={yalaCenter}
         defaultZoom={10}
         className="field-incident-map"

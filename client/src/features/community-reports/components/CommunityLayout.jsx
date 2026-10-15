@@ -6,7 +6,7 @@ import { useReportDraft } from '../context/useReportDraft.js';
 
 const navigation = [
   ['dashboard', 'Dashboard', '/member'], ['report', 'Submit Report', '/reports/type'],
-  ['map', 'Map'], ['folder', 'My Reports'], ['bell', 'Alerts'], ['settings', 'Settings'],
+  ['map', 'Map'], ['folder', 'My Reports', '/reports/my-reports'], ['bell', 'Alerts'], ['settings', 'Settings'],
 ];
 
 export default function CommunityLayout({ children, navigate, active = 'report' }) {

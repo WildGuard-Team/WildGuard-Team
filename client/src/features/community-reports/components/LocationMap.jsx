@@ -85,6 +85,7 @@ export default function LocationMap({
   className = '',
   showTileStatus = false,
   readOnly = false,
+  locationLabel = 'Report location',
 }) {
   const [tileStatus, setTileStatus] = useState('loading');
   const tileFailed = useRef(false);
@@ -112,7 +113,7 @@ export default function LocationMap({
       if (!readOnly) onMarkerDrag?.(selectedCoordinates(event.target.getLatLng()));
     },
   };
-  return <div className={`location-map-region ${className}`} role="region" aria-label={readOnly ? 'Incident location map' : 'Interactive location map'}>
+  return <div className={`location-map-region ${className}`} role="region" aria-label={readOnly ? `${locationLabel} map` : 'Interactive location map'}>
     {showTileStatus && tileStatus !== 'ready' && (
       <p className={`location-map-status${tileStatus === 'error' ? ' is-error' : ''}`} role="status">
         {tileStatus === 'error'
@@ -126,8 +127,8 @@ export default function LocationMap({
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} eventHandlers={tileHandlers} />
       {!readOnly && <MapSelection onMapSelect={onMapSelect} />}
       <MapViewport coordinates={coordinates} readOnly={readOnly} />
-      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} keyboard={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers} title={readOnly ? 'Incident location' : 'Selected incident location. Drag to adjust.'} alt="Selected incident location" autoPan={!readOnly}>
-        <Tooltip direction="top" offset={[0, -36]}>Selected location</Tooltip>
+      {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} keyboard={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers} title={readOnly ? locationLabel : 'Selected incident location. Drag to adjust.'} alt={readOnly ? locationLabel : 'Selected incident location'} autoPan={!readOnly}>
+        <Tooltip direction="top" offset={[0, -36]}>{readOnly ? locationLabel : 'Selected location'}</Tooltip>
       </Marker>}
     </MapContainer>
   </div>;
