@@ -44,6 +44,7 @@ import ReviewReportPage from './features/community-reports/pages/ReviewReportPag
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
 import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
+import ManagerCommunityReportsPage from './features/community-reports/pages/ManagerCommunityReportsPage.jsx';
 
 import ConservationReportsPage from './features/conservation-reports/pages/ConservationReportsPage.jsx';
 import ParkManagerDashboardPage from './features/conservation-reports/pages/ParkManagerDashboardPage.jsx';
@@ -385,6 +386,17 @@ function AppRoutes() {
   ) {
     return (
       <ParkManagerDashboardPage
+        navigate={navigate}
+      />
+    );
+  }
+
+  if (
+    user?.role === 'PARK_MANAGER'
+    && path === '/manager/community-reports'
+  ) {
+    return (
+      <ManagerCommunityReportsPage
         navigate={navigate}
       />
     );

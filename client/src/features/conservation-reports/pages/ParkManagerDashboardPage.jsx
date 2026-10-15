@@ -40,6 +40,10 @@ export default function ParkManagerDashboardPage({ navigate }) {
     navigate('/manager/reports');
   }
 
+  function openCommunityReports() {
+    navigate('/manager/community-reports');
+  }
+
   return <ParkManagerLayout navigate={navigate}>
     <div className="manager-dashboard">
       <section className="manager-dashboard-hero" aria-labelledby="manager-dashboard-title">
@@ -49,6 +53,7 @@ export default function ParkManagerDashboardPage({ navigate }) {
           <p>Transform protected-area records into decisions that support wildlife, patrol teams and neighbouring communities.</p>
           <div className="manager-dashboard-hero-actions">
             <button type="button" onClick={openReports}>Generate a report <ManagerIcon name="chevron" size={18} /></button>
+            <button type="button" className="manager-dashboard-community-action" onClick={openCommunityReports}>Review community reports <ManagerIcon name="chevron" size={18} /></button>
           </div>
         </div>
         <div className="manager-dashboard-hero-caption">

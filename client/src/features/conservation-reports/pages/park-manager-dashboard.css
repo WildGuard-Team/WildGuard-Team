@@ -9,6 +9,8 @@
 .manager-dashboard-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 17px; margin-top: 27px; }
 .manager-dashboard-hero-actions button { display: inline-flex; min-height: 48px; align-items: center; gap: 9px; padding: 11px 18px; color: #07583e; background: #fff; border: 0; border-radius: 9px; box-shadow: 0 8px 22px rgba(0, 22, 16, .22); font-weight: 800; }
 .manager-dashboard-hero-actions button:hover { color: #fff; background: #0b9867; transform: translateY(-1px); }
+.manager-dashboard-hero-actions .manager-dashboard-community-action { color: #fff; background: rgba(3, 50, 36, .58); border: 1px solid rgba(255,255,255,.42); box-shadow: none; backdrop-filter: blur(7px); }
+.manager-dashboard-hero-actions .manager-dashboard-community-action:hover { background: #0b9867; border-color: #0b9867; }
 .manager-dashboard-hero-caption { align-self: flex-end; display: grid; gap: 3px; margin: 0 24px 22px 0; padding: 12px 15px; background: rgba(3, 43, 31, .66); border: 1px solid rgba(255,255,255,.2); border-radius: 9px; backdrop-filter: blur(8px); }
 .manager-dashboard-hero-caption strong { font-size: .77rem; }.manager-dashboard-hero-caption span { color: #bee1d2; font-size: .67rem; }
 

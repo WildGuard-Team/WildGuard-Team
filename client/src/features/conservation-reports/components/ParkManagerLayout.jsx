@@ -5,6 +5,7 @@ import ManagerIcon from './ManagerIcon.jsx';
 
 const navigation = [
   ['dashboard', 'Dashboard', '/manager/dashboard'],
+  ['community', 'Community Reports', '/manager/community-reports'],
   ['reports', 'Conservation Reports', '/manager/reports'],
   ['rangers', 'Ranger Approvals', '/manager/rangers'],
   ['history', 'Report History', '/manager/reports/history'],
