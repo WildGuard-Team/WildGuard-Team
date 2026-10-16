@@ -84,23 +84,29 @@ export default function ReviewReportPage({ navigate }) {
     catch (requestError) { setError(requestError.message); }
     finally { submissionLock.current = false; setIsSubmitting(false); }
   }
-  return <ReportLayout navigate={navigate} className="community-review" title="Review & Submit" subtitle="Review your report carefully before submitting it to WildGuard." step={4}>
+  return <ReportLayout navigate={navigate} className="community-review" title="Review & Submit" subtitle="Review your report carefully before submitting it to WildGuard." step={4} hero heroEyebrow="SUBMIT REPORT">
     <form className="community-review__form" onSubmit={submit} noValidate aria-busy={isSubmitting}>
       <FormAlert>{error}</FormAlert>
       <fieldset className="community-review__fields" disabled={isSubmitting}>
         <legend className="sr-only">Review report details and confirm submission</legend>
         <div className="community-review__grid">
+          <div className="community-review__panel">
+            <header className="community-review__panel-heading"><h2>Report Details</h2><p>Check the key information about your report.</p></header>
           <div className="review-summary-panel">
             <SummaryRow icon="document" label="Report Type" value={reportTypeLabel(draft.reportType)} onEdit={() => navigate('/reports/type')} editLabel="Edit report type" />
             <SummaryRow icon="calendar" label="Incident Date & Time" value={incidentDateLabel} onEdit={() => navigate('/reports/details')} editLabel="Edit incident date and time" />
             <SummaryRow icon="pin" label="Location" value={locationText} badge={locationSourceLabel[draft.location.source]} onEdit={() => navigate('/reports/details')} editLabel="Edit location" />
           </div>
+          </div>
+          <div className="community-review__panel">
+            <header className="community-review__panel-heading"><h2>Additional Information</h2><p>Review the description and any attached evidence.</p></header>
           <div className="community-review__details-panel">
             <section className="review-description" aria-labelledby="review-description-title">
-              <div className="community-review__section-heading"><h2 id="review-description-title">Description</h2><button type="button" className="community-review__edit" aria-label="Edit description" onClick={() => navigate('/reports/details')}><CommunityIcon name="edit" /></button></div>
+              <div className="community-review__section-heading"><span className="community-review__section-icon" aria-hidden="true"><CommunityIcon name="document" size={30} /></span><h2 id="review-description-title">Description</h2><button type="button" className="community-review__edit" aria-label="Edit description" onClick={() => navigate('/reports/details')}><CommunityIcon name="edit" /></button></div>
               <div className="review-description__text" tabIndex={0} role="region" aria-label="Incident description">{draft.description}</div>
             </section>
             <ReviewAttachments files={draft.evidence} isRestoring={isRestoring} recoveryRequired={draft.evidenceRestoreRequired || evidenceHydrationStatus === 'failed'} warning={evidenceRestoreError} onEdit={() => navigate('/reports/evidence')} onRemove={removeEvidence} onSkip={continueWithoutEvidence} />
+          </div>
           </div>
         </div>
         <label className="review-confirmation" htmlFor="review-accuracy">
@@ -108,7 +114,7 @@ export default function ReviewReportPage({ navigate }) {
           <span className="review-confirmation__check" aria-hidden="true"><CommunityIcon name="check" /></span>
           <span>I confirm that the information provided is accurate and complete.</span>
         </label>
-        <div className="review-actions"><button type="button" className="secondary-button" onClick={() => navigate('/reports/evidence')}>Back</button><button type="submit" className="primary-button" disabled={!canSubmit}>{isSubmitting ? 'Submitting report…' : 'Submit Report'}</button></div>
+        <div className="review-actions"><button type="button" className="secondary-button" onClick={() => navigate('/reports/evidence')}>Back</button><button type="submit" className="primary-button" disabled={!canSubmit}>{isSubmitting ? 'Submitting report…' : 'Submit Report'}<CommunityIcon name="chevron" size={21} /></button></div>
       </fieldset>
     </form>
     {isSubmitting && <SubmissionOverlay />}

@@ -35,7 +35,7 @@ function MapSelection({ onMapSelect }) {
   return null;
 }
 
-function MapViewport({ coordinates, readOnly }) {
+function MapViewport({ coordinates, scrollWheelZoom }) {
   const map = useMap();
   useEffect(() => {
     const container = map.getContainer();
@@ -70,9 +70,9 @@ function MapViewport({ coordinates, readOnly }) {
     if (hasValidCoordinates(coordinates)) map.setView(coordinatesToPosition(coordinates), Math.max(map.getZoom(), 13));
   }, [coordinates, map]);
   useEffect(() => {
-    if (readOnly) map.scrollWheelZoom.disable();
-    else map.scrollWheelZoom.enable();
-  }, [map, readOnly]);
+    if (scrollWheelZoom) map.scrollWheelZoom.enable();
+    else map.scrollWheelZoom.disable();
+  }, [map, scrollWheelZoom]);
   return null;
 }
 
@@ -86,6 +86,8 @@ export default function LocationMap({
   showTileStatus = false,
   readOnly = false,
   locationLabel = 'Report location',
+  scrollWheelZoom = !readOnly,
+  children,
 }) {
   const [tileStatus, setTileStatus] = useState('loading');
   const tileFailed = useRef(false);
@@ -123,10 +125,11 @@ export default function LocationMap({
           : readOnly ? 'Loading incident location map…' : 'Loading map…'}
       </p>
     )}
-    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : defaultCenter)} zoom={hasSelectedLocation ? 13 : defaultZoom} scrollWheelZoom={!readOnly} zoomControl className="location-map">
+    <MapContainer center={coordinatesToPosition(hasSelectedLocation ? coordinates : defaultCenter)} zoom={hasSelectedLocation ? 13 : defaultZoom} scrollWheelZoom={scrollWheelZoom} zoomControl className="location-map">
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} eventHandlers={tileHandlers} />
       {!readOnly && <MapSelection onMapSelect={onMapSelect} />}
-      <MapViewport coordinates={coordinates} readOnly={readOnly} />
+      <MapViewport coordinates={coordinates} scrollWheelZoom={scrollWheelZoom} />
+      {children}
       {hasSelectedLocation && <Marker position={coordinatesToPosition(coordinates)} icon={selectedLocationIcon} draggable={!readOnly} keyboard={!readOnly} eventHandlers={readOnly ? undefined : markerHandlers} title={readOnly ? locationLabel : 'Selected incident location. Drag to adjust.'} alt={readOnly ? locationLabel : 'Selected incident location'} autoPan={!readOnly}>
         <Tooltip direction="top" offset={[0, -36]}>{readOnly ? locationLabel : 'Selected location'}</Tooltip>
       </Marker>}

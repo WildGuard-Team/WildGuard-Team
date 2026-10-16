@@ -6,7 +6,7 @@ import { useReportDraft } from '../context/useReportDraft.js';
 
 const navigation = [
   ['dashboard', 'Dashboard', '/member'], ['report', 'Submit Report', '/reports/type'],
-  ['map', 'Map'], ['folder', 'My Reports', '/reports/my-reports'], ['bell', 'Alerts'], ['settings', 'Settings'],
+  ['map', 'Map', '/member/map'], ['folder', 'My Reports', '/reports/my-reports'],
 ];
 
 export default function CommunityLayout({ children, navigate, active = 'report' }) {
@@ -31,7 +31,7 @@ export default function CommunityLayout({ children, navigate, active = 'report' 
     <button className="sidebar-toggle" type="button" onClick={() => setOpen(true)} aria-label="Open navigation"><CommunityIcon name="menu" /></button>
     <aside className={`community-sidebar${open ? ' is-open' : ''}`} aria-label="Community navigation">
       <div className="sidebar-brand"><img src="/logo.jpg" alt="WildGuard" /><span>Community Member</span><button type="button" onClick={() => setOpen(false)} aria-label="Close navigation"><CommunityIcon name="close" /></button></div>
-      <nav>{navigation.map(([icon, label, path]) => path ? <button key={label} className={active === icon ? 'is-active' : ''} type="button" onClick={() => { if (path === '/reports/type') resetDraft(); navigate(path); setOpen(false); }}><CommunityIcon name={icon} /><span>{label}</span></button> : <span key={label} className="sidebar-unavailable" aria-disabled="true"><CommunityIcon name={icon} /><span>{label}</span><small>Coming soon</small></span>)}</nav>
+      <nav>{navigation.map(([icon, label, path]) => <button key={label} className={active === icon ? 'is-active' : ''} aria-current={active === icon ? 'page' : undefined} type="button" onClick={() => { if (path === '/reports/type') resetDraft(); navigate(path); setOpen(false); }}><CommunityIcon name={icon} /><span>{label}</span></button>)}</nav>
       <div className="sidebar-footer"><FormAlert>{error}</FormAlert><button type="button" onClick={signOut} disabled={isLoggingOut}><CommunityIcon name="logout" /><span>{isLoggingOut ? 'Logging out…' : 'Logout'}</span></button></div>
     </aside>
     {open && <button type="button" className="sidebar-scrim" aria-label="Close navigation" onClick={() => setOpen(false)} />}

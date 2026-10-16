@@ -1,0 +1,62 @@
+.member-location-page {
+  width: 100%;
+  max-width: 1210px;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.member-location-heading { align-items: center; gap: 18px; margin-bottom: 10px; }
+.member-location-heading .primary-button {
+  display: flex;
+  width: auto;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.member-location-heading .primary-button svg { flex-shrink: 0; }
+.member-location-status { margin: 0 0 12px; color: #52677b; font-size: .88rem; line-height: 1.5; }
+.member-location-error {
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  color: #a72d2d;
+  background: #fff6f1;
+  border: 1px solid #f0d7cd;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+.member-location-card {
+  min-width: 0;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #deebe5;
+  border-radius: 10px;
+  box-shadow: 0 7px 18px rgba(24, 65, 53, .05);
+}
+.member-location-page .location-map { height: clamp(340px, 61dvh, 760px); isolation: isolate; }
+.member-location-page .leaflet-container .wildguard-location-marker {
+  /* Preserve the pin's coordinate anchor despite the shared image margin reset. */
+  margin-left: -18px !important;
+  margin-top: -44px !important;
+}
+.member-location-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 36px;
+  margin: 12px 0 0;
+  padding: 12px 16px;
+  background: #eaf7f1;
+  border-radius: 7px;
+}
+.member-location-info dt { margin-bottom: 4px; color: #547168; font-size: .8rem; }
+.member-location-info dd { margin: 0; color: #18342b; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1050px) {
+  .member-location-heading { flex-wrap: wrap; }
+}
+@media (max-width: 760px) {
+  .member-location-heading .primary-button { width: 100%; margin-top: 14px; }
+  .member-location-card { padding: 8px; }
+  .member-location-page .location-map { height: clamp(320px, 54dvh, 560px); }
+  .member-location-info { gap: 12px 24px; padding: 12px; }
+}

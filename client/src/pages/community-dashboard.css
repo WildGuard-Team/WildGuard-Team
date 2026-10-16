@@ -1,45 +1,121 @@
+.community-main:has(.community-dashboard) .community-header {
+  height: 68px;
+  flex-basis: 68px;
+  padding-inline: 34px;
+  border-bottom: 1px solid #dcebe5;
+}
+
+.community-content:has(> .community-dashboard) {
+  padding: 22px 32px 18px;
+  background: #eaf6f2;
+}
+
 .community-dashboard {
-  width: min(1210px, 100%);
+  width: 100%;
   min-height: 0;
-  margin: 4px auto 0;
+  margin: 0 auto;
   display: grid;
   align-content: start;
-  gap: 24px;
+  gap: 20px;
 }
 
 .community-dashboard .dashboard-welcome {
+  position: relative;
   width: 100%;
-  min-height: 0;
-  padding: 24px 27px 18px;
+  max-width: none;
+  min-height: 306px;
+  margin: 0;
+  padding: 40px 50px;
+  color: #fff;
+  background: #003d2b url('../assets/community-dashboard/golden-hour-stag.png') center 40% / cover no-repeat;
+  border: 1px solid rgba(3, 65, 44, .12);
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(19, 78, 57, .08);
+}
+
+.community-dashboard .dashboard-welcome > p {
+  margin: 0 0 14px;
+  color: #97e9c8;
+  font-size: .82rem;
+  font-weight: 750;
+  letter-spacing: .12em;
 }
 
 .community-dashboard .dashboard-welcome h1 {
-  font-size: clamp(2rem, 3vw, 2.5rem);
+  max-width: 80%;
+  color: #fff;
+  font-size: clamp(2rem, 3.05vw, 3.2rem);
+  font-weight: 750;
+  letter-spacing: -.035em;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.community-dashboard .dashboard-welcome__copy {
+  max-width: min(560px, 65%);
+  margin-top: 8px;
+  color: #e5f3ec;
+  font-size: 1.375rem;
+  line-height: 1.35;
 }
 
 .community-dashboard .dashboard-welcome .primary-button {
-  min-height: 54px;
-  margin-top: 24px;
-  padding-inline: 22px;
+  min-height: 52px;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 100%;
+  margin-top: 22px;
+  padding: 12px 28px 12px 32px;
+  color: #00533b;
+  background: #fff;
+  border-color: #e2eee8;
+  border-radius: 11px;
+  font-size: 1.125rem;
+  font-weight: 750;
 }
+
+.community-dashboard .dashboard-welcome .primary-button:hover { background: #eaf8f1; }
+.community-dashboard .dashboard-welcome .primary-button:focus-visible { outline-color: #a0f0cf; }
+.community-dashboard .dashboard-welcome .primary-button svg { flex-shrink: 0; }
+
+.dashboard-welcome__message {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 280px;
+  padding: 12px 18px;
+  color: #fff;
+  background: rgba(18, 39, 25, .87);
+  border: 1px solid rgba(182, 223, 170, .3);
+  border-radius: 13px;
+  backdrop-filter: blur(6px);
+}
+
+.dashboard-welcome__message svg { flex-shrink: 0; color: #9ae8c8; fill: #9ae8c8; stroke: #194f39; stroke-width: 1.5; }
+.dashboard-welcome__message p { margin: 0; font-size: .875rem; line-height: 1.35; }
 
 .dashboard-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .dashboard-summary-card {
+  position: relative;
+  isolation: isolate;
   display: grid;
   min-width: 0;
-  min-height: 126px;
+  min-height: 138px;
   grid-template-columns: 84px minmax(0, 1fr);
   align-items: center;
-  gap: 20px;
-  padding: 20px 26px;
+  gap: 24px;
+  padding: 20px 25px;
   background: #fff;
   border: 1px solid #e5eeea;
-  border-radius: 10px;
+  border-radius: 15px;
   box-shadow: 0 7px 18px rgba(24, 65, 53, .06);
 }
 
@@ -49,29 +125,34 @@
   height: 84px;
   place-items: center;
   color: #087248;
-  background: #e7f7f1;
+  background: #e2f4ee;
   border-radius: 50%;
 }
 
 .dashboard-summary-card__label {
   display: block;
-  overflow: hidden;
   color: #52677b;
   font-size: 1rem;
   line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .dashboard-summary-card__value {
   display: block;
   margin-top: 7px;
-  color: #071426;
-  font-size: 2.45rem;
+  color: #053d2d;
+  font-size: 2.75rem;
   font-weight: 750;
   letter-spacing: -.04em;
   line-height: 1;
 }
+
+.dashboard-summary-card--clock .dashboard-summary-card__icon { color: #bc7507; background: #fff1d2; }
+.dashboard-summary-card--clock .dashboard-summary-card__value { color: #ba7007; }
+.dashboard-summary-card--check-circle .dashboard-summary-card__value { color: #087a55; }
+
+/* Decorative artwork only: these waves do not represent report history. */
+.dashboard-summary-card__wave { position: absolute; z-index: -1; right: 18px; bottom: 11px; width: 56%; height: 68px; color: #52c19c; pointer-events: none; }
+.dashboard-summary-card--clock .dashboard-summary-card__wave { color: #ffd16b; }
 
 .dashboard-skeleton {
   display: block;
@@ -89,34 +170,37 @@
 }
 
 .dashboard-recent-panel {
-  overflow: hidden;
   background: #fff;
   border: 1px solid #e5eeea;
-  border-radius: 10px;
+  border-radius: 15px;
   box-shadow: 0 7px 18px rgba(24, 65, 53, .05);
 }
 
 .dashboard-recent-panel__header {
   display: flex;
-  min-height: 80px;
+  min-height: 96px;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 28px;
+  padding: 20px 30px 18px;
   border-bottom: 1px solid #e3ece7;
 }
 
 .dashboard-recent-panel__header h2 {
   margin: 0;
   color: #071426;
-  font-size: 1.38rem;
+  font-size: 1.5rem;
   letter-spacing: -.03em;
 }
+
+.dashboard-recent-panel__header p { margin: 7px 0 0; color: #63728a; font-size: 1rem; line-height: 1.4; }
+.dashboard-recent-panel__header > div { min-width: 0; }
 
 .dashboard-view-all {
   display: inline-flex;
   align-items: center;
   gap: 9px;
+  flex-shrink: 0;
   padding: 6px 0;
   color: #087248;
   background: transparent;
@@ -139,10 +223,11 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: 74px minmax(0, 1fr) auto 22px;
+  min-height: 124px;
+  grid-template-columns: 84px minmax(0, 1fr) auto 22px;
   align-items: center;
-  gap: 20px;
-  padding: 18px 28px;
+  gap: 26px;
+  padding: 14px 30px;
   color: inherit;
   background: #fff;
   border: 0;
@@ -150,16 +235,17 @@
 }
 
 .dashboard-recent-row + .dashboard-recent-row { border-top: 1px solid #e3ece7; }
+.dashboard-recent-row:last-child { border-radius: 0 0 15px 15px; }
 .dashboard-recent-row:hover { background: #fbfefd; }
 
 .dashboard-recent-row__icon {
   display: grid;
-  width: 74px;
-  height: 74px;
+  width: 84px;
+  height: 84px;
   place-items: center;
   color: #087248;
-  background: #e7f7f1;
-  border-radius: 17px;
+  background: #e4f5ef;
+  border-radius: 16px;
 }
 
 .dashboard-recent-row__content { min-width: 0; }
@@ -168,24 +254,25 @@
   display: block;
   overflow: hidden;
   color: #071426;
-  font-size: 1.1rem;
+  font-size: 1.1875rem;
   line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .dashboard-recent-row__metadata {
-  display: flex;
+  display: grid;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   margin: 7px 0 0;
   color: #63728a;
   font-size: .92rem;
   line-height: 1.4;
 }
 
-.dashboard-recent-row__location {
+.dashboard-recent-row__location,
+.dashboard-recent-row__time {
   display: inline-flex;
   min-width: 0;
   align-items: center;
@@ -193,29 +280,31 @@
 }
 
 .dashboard-recent-row__location span,
-.dashboard-recent-row__time {
+.dashboard-recent-row__time span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dashboard-recent-row__location svg { flex: 0 0 auto; }
-.dashboard-recent-row__divider { flex: 0 0 auto; }
+.dashboard-recent-row__metadata svg { flex: 0 0 auto; }
 
 .dashboard-status-pill {
   display: inline-flex;
-  min-width: 128px;
-  min-height: 42px;
+  min-width: 146px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   padding: 7px 12px;
-  border-radius: 9px;
+  border-radius: 11px;
   font-size: .76rem;
   font-weight: 750;
   letter-spacing: .065em;
   line-height: 1.2;
   text-align: center;
 }
+
+.community-dashboard .report-status-badge--under_review { --status-background: #e5f2ff; --status-color: #0070bf; }
+.community-dashboard .report-status-badge--rejected { --status-background: #ffe5e6; --status-color: #b80d12; }
 
 .dashboard-recent-row__chevron { color: #071426; }
 
@@ -281,27 +370,56 @@
 }
 
 @media (max-width: 1050px) {
-  .dashboard-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .community-content:has(> .community-dashboard) { padding: 22px 24px; }
+  .community-dashboard .dashboard-welcome { padding: 32px; }
+  .community-dashboard .dashboard-welcome h1 { max-width: 100%; }
+  .community-dashboard .dashboard-welcome__copy { max-width: 75%; font-size: 1.125rem; }
+  .dashboard-welcome__message { position: static; width: fit-content; margin: 20px 0 0 auto; }
+  .dashboard-summary-grid { gap: 14px; }
   .dashboard-summary-card { grid-template-columns: 66px minmax(0, 1fr); gap: 14px; padding: 18px; }
   .dashboard-summary-card__icon { width: 66px; height: 66px; }
+  .dashboard-summary-card__label { font-size: .875rem; }
   .dashboard-recent-row { grid-template-columns: 64px minmax(0, 1fr) auto 20px; gap: 15px; padding-inline: 20px; }
   .dashboard-recent-row__icon { width: 64px; height: 64px; border-radius: 14px; }
 }
 
+@media (min-width: 761px) and (max-width: 1200px) {
+  .dashboard-summary-card { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; padding-inline: 16px; }
+  .dashboard-summary-card__icon { width: 58px; height: 58px; }
+  .dashboard-summary-card__value { font-size: 2.4rem; }
+  .dashboard-status-pill { min-width: 120px; }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .dashboard-summary-grid { grid-template-columns: 1fr; }
+  .dashboard-summary-card { min-height: 98px; }
+}
+
 @media (max-width: 760px) {
+  .community-main:has(.community-dashboard) .community-header { height: 64px; flex-basis: 64px; padding: 10px 20px 10px 75px; }
+  .community-content:has(> .community-dashboard) { padding: 16px; }
   .community-dashboard { gap: 14px; margin-top: 0; }
-  .community-dashboard .dashboard-welcome { padding: 20px 18px; }
-  .community-dashboard .dashboard-welcome .primary-button { width: 100%; justify-content: space-between; margin-top: 19px; }
+  .community-dashboard .dashboard-welcome { min-height: 306px; padding: 28px 22px; background-position: 62% center; background-image: linear-gradient(90deg, rgba(0, 43, 30, .76), rgba(0, 43, 30, .14)), url('../assets/community-dashboard/golden-hour-stag.png'); border-radius: 18px; }
+  .community-dashboard .dashboard-welcome h1 { font-size: clamp(1.9rem, 6vw, 2.5rem); }
+  .community-dashboard .dashboard-welcome > p { font-size: .68rem; }
+  .community-dashboard .dashboard-welcome__copy { max-width: 90%; font-size: 1.05rem; }
+  .community-dashboard .dashboard-welcome .primary-button { width: fit-content; justify-content: space-between; gap: 12px; margin-top: 19px; padding-inline: 18px; font-size: .95rem; }
+  .dashboard-welcome__message { margin-top: 24px; padding: 10px 12px; gap: 10px; }
+  .dashboard-welcome__message p { font-size: .75rem; }
   .dashboard-summary-grid { grid-template-columns: 1fr; gap: 12px; }
   .dashboard-summary-card { min-height: 98px; grid-template-columns: 58px minmax(0, 1fr); padding: 16px 18px; }
   .dashboard-summary-card__icon { width: 58px; height: 58px; }
   .dashboard-summary-card__value { font-size: 2rem; }
-  .dashboard-recent-panel__header { min-height: 66px; padding: 15px 18px; }
+  .dashboard-recent-panel__header { min-height: 66px; flex-wrap: wrap; gap: 10px; padding: 18px; }
   .dashboard-recent-panel__header h2 { font-size: 1.2rem; }
+  .dashboard-recent-panel__header p { font-size: .875rem; }
+  .dashboard-view-all { font-size: .875rem; }
   .dashboard-recent-row { grid-template-columns: 51px minmax(0, 1fr) 18px; gap: 12px; padding: 15px 18px; }
   .dashboard-recent-row__icon { width: 51px; height: 51px; border-radius: 12px; }
-  .dashboard-recent-row__content strong { font-size: 1rem; }
-  .dashboard-recent-row__metadata { flex-wrap: wrap; gap: 5px 9px; margin-top: 4px; font-size: .8rem; }
+  .dashboard-recent-row__content strong { font-size: 1rem; white-space: normal; overflow-wrap: anywhere; }
+  .dashboard-recent-row__metadata { gap: 5px; margin-top: 4px; font-size: .8rem; }
+  .dashboard-recent-row__location { align-items: flex-start; }
+  .dashboard-recent-row__location span { white-space: normal; overflow-wrap: anywhere; }
   .dashboard-status-pill { grid-column: 2; min-width: 112px; min-height: 31px; justify-self: start; margin-top: -5px; font-size: .67rem; }
   .dashboard-recent-row__chevron { grid-column: 3; grid-row: 1 / span 2; }
   .dashboard-recent-loading { padding: 16px 18px; }
