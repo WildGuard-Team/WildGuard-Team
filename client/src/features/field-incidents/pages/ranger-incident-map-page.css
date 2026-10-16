@@ -1,0 +1,57 @@
+.ranger-incident-map-page { display: grid; gap: 18px; width: 100%; max-width: 1280px; margin: 0 auto; padding-bottom: 20px; color: #0b2630; }
+.ranger-map-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 23px 26px; border: 1px solid #dcece4; border-radius: 12px; background: linear-gradient(110deg, #e4f2eb, #f3f9f6); }
+.ranger-map-kicker { margin: 0 0 9px; color: #08764d; font-size: .75rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.ranger-map-heading h1 { margin: 0; font-size: clamp(1.8rem, 2.5vw, 2.3rem); line-height: 1.1; letter-spacing: -.035em; }
+.ranger-map-subtitle { margin: 10px 0 0; color: #5b7183; font-size: .97rem; line-height: 1.5; }
+.ranger-map-heading .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; width: fit-content; min-height: 44px; padding: 12px 17px; border-radius: 7px; font-size: .86rem; }
+.ranger-map-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.ranger-map-summary-card { display: flex; align-items: center; gap: 16px; min-width: 0; padding: 17px 20px; border: 1px solid #e0ebe6; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(6, 62, 40, .025); }
+.ranger-map-summary-icon { display: grid; place-items: center; flex: 0 0 48px; height: 48px; border-radius: 10px; background: #e4f3eb; color: #08794f; }
+.ranger-map-summary-card.is-highRisk .ranger-map-summary-icon { background: #fff0ec; color: #b04735; }
+.ranger-map-summary-card.is-pendingSync .ranger-map-summary-icon { background: #fff5dd; color: #946410; }
+.ranger-map-summary-card h2 { margin: 0 0 7px; color: #5b7081; font-size: .86rem; font-weight: 500; }
+.ranger-map-summary-value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; }
+.ranger-map-summary-value strong { font-size: 1.8rem; line-height: 1; letter-spacing: -.035em; }
+.ranger-map-summary-value > span { color: #748595; font-size: .72rem; line-height: 1.4; }
+.ranger-map-notice { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 18px; border: 1px solid #e9d8ad; border-radius: 9px; background: #fffbf1; color: #745b2d; font-size: .86rem; }
+.ranger-map-notice p { margin: 4px 0 0; line-height: 1.45; }
+.ranger-map-notice button { flex-shrink: 0; }
+.ranger-map-workspace { min-width: 0; padding: 18px; border: 1px solid #dfeae4; border-radius: 12px; background: #fff; box-shadow: 0 3px 14px rgba(6, 62, 40, .035); }
+.ranger-map-filters { display: grid; grid-template-columns: minmax(180px, 1.5fr) minmax(160px, 1.2fr) minmax(130px, 1fr) minmax(145px, 1fr) auto; align-items: end; gap: 12px; }
+.ranger-map-filters label { display: grid; min-width: 0; gap: 7px; color: #385949; font-size: .77rem; font-weight: 600; }
+.ranger-map-filters :is(input, select) { width: 100%; min-width: 0; height: 42px; padding: 9px 11px; border: 1px solid #d7e4dd; border-radius: 7px; background: #fff; color: #263f35; font-size: .85rem; }
+.ranger-map-filters input::placeholder { color: #85958e; }
+.ranger-map-clear { min-height: 42px; padding: 9px 12px; border: 1px solid #d7e4dd; border-radius: 7px; background: #f3f8f5; color: #267052; font-size: .8rem; }
+.ranger-map-clear:disabled { opacity: .5; cursor: default; }
+.ranger-map-clear:not(:disabled):hover { background: #e4f3eb; }
+.ranger-incident-map-page :is(button, input, select, a):focus-visible { outline: 3px solid #099f70; outline-offset: 3px; }
+.ranger-map-results { margin: 15px 0 12px; color: #657c6f; font-size: .78rem; line-height: 1.4; }
+.ranger-map-gps-note { display: flex; align-items: flex-start; gap: 9px; margin: -4px 0 0; color: #667d70; font-size: .81rem; line-height: 1.5; }
+.ranger-map-gps-note svg { flex-shrink: 0; margin-top: 1px; }
+@media (max-width: 1250px) {
+  .ranger-map-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ranger-map-search { grid-column: span 2; }
+  .ranger-map-clear { width: fit-content; }
+  .ranger-map-summary-card { padding: 16px; gap: 12px; }
+}
+@media (max-width: 960px) {
+  .ranger-map-heading { align-items: flex-start; flex-direction: column; gap: 16px; padding: 20px; }
+  .ranger-map-summary-card { gap: 10px; padding: 14px; }
+  .ranger-map-summary-icon { flex-basis: 34px; height: 40px; }
+  .ranger-map-summary-icon svg { width: 23px; }
+  .ranger-map-summary-card h2 { font-size: .76rem; }
+  .ranger-map-workspace { padding: 14px; }
+}
+@media (max-width: 640px) {
+  .ranger-incident-map-page { gap: 14px; }
+  .ranger-map-heading { padding: 19px 17px; }
+  .ranger-map-summary { grid-template-columns: 1fr; gap: 9px; }
+  .ranger-map-summary-card { padding: 14px 17px; gap: 15px; }
+  .ranger-map-summary-icon { flex-basis: 44px; height: 44px; }
+  .ranger-map-summary-card h2 { font-size: .84rem; }
+  .ranger-map-filters { grid-template-columns: 1fr; }
+  .ranger-map-search { grid-column: auto; }
+  .ranger-map-clear { width: 100%; }
+  .ranger-map-workspace { padding: 12px; }
+  .ranger-map-notice { align-items: flex-start; flex-direction: column; }
+}

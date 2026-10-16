@@ -1,0 +1,57 @@
+.sidebar-brand.ranger-sidebar-brand {
+  gap: 12px;
+  padding-inline: 20px;
+}
+
+.ranger-sidebar-emblem {
+  position: relative;
+  flex: 0 0 44px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* Reuse the existing elephant emblem, cropping out its small printed wordmark. */
+.ranger-sidebar-brand .ranger-sidebar-emblem img {
+  position: absolute;
+  top: -16%;
+  left: -25%;
+  width: 150%;
+  max-width: none;
+  height: auto;
+  border-radius: 0;
+  object-fit: contain;
+}
+
+.ranger-sidebar-brand-copy {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.ranger-sidebar-brand-copy strong {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: .065em;
+}
+
+.ranger-sidebar-brand-copy small {
+  color: #c7e4d8;
+  font-size: .57rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: .09em;
+}
+
+@media (max-width: 1050px) {
+  .sidebar-brand.ranger-sidebar-brand { gap: 10px; padding-inline: 16px; }
+  .ranger-sidebar-emblem { flex-basis: 38px; }
+  .ranger-sidebar-brand-copy strong { font-size: 1rem; }
+}
+
+@media (max-width: 760px) {
+  .sidebar-brand.ranger-sidebar-brand > button { flex-shrink: 0; }
+}
