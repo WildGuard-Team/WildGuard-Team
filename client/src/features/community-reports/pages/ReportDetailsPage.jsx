@@ -9,6 +9,7 @@ import { useCurrentLocation } from '../hooks/useCurrentLocation.js';
 import { reverseGeocode } from '../services/locationApi.js';
 import { validateReportDetails } from '../validation/reportDetails.validation.js';
 import { validateIncidentDateTime } from '../validation/incidentDateTime.validation.js';
+import './incident-details-hero.css';
 
 export default function ReportDetailsPage({ navigate }) {
   const { draft, updateDraft, updateLocation } = useReportDraft();
@@ -91,7 +92,7 @@ export default function ReportDetailsPage({ navigate }) {
     if (!Object.keys(nextErrors).length) navigate('/reports/evidence');
   }
 
-  return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Describe what you observed and confirm where it happened." step={2}>
+  return <ReportLayout navigate={navigate} title="Incident Details & Location" subtitle="Describe what you observed and confirm where it happened." step={2} className="incident-details-page" hero heroEyebrow="SUBMIT A COMMUNITY REPORT">
     <form className="incident-details-panel" noValidate onSubmit={continueToEvidence}>
       <IncidentDetailsForm description={draft.description} error={errors.description} onChange={(description) => { updateDraft({ description }); setErrors((current) => ({ ...current, description: '' })); }}
         incidentDateTime={draft.incidentDateTime} dateError={errors.incidentDateTime} onDateChange={(incidentDateTime) => { updateDraft({ incidentDateTime }); setErrors((current) => ({ ...current, incidentDateTime: validateIncidentDateTime(incidentDateTime) })); }} />

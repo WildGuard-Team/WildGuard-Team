@@ -170,6 +170,24 @@ describe('offline retry safety', () => {
 });
 
 describe('Report Details', () => {
+  it('opens complete long content in a closable dialog and restores focus without changing report requests', async () => {
+    HTMLDialogElement.prototype.showModal = vi.fn(function () { this.open = true; });
+    HTMLDialogElement.prototype.close = vi.fn(function () { this.open = false; this.dispatchEvent(new Event('close')); });
+    const description = 'A herd was observed beside the forest entrance.\n'.repeat(40);
+    fetchMock.mockResolvedValue(response({ report: report({ description }) }));
+    render(<SubmittedReportDetailsPage reportId="report/1" navigate={vi.fn()} />);
+    const trigger = await screen.findByRole('button', { name: 'Read full description' });
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole('dialog', { name: 'Full incident description' });
+    expect(dialog.open).toBe(true);
+    expect(dialog.querySelector('p').textContent).toBe(description);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close full incident description' }));
+    await waitFor(() => expect(dialog.open).toBe(false));
+    expect(document.activeElement).toBe(trigger);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/reports/my-reports/report%2F1');
+  });
+
   it('shows loading then full successful report with status, actual dates, evidence empty state and back navigation', async () => {
     const request = deferred();
     fetchMock.mockReturnValue(request.promise);

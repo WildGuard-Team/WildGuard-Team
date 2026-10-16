@@ -1,3 +1,4 @@
+import { Leaf } from 'lucide-react';
 import { useAuth } from '../context/useAuth.js';
 import CommunityLayout from '../features/community-reports/components/CommunityLayout.jsx';
 import CommunityIcon from '../features/community-reports/components/CommunityIcon.jsx';
@@ -67,8 +68,9 @@ export default function MemberLandingPage({ navigate }) {
         <header className="dashboard-welcome">
           <p>Community member dashboard</p>
           <h1 id="dashboard-title">Welcome back, {firstName(user?.fullName)}.</h1>
-          <span>Help WildGuard protect wildlife by sharing incidents in your community.</span>
+          <span className="dashboard-welcome__copy">Help WildGuard protect wildlife by sharing incidents in your community.</span>
           <button type="button" className="primary-button" onClick={startReport}>Submit a Community Report <CommunityIcon name="chevron" size={20} /></button>
+          <aside className="dashboard-welcome__message"><Leaf size={30} aria-hidden="true" /><p>Every report helps create<br />safer habitats for wildlife.</p></aside>
         </header>
 
         <section className="dashboard-summary-grid" aria-label="Report summary" aria-busy={loading}>
@@ -79,7 +81,7 @@ export default function MemberLandingPage({ navigate }) {
 
         <section className="dashboard-recent-panel" aria-labelledby="recent-reports-title">
           <header className="dashboard-recent-panel__header">
-            <h2 id="recent-reports-title">Recent reports</h2>
+            <div><h2 id="recent-reports-title">Recent reports</h2><p>Your latest submitted reports and their current status.</p></div>
             <button type="button" className="dashboard-view-all" onClick={() => navigate('/reports/my-reports')}>View all reports <CommunityIcon name="chevron" size={19} /></button>
           </header>
           {loading ? <RecentReportsLoading /> : error ? <DashboardError retry={retry} /> : recentReports.length ? <div className="dashboard-recent-list">{recentReports.map((report) => <RecentReportRow key={report._id} report={report} onClick={() => navigate(`/reports/my-reports/${encodeURIComponent(report._id)}`)} />)}</div> : <DashboardEmptyState onStartReport={startReport} />}
@@ -90,9 +92,14 @@ export default function MemberLandingPage({ navigate }) {
 }
 
 function DashboardSummaryCard({ icon, label, value, loading, unavailable }) {
-  return <article className="dashboard-summary-card">
+  return <article className={`dashboard-summary-card dashboard-summary-card--${icon}`}>
     <span className="dashboard-summary-card__icon"><CommunityIcon name={icon} size={38} /></span>
     <div><span className="dashboard-summary-card__label">{label}</span>{loading ? <span className="dashboard-summary-card__value dashboard-skeleton"><span className="sr-only">Loading</span></span> : <strong className="dashboard-summary-card__value" aria-label={unavailable ? 'Unavailable' : undefined}>{unavailable ? '—' : value}</strong>}</div>
+    <svg className="dashboard-summary-card__wave" viewBox="0 0 240 70" fill="none" aria-hidden="true" focusable="false">
+      <defs><linearGradient id={`dashboard-wave-${icon}`} x1="0" y1="0" x2="0" y2="70" gradientUnits="userSpaceOnUse"><stop stopColor="currentColor" stopOpacity=".25" /><stop offset="1" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs>
+      <path d="M0 68C35 68 48 63 71 46S101 32 122 41S150 44 174 23S210 3 240 20V70H0Z" fill={`url(#dashboard-wave-${icon})`} />
+      <path d="M0 68C35 68 48 63 71 46S101 32 122 41S150 44 174 23S210 3 240 20" stroke="currentColor" strokeOpacity=".35" />
+    </svg>
   </article>;
 }
 
@@ -119,7 +126,7 @@ function RecentReportRow({ report, onClick }) {
     <span className="dashboard-recent-row__icon"><CommunityIcon name={iconForReportType(report.reportType)} size={32} /></span>
     <span className="dashboard-recent-row__content">
       <strong>{reportTypeLabel(report.reportType)}</strong>
-      <span className="dashboard-recent-row__metadata"><span className="dashboard-recent-row__location"><CommunityIcon name="pin" size={18} /><span title={reportLocation(report)}>{reportLocation(report)}</span></span><span className="dashboard-recent-row__divider" aria-hidden="true">•</span><span className="dashboard-recent-row__time">{submittedTime(report.createdAt)}</span></span>
+      <span className="dashboard-recent-row__metadata"><span className="dashboard-recent-row__location"><CommunityIcon name="pin" size={18} /><span title={reportLocation(report)}>{reportLocation(report)}</span></span><span className="dashboard-recent-row__time"><CommunityIcon name="calendar" size={18} /><span>{submittedTime(report.createdAt)}</span></span></span>
     </span>
     <ReportStatusBadge status={report.status} className="dashboard-status-pill" />
     <CommunityIcon name="chevron" size={22} className="dashboard-recent-row__chevron" />

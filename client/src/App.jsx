@@ -43,6 +43,7 @@ import ReportEvidencePage from './features/community-reports/pages/ReportEvidenc
 import ReviewReportPage from './features/community-reports/pages/ReviewReportPage.jsx';
 import ReportConfirmationPage from './features/community-reports/pages/ReportConfirmationPage.jsx';
 import MyReportsPage from './features/community-reports/pages/MyReportsPage.jsx';
+import MemberMapPage from './features/community-reports/pages/MemberMapPage.jsx';
 import SubmittedReportDetailsPage from './features/community-reports/pages/SubmittedReportDetailsPage.jsx';
 import ManagerCommunityReportsPage from './features/community-reports/pages/ManagerCommunityReportsPage.jsx';
 
@@ -527,6 +528,13 @@ function AppRoutes() {
   /*
    * Community Member routes
    */
+  if (
+    user?.role === 'COMMUNITY_MEMBER'
+    && path === '/member/map'
+  ) {
+    return <MemberMapPage key={user.id} navigate={navigate} />;
+  }
+
   if (
     user?.role === 'COMMUNITY_MEMBER'
     && path === '/reports/my-reports'

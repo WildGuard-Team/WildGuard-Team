@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import EvidencePreviewCard from './EvidencePreviewCard.jsx';
 import { evidenceAccept, evidenceFileKey, validateEvidenceSelection } from '../validation/evidence.validation.js';
 
-export default function EvidenceUploader({ files, onChange, browseLabel = 'Browse Files' }) {
+export default function EvidenceUploader({ files, onChange, browseLabel = 'Browse Files', uploadIcon = '⇧', browseIcon = null }) {
   const inputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -25,8 +25,8 @@ export default function EvidenceUploader({ files, onChange, browseLabel = 'Brows
     <input ref={inputRef} className="sr-only" id="evidence-files" type="file" multiple accept={evidenceAccept}
       onChange={(event) => { addFiles(event.target.files); event.target.value = ''; }} />
     <div className={`evidence-drop-zone${dragActive ? ' is-drag-active' : ''}`} onDragEnter={(event) => { event.preventDefault(); setDragActive(true); }} onDragOver={(event) => event.preventDefault()} onDragLeave={(event) => { if (event.currentTarget === event.target) setDragActive(false); }} onDrop={drop}>
-      <span className="evidence-upload-icon" aria-hidden="true">⇧</span><strong id="evidence-upload-title">Drag and drop files here</strong><span>or</span>
-      <button type="button" className="evidence-browse-button" onClick={() => inputRef.current?.click()}>{browseLabel}</button>
+      <span className="evidence-upload-icon" aria-hidden="true">{uploadIcon}</span><strong id="evidence-upload-title">Drag and drop files here</strong><span>or</span>
+      <button type="button" className="evidence-browse-button" onClick={() => inputRef.current?.click()}>{browseIcon}{browseLabel}</button>
       <small>JPG, PNG, WEBP or MP4 <b>•</b> Up to 3 files</small>
     </div>
     <div className="evidence-status" aria-live="polite">{messages.map((message) => <p key={message}>{message}</p>)}</div>

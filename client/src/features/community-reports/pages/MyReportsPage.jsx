@@ -10,6 +10,11 @@ import './my-reports.css';
 
 const filters = [['all', 'All Reports'], ['offline_pending', 'Pending'], ['under_review', 'Under Review'], ['approved', 'Approved'], ['rejected', 'Rejected']];
 const empty = { all: 'You have no reports yet.', offline_pending: 'No reports are waiting to be submitted.', under_review: 'You have no reports under review.', approved: 'You have no approved reports yet.', rejected: 'You have no rejected reports.' };
+const reportIcons = {
+  WILDLIFE_SIGHTING: '/animal-footprint-svgrepo-com.svg',
+  HUMAN_WILDLIFE_CONFLICT: '/people-svgrepo-com.svg',
+  SUSPICIOUS_ACTIVITY: '/warning-alt-svgrepo-com.svg',
+};
 
 export default function MyReportsPage({ navigate, message = '' }) {
   const { user } = useAuth();
@@ -71,7 +76,7 @@ export default function MyReportsPage({ navigate, message = '' }) {
 
   return <CommunityLayout navigate={navigate} active="folder">
     <section className="my-reports" aria-labelledby="my-reports-title">
-      <header className="dashboard-welcome my-reports__heading"><p>COMMUNITY REPORTS</p><h1 id="my-reports-title">My Reports</h1><span>View reports saved on this device and submitted to WildGuard.</span></header>
+      <header className="dashboard-welcome my-reports__heading"><span className="my-reports__hero-art" aria-hidden="true" /><p>COMMUNITY REPORTS</p><h1 id="my-reports-title">My Reports</h1><span className="my-reports__subtitle">View reports saved on this device and submitted to WildGuard.</span></header>
       <div className="my-reports__filters" aria-label="Filter reports">{filters.map(([value, label]) => <button type="button" key={value} aria-pressed={filter === value} className={filter === value ? 'is-active' : ''} onClick={() => { if (filter === value) return; setFilter(value); setData({ reports: [], loading: true, error: '' }); }}>{label}</button>)}<button type="button" aria-label="Refresh reports" onClick={reload}><CommunityIcon name="refresh" size={18} /></button></div>
       {notice && <p className="my-reports__notice" role="status">{notice}</p>}
       {!online && <p className="my-reports__notice">You’re offline. Reports saved on this device are available; submitted reports will load when connected.</p>}
@@ -89,13 +94,21 @@ function ReportCard({ report, sending, onRetry, onViewDetails }) {
   const location = report.location?.displayName || report.location?.manualLocation || (coordinates ? `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}` : 'Location not available');
   const date = new Date(report.savedAt ?? report.createdAt);
   return <article className="my-report-card">
-    <ReportStatusBadge status={report.status} compact className="my-report-card__status" />
-    <h2>{reportTypeLabel(report.reportType)}</h2>
-    <p className="my-report-card__description" title={report.description}>{report.description}</p>
-    <p className="my-report-card__detail"><CommunityIcon name="pin" size={17} /><span>{location}</span></p>
+    <span className="my-report-card__art" aria-hidden="true" />
+    <div className="my-report-card__heading">
+      <span className="my-report-card__icon" aria-hidden="true">{reportIcons[report.reportType] ? <img src={reportIcons[report.reportType]} alt="" /> : <CommunityIcon name="document" size={36} />}</span>
+      <div className="my-report-card__copy">
+        <ReportStatusBadge status={report.status} compact className="my-report-card__status" />
+        <h2>{reportTypeLabel(report.reportType)}</h2>
+        <p className="my-report-card__description" title={report.description}>{report.description}</p>
+      </div>
+    </div>
+    <p className="my-report-card__detail my-report-card__location"><CommunityIcon name="pin" size={17} /><span title={location}>{location}</span></p>
     <p className="my-report-card__detail"><CommunityIcon name="calendar" size={17} /><span>{pending ? 'Saved' : 'Submitted'} {Number.isFinite(date.getTime()) ? date.toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' }) : 'date unavailable'}</span></p>
-    {report.referenceNumber && <p className="my-report-card__reference">{report.referenceNumber}</p>}
-    {pending && <footer><small>Waiting for an internet connection</small><button type="button" className="primary-button" disabled={sending} onClick={onRetry}><CommunityIcon name="refresh" size={17} />{sending ? 'Submitting…' : 'Retry submit'}</button></footer>}
-    {!pending && report._id && <footer><button type="button" className="my-report-card__view-details" onClick={onViewDetails}>View details <CommunityIcon name="chevron" size={17} /></button></footer>}
+    {(report.referenceNumber || pending || report._id) && <footer>
+      {report.referenceNumber && <p className="my-report-card__reference">{report.referenceNumber}</p>}
+      {pending && <><small>Waiting for an internet connection</small><button type="button" className="primary-button" disabled={sending} onClick={onRetry}><CommunityIcon name="refresh" size={17} />{sending ? 'Submitting…' : 'Retry submit'}</button></>}
+      {!pending && report._id && <button type="button" className="my-report-card__view-details" onClick={onViewDetails}>View details <CommunityIcon name="chevron" size={17} /></button>}
+    </footer>}
   </article>;
 }

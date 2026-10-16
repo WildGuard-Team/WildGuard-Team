@@ -5,6 +5,7 @@ import { evidenceFileKey } from '../validation/evidence.validation.js';
 export default function ReviewAttachments({ files, isRestoring, recoveryRequired, warning, onEdit, onRemove, onSkip }) {
   return <section className="review-attachments" aria-labelledby="review-attachments-title" aria-busy={isRestoring}>
     <div className="community-review__section-heading">
+      <span className="community-review__section-icon" aria-hidden="true"><Paperclip size={30} /></span>
       <h2 id="review-attachments-title">Attachments</h2>
       <button type="button" className="community-review__edit" onClick={onEdit} aria-label="Edit evidence"><CommunityIcon name="edit" /></button>
     </div>
@@ -18,10 +19,13 @@ export default function ReviewAttachments({ files, isRestoring, recoveryRequired
         {files.length ? <div className="review-attachment-grid">
           {files.map((file) => <EvidencePreviewCard key={evidenceFileKey(file)} file={file} compact onRemove={() => onRemove(file)} />)}
           {files.length < 3 && <button type="button" className="review-attachments__add" onClick={onEdit}><CommunityIcon name="plus" size={32} /><span>Add File</span></button>}
-        </div> : <div className="review-attachments__empty">
+        </div> : <div className="review-attachments__empty review-attachments__empty--optional">
+          <span className="review-attachments__image-icon" aria-hidden="true"><Image size={28} /></span>
           <p>No evidence attached (optional)</p>
+          <small>You can add photos or a short video to support your report.</small>
           <button type="button" className="secondary-button" onClick={onEdit}><CommunityIcon name="plus" size={20} />Add Evidence</button>
         </div>}
       </>}
   </section>;
 }
+import { Image, Paperclip } from 'lucide-react';
