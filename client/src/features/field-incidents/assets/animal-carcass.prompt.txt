@@ -1,0 +1,5 @@
+Generated with the built-in imagegen tool for the Animal Carcass dashboard category.
+This is a category illustration, not incident evidence.
+
+Prompt:
+Use case: photorealistic-natural. Asset type: a small landscape category photograph for an existing green-and-white Sri Lankan park ranger incident dashboard, Animal Carcass card. Create a realistic quiet wildlife-monitoring photograph of old, dry, sun-bleached deer skeletal remains (rib cage, partial spine and skull) lying naturally among brown fallen leaves, twigs and moss on a tropical forest floor. Nongraphic: dry bones only, no flesh, no blood, no wounds, no fluids, no people. Warm filtered daylight, rich natural green foliage and earthy brown colors, credible documentary photography with clear texture, matching wildlife photos on nearby category cards. Wide landscape composition, with remains centered in a horizontal band so a roughly 3:1 card crop still clearly shows the subject. No labels, no lettering, no logo, no checkmark, no border, no UI. Opaque photographic background.
