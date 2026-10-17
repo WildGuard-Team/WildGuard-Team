@@ -1,0 +1,80 @@
+.ranger-incident-map {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dbe8e1;
+  border-radius: 11px;
+  background: #fff;
+  color: #17392c;
+  box-shadow: 0 3px 10px rgb(19 61 42 / 3%);
+}
+.ranger-map-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 19px; border-bottom: 1px solid #e4ece7; }
+.ranger-map-toolbar-copy { display: flex; min-width: 0; align-items: center; gap: 9px; color: #19734f; }
+.ranger-map-toolbar-copy > span { color: #17392c; font-size: .9rem; font-weight: 700; }
+.ranger-map-toolbar-copy > small { margin-left: 7px; color: #718279; font-size: .75rem; }
+.ranger-map-location-button { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 7px; min-height: 37px; padding: 8px 12px; border: 1px solid #c8ddd0; border-radius: 7px; background: #f7fbf8; color: #236448; font: inherit; font-size: .78rem; font-weight: 650; cursor: pointer; }
+.ranger-map-location-button:hover { background: #edf7f0; }
+.ranger-map-location-button:disabled { color: #6a8074; cursor: wait; opacity: .75; }
+.ranger-incident-map :is(button, a):focus-visible { outline: 3px solid #3ca77b; outline-offset: 3px; }
+.ranger-map-location-message { margin: 0; padding: 11px 19px; border-bottom: 1px solid #eadfbd; background: #fffaf0; color: #7f601d; font-size: .8rem; line-height: 1.5; }
+.ranger-map-canvas-wrap { position: relative; isolation: isolate; height: 600px; background: #e8efe5; }
+.ranger-map-canvas { z-index: 0; width: 100%; height: 100%; font-family: inherit; }
+.ranger-map-canvas .leaflet-control-zoom { margin: 16px; overflow: hidden; border: 1px solid #cedbd0; border-radius: 7px; box-shadow: 0 2px 7px rgb(30 55 39 / 12%); }
+.ranger-map-canvas .leaflet-control-zoom a { width: 34px; height: 34px; color: #254935; line-height: 34px; }
+.ranger-map-canvas .leaflet-control-attribution { max-width: calc(100% - 15px); padding: 3px 6px; background: rgb(255 255 255 / 90%); font-size: 10px; }
+.ranger-map-canvas .leaflet-control-attribution a { color: #266145; }
+.ranger-map-tile-status { position: absolute; z-index: 500; top: 12px; right: 12px; max-width: min(340px, calc(100% - 82px)); margin: 0; padding: 9px 12px; border: 1px solid #d9e7dc; border-radius: 7px; background: rgb(255 255 255 / 96%); color: #4e6c59; font-size: .75rem; line-height: 1.45; box-shadow: 0 2px 7px rgb(30 55 39 / 6%); pointer-events: none; }
+.ranger-map-tile-status.is-error { border-color: #e7d9b6; background: #fffbf0; color: #775d23; }
+.ranger-map-empty { position: absolute; z-index: 450; top: 50%; left: 50%; width: min(340px, calc(100% - 36px)); padding: 24px 20px; border: 1px solid #dce9de; border-radius: 12px; background: rgb(255 255 255 / 96%); box-shadow: 0 8px 30px rgb(25 58 34 / 10%); text-align: center; transform: translate(-50%, -50%); }
+.ranger-map-empty-icon { display: inline-grid; width: 48px; height: 48px; margin-bottom: 12px; place-items: center; border: 1px solid #daebe0; border-radius: 12px; background: #f0f8f2; color: #3a8a62; }
+.ranger-map-empty h3 { margin: 0; color: #264c36; font-size: 1rem; line-height: 1.4; }
+.ranger-map-empty p { margin: 8px 0 0; color: #748476; font-size: .8rem; line-height: 1.6; }
+.ranger-map-report-button { display: inline-flex; min-height: 39px; align-items: center; justify-content: center; margin-top: 17px; padding: 9px 15px; border: 1px solid #11774c; border-radius: 7px; background: #168452; color: #fff; font: inherit; font-size: .8rem; font-weight: 650; cursor: pointer; }
+.ranger-map-report-button:hover { background: #106f44; }
+.ranger-map-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; padding: 15px 19px; border-top: 1px solid #e3ece6; }
+.ranger-map-legend-title { color: #496454; font-size: .75rem; font-weight: 700; }
+.ranger-map-legend ul { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 0; padding: 0; list-style: none; }
+.ranger-map-legend li { display: inline-flex; align-items: center; gap: 7px; color: #66796c; font-size: .74rem; }
+.ranger-map-legend-symbol { display: inline-grid; width: 11px; height: 11px; flex-shrink: 0; place-items: center; border: 1px solid #fff; border-radius: 50%; box-shadow: 0 0 0 1px rgb(24 76 43 / 10%); }
+.ranger-map-legend-symbol.is-submitted { background: #238655; }
+.ranger-map-legend-symbol.is-pending { background: #dc9a24; }
+.ranger-map-legend-symbol.is-high-risk { width: 14px; height: 14px; border-color: #bb3939; color: #b32c2c; background: #fff; font-size: 10px; font-weight: 800; line-height: 1; }
+.ranger-map-legend-symbol.is-current { background: #2877d3; }
+.ranger-map-canvas .ranger-map-marker { border: 0; background: transparent; }
+.ranger-map-marker__pin { position: absolute; top: 3px; left: 6px; width: 25px; height: 25px; border: 3px solid #fff; border-radius: 50% 50% 50% 0; background: #238655; box-shadow: -1px 2px 5px rgb(24 51 32 / 28%); transform: rotate(-45deg); }
+.ranger-map-marker.is-pending .ranger-map-marker__pin { background: #dc9a24; }
+.ranger-map-marker.is-high-risk .ranger-map-marker__pin { box-shadow: 0 0 0 2px #c43d3d, -1px 2px 6px rgb(74 28 28 / 25%); }
+.ranger-map-marker__risk { position: absolute; z-index: 1; top: -4px; right: -2px; display: grid; width: 16px; height: 16px; place-items: center; border: 2px solid #fff; border-radius: 50%; background: #c43d3d; color: #fff; font-family: Arial, sans-serif; font-size: 10px; font-weight: 800; line-height: 1; }
+.ranger-map-canvas .leaflet-popup-content-wrapper { border: 1px solid #dae7de; border-radius: 10px; box-shadow: 0 5px 20px rgb(25 58 34 / 16%); }
+.ranger-map-canvas .leaflet-popup-content { margin: 17px; }
+.ranger-map-popup { color: #254b36; font-family: inherit; }
+.ranger-map-popup .ranger-map-popup-reference { margin: 0 0 6px; color: #758578; font-size: .7rem; font-weight: 600; overflow-wrap: anywhere; }
+.ranger-map-popup h3 { margin: 0; color: #20472f; font-size: .98rem; line-height: 1.4; overflow-wrap: anywhere; }
+.ranger-map-popup-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.ranger-map-popup :is(.field-incident-status-badge, .field-incident-risk-badge) { display: inline-block; padding: 4px 7px; border: 1px solid #d5e3d9; border-radius: 999px; color: #587261; background: #f0f5f1; font-size: .59rem; font-weight: 750; }
+.ranger-map-popup .field-incident-status-badge.is-submitted,
+.ranger-map-popup .field-incident-risk-badge.is-low { border-color: #bfdcc6; color: #24663c; background: #e9f5ec; }
+.ranger-map-popup .field-incident-status-badge.is-pending,
+.ranger-map-popup .field-incident-risk-badge.is-medium { border-color: #ecd89f; color: #865d00; background: #fff5d9; }
+.ranger-map-popup .field-incident-risk-badge.is-high { border-color: #edc1bb; color: #a82d25; background: #fceae8; }
+.ranger-map-popup dl { display: grid; gap: 10px; margin: 15px 0; }
+.ranger-map-popup dl > div { display: grid; grid-template-columns: 75px minmax(0, 1fr); gap: 8px; }
+.ranger-map-popup dt { color: #748477; font-size: .7rem; }
+.ranger-map-popup dd { margin: 0; color: #36533f; font-size: .73rem; line-height: 1.5; overflow-wrap: anywhere; }
+.ranger-map-popup-view { width: 100%; min-height: 36px; padding: 8px 12px; border: 1px solid #bed7c6; border-radius: 6px; background: #edf7f0; color: #216c45; font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
+.ranger-map-popup-view:hover { background: #deefe4; }
+.ranger-map-canvas .ranger-map-current-location { margin: 0; color: #265b94; font-size: .8rem; }
+@media (max-width: 640px) {
+  .ranger-map-toolbar { gap: 10px; padding: 12px; }
+  .ranger-map-toolbar-copy { gap: 6px; }
+  .ranger-map-toolbar-copy > span { font-size: .8rem; }
+  .ranger-map-toolbar-copy > small { display: none; }
+  .ranger-map-location-button { gap: 5px; padding: 8px 9px; font-size: .72rem; }
+  .ranger-map-location-message { padding: 10px 12px; }
+  .ranger-map-canvas-wrap { height: 420px; }
+  .ranger-map-canvas .leaflet-control-zoom { margin: 12px; }
+  .ranger-map-tile-status { top: 9px; right: 9px; padding: 7px 9px; font-size: .7rem; }
+  .ranger-map-empty { padding: 20px 16px; }
+  .ranger-map-legend { align-items: flex-start; gap: 10px; padding: 13px; }
+  .ranger-map-legend-title { width: 100%; }
+  .ranger-map-legend ul { gap: 10px 16px; }
+}

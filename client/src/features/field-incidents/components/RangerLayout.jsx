@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/useAuth.js';
 import FormAlert from '../../auth/components/FormAlert.jsx';
 import CommunityIcon from '../../community-reports/components/CommunityIcon.jsx';
+import './ranger-layout.css';
 
 const navigation = [
   ['dashboard', 'Dashboard', '/ranger'],
   ['report', 'Report Field Incident', '/ranger/incidents/new'],
   ['folder', 'My Incidents', '/ranger/incidents'],
-  ['map', 'Map'],
-  ['bell', 'Alerts'],
-  ['settings', 'Settings'],
+  ['map', 'Map', '/ranger/map'],
 ];
 
 export default function RangerLayout({
@@ -73,14 +72,14 @@ export default function RangerLayout({
         className={`community-sidebar${open ? ' is-open' : ''}`}
         aria-label="Park Ranger navigation"
       >
-        <div className="sidebar-brand">
-          <img
-            src="/logo.jpg"
-            alt="WildGuard"
-          />
+        <div className="sidebar-brand ranger-sidebar-brand">
+          <span className="ranger-sidebar-emblem" aria-hidden="true">
+            <img src="/logo.jpg" alt="" />
+          </span>
 
-          <span>
-            Park Ranger
+          <span className="ranger-sidebar-brand-copy">
+            <strong>WILDGUARD</strong>
+            <small>PARK RANGER PORTAL</small>
           </span>
 
           <button
@@ -93,43 +92,20 @@ export default function RangerLayout({
         </div>
 
         <nav>
-          {navigation.map(
-            ([icon, label, path]) =>
-              path ? (
-                <button
-                  key={label}
-                  type="button"
-                  className={
-                    active === icon
-                      ? 'is-active'
-                      : ''
-                  }
-                  onClick={() => {
-                    navigate(path);
-                    setOpen(false);
-                  }}
-                >
-                  <CommunityIcon name={icon} />
-                  <span>{label}</span>
-                </button>
-              ) : (
-                <span
-                  key={label}
-                  className="sidebar-unavailable"
-                  aria-disabled="true"
-                >
-                  <CommunityIcon name={icon} />
-
-                  <span>
-                    {label}
-                  </span>
-
-                  <small>
-                    Coming soon
-                  </small>
-                </span>
-              )
-          )}
+          {navigation.map(([icon, label, path]) => (
+            <button
+              key={label}
+              type="button"
+              className={active === icon ? 'is-active' : ''}
+              onClick={() => {
+                navigate(path);
+                setOpen(false);
+              }}
+            >
+              <CommunityIcon name={icon} />
+              <span>{label}</span>
+            </button>
+          ))}
         </nav>
 
         <div className="sidebar-footer">
